@@ -1,0 +1,1794 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Israeli MBA Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650;12..96,750&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: search-first single column. Hero search dominates Discover; rails below. Profile = header card + timeline / mutuals two-column. */
+:root{
+  --bg:#F1F2EE; --surface:#FFFFFF; --surface-2:#F7F8F4; --ink:#161A26; --muted:#5C6272; --faint:#8C91A0; --line:#E1E3DC;
+  --accent:#2E49C2; --accent-ink:#FFFFFF; --accent-soft:#E8ECFA; --accent-text:#2940A8;
+  --warm:#B5641E; --warm-soft:#FBEEDF;
+  --ok:#1D7448; --ok-soft:#E2F1E8; --wa:#159447; --wa-soft:#E0F3E7;
+  --shadow:0 1px 2px rgba(22,26,38,.05),0 6px 20px rgba(22,26,38,.06);
+  --shadow-lg:0 2px 6px rgba(22,26,38,.06),0 22px 56px rgba(22,26,38,.12);
+  --scrim:rgba(18,21,32,.42);
+  --f-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --f-body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --r-lg:20px; --r-md:14px; --r-sm:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F121A; --surface:#171B26; --surface-2:#1C2130; --ink:#E8EAF1; --muted:#A1A7B8; --faint:#757C90; --line:#272D3D;
+  --accent:#7D95FF; --accent-ink:#0F1426; --accent-soft:#222A47; --accent-text:#A9B8FF;
+  --warm:#F0A764; --warm-soft:#33261A; --ok:#6FD39F; --ok-soft:#173025; --wa:#4AD483; --wa-soft:#15301F;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25); --shadow-lg:0 2px 6px rgba(0,0,0,.3),0 22px 56px rgba(0,0,0,.45);
+  --scrim:rgba(0,0,0,.6); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0F121A; --surface:#171B26; --surface-2:#1C2130; --ink:#E8EAF1; --muted:#A1A7B8; --faint:#757C90; --line:#272D3D;
+  --accent:#7D95FF; --accent-ink:#0F1426; --accent-soft:#222A47; --accent-text:#A9B8FF;
+  --warm:#F0A764; --warm-soft:#33261A; --ok:#6FD39F; --ok-soft:#173025; --wa:#4AD483; --wa-soft:#15301F;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25); --shadow-lg:0 2px 6px rgba(0,0,0,.3),0 22px 56px rgba(0,0,0,.45);
+  --scrim:rgba(0,0,0,.6); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+svg{display:block}
+.wrap{max-width:1140px;margin:0 auto;padding-inline:20px}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:20px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:650;font-size:17px;letter-spacing:-.01em;white-space:nowrap}
+.brand-mark{width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.top-search{flex:1;max-width:460px;min-width:0}
+.nav{display:flex;gap:4px;margin-left:auto}
+.nav button{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;color:var(--muted);font-weight:600;font-size:14px;position:relative}
+.nav button:hover{background:var(--surface);color:var(--ink)}
+.nav button.on{color:var(--ink);background:var(--surface);box-shadow:var(--shadow)}
+.badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--warm);color:#fff;font-size:11px;font-weight:700;display:inline-grid;place-items:center}
+.bottom-nav{display:none}
+
+/* avatar */
+.av{display:inline-block;flex:none;border-radius:50%;overflow:hidden;background:var(--surface-2)}
+.av svg{width:100%;height:100%}
+.av.sq{border-radius:28%}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:38px;padding:0 15px;border-radius:11px;font-weight:600;font-size:14px;white-space:nowrap;transition:background .15s,transform .1s}
+.btn:active{transform:scale(.98)}
+.btn svg{width:16px;height:16px}
+.btn.sm{height:32px;padding:0 11px;font-size:13px;border-radius:9px}
+.btn.lg{height:46px;padding:0 20px;font-size:15px;border-radius:13px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--faint)}
+.btn.is-pending{background:var(--warm-soft);color:var(--warm)}
+.btn.is-connected{background:var(--ok-soft);color:var(--ok);cursor:default}
+.btn.wa{background:var(--wa-soft);color:var(--wa)}
+.btn.mail{background:var(--accent-soft);color:var(--accent-text)}
+.link{color:var(--accent-text);font-weight:600;font-size:14px}
+.link:hover{text-decoration:underline}
+
+/* search */
+.search{position:relative;display:flex;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);transition:border-color .15s,box-shadow .15s}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft),var(--shadow)}
+.search-ico{position:absolute;left:14px;color:var(--faint);pointer-events:none}
+.search-ico svg{width:18px;height:18px}
+.search-input{flex:1;min-width:0;border:0;background:transparent;outline:none;height:42px;padding:0 12px 0 42px;font-size:14px}
+.search-input::-webkit-search-cancel-button{display:none}
+.search-go{display:none}
+.search.big{border-radius:20px;box-shadow:var(--shadow-lg)}
+.search.big .search-input{height:66px;font-size:18px;padding-left:56px}
+.search.big .search-ico{left:20px}
+.search.big .search-ico svg{width:22px;height:22px}
+.search.big .search-go,.search.mid .search-go{display:inline-flex;margin-right:9px}
+.search.mid{border-radius:16px}
+.search.mid .search-input{height:54px;font-size:16px;padding-left:48px}
+.search.mid .search-ico{left:17px}
+.ac{position:absolute;left:0;right:0;top:calc(100% + 8px);background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg);padding:8px;z-index:40;max-height:420px;overflow:auto;text-align:left}
+.ac-h{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);padding:10px 10px 4px}
+.ac-i{display:flex;align-items:center;gap:12px;width:100%;padding:8px 10px;border-radius:10px;text-align:left}
+.ac-i.on,.ac-i:hover{background:var(--surface-2)}
+.ac-i .ico{width:32px;height:32px;border-radius:9px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;flex:none}
+.ac-i .ico svg{width:16px;height:16px}
+.ac-i b{font-weight:600}
+.ac-i small{display:block;color:var(--muted);font-size:12.5px}
+.ac-i .kind{margin-left:auto;font-size:12px;color:var(--faint)}
+mark{background:none;color:var(--accent-text);font-weight:700}
+
+/* hero */
+.hero{padding-block:56px 30px;max-width:760px;margin:0 auto;text-align:center}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--ok);background:var(--ok-soft);padding:5px 11px;border-radius:99px}
+.eyebrow svg{width:14px;height:14px}
+.hero h1{font-family:var(--f-display);font-weight:750;font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-.03em;margin:18px 0 26px;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.shortcuts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.shortcut{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-align:left;transition:border-color .15s,box-shadow .15s}
+.shortcut:hover{border-color:var(--faint)}
+.shortcut.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.shortcut .ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-text);flex:none}
+.shortcut .ico svg{width:19px;height:19px}
+.shortcut b{display:block;font-weight:650;font-size:15px}
+.shortcut small{color:var(--muted);font-size:12.5px}
+.browse{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:left}
+.browse-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-weight:650}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);font-size:13.5px;font-weight:500}
+.chip:hover{border-color:var(--accent);color:var(--accent-text)}
+.chip .n{font-family:var(--f-mono);font-size:11.5px;color:var(--faint)}
+.try{margin-top:18px;font-size:13.5px;color:var(--muted);display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px}
+.try button{color:var(--accent-text);font-weight:500}
+.try button:hover{text-decoration:underline}
+
+/* rails */
+.rail{margin-top:34px}
+.rail-h{display:flex;align-items:flex-end;gap:12px;margin-bottom:12px}
+.rail-h h2{font-family:var(--f-display);font-weight:650;font-size:20px;letter-spacing:-.015em;margin:0}
+.rail-h p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+.rail-h .sp{margin-left:auto;display:flex;align-items:center;gap:6px}
+.arrow{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--muted)}
+.arrow:hover{color:var(--ink);border-color:var(--faint)}
+.arrow svg{width:16px;height:16px}
+.track{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 14px;scrollbar-width:thin}
+.pcard{flex:0 0 212px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+.pcard:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.pcard-hit{display:flex;flex-direction:column;align-items:flex-start;gap:10px;text-align:left;width:100%}
+.pcard .nm{font-weight:650;font-size:15.5px;line-height:1.2}
+.pcard .rl{color:var(--muted);font-size:13px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:35px}
+.signal{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--accent-text);background:var(--accent-soft);padding:4px 9px;border-radius:8px;align-self:flex-start;max-width:100%}
+.signal span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.signal svg{width:13px;height:13px;flex:none}
+.signal.warm{color:var(--warm);background:var(--warm-soft)}
+.pcard-actions{display:flex;gap:8px;margin-top:auto}
+.pcard-actions .btn{flex:1}
+.empty-rail{padding:22px;border:1px dashed var(--line);border-radius:var(--r-lg);color:var(--muted);font-size:14px;text-align:center;width:100%}
+
+/* results */
+.page{padding-block:28px 60px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-weight:600;font-size:14px;margin-bottom:14px}
+.back:hover{color:var(--ink)}
+.back svg{width:16px;height:16px}
+.res-head{display:flex;flex-direction:column;gap:14px;margin-bottom:22px}
+.res-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.res-meta h1{font-family:var(--f-display);font-size:22px;font-weight:650;letter-spacing:-.015em;margin:0}
+.res-meta .sp{margin-left:auto;display:flex;gap:8px;align-items:center}
+.sel{height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:0 10px;font-size:13.5px}
+.active-f{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fchip{display:inline-flex;align-items:center;gap:6px;padding:5px 8px 5px 11px;border-radius:99px;background:var(--accent-soft);color:var(--accent-text);font-size:13px;font-weight:600}
+.fchip svg{width:14px;height:14px}
+.res-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:24px;align-items:start}
+.filters{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;gap:14px;position:sticky;top:84px}
+.filters h3{margin:0;font-size:14px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.filters label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+.filters .sel{width:100%;color:var(--ink);font-weight:500}
+.filter-toggle{display:none}
+.rlist{display:flex;flex-direction:column;gap:12px}
+.rcard{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:18px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow)}
+.rcard:hover{border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.rcard .main{min-width:0;display:flex;flex-direction:column;gap:6px}
+.rcard .nm{font-weight:700;font-size:17px;text-align:left}
+.rcard .nm:hover{color:var(--accent-text)}
+.rcard .rl{font-size:14.5px}
+.meta{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--muted);font-size:13px}
+.meta span{display:inline-flex;align-items:center;gap:5px}
+.meta svg{width:14px;height:14px;color:var(--faint)}
+.mut{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);text-align:left}
+.stack{display:flex}
+.stack .av{border:2px solid var(--surface);margin-left:-8px}
+.stack .av:first-child{margin-left:0}
+.rcard .acts{display:flex;flex-direction:column;gap:8px}
+.tag{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.02em;padding:2px 7px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted);vertical-align:2px;margin-left:6px}
+.tag.stu{color:var(--warm);background:var(--warm-soft);border-color:transparent}
+.noresults{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r-lg);padding:36px 24px;text-align:center}
+.noresults h2{font-family:var(--f-display);font-weight:650;margin:0 0 6px;font-size:21px}
+.noresults p{color:var(--muted);margin:0 0 18px}
+.noresults .chips{justify-content:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:14px}
+.grid .pcard{flex:none}
+
+/* profile */
+.phead{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
+.phead-band{position:relative;height:128px;overflow:hidden;background:linear-gradient(115deg,color-mix(in srgb,var(--sc) 78%,#000) 0%,var(--sc) 70%);color:#fff}
+.band-mark{position:absolute;right:26px;bottom:-14px;font-family:var(--f-display);font-weight:750;font-size:clamp(56px,10vw,104px);letter-spacing:-.04em;line-height:1;opacity:.16;white-space:nowrap}
+.band-label{position:absolute;right:28px;top:20px;display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right}
+.band-label b{font-family:var(--f-display);font-size:15px;font-weight:650;letter-spacing:.01em}
+.band-label span{font-family:var(--f-mono);font-size:12px;opacity:.85}
+.school-line{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 12px}
+.school-line .txt b{display:block;font-size:15.5px;font-weight:700}
+.school-line .txt span{color:var(--muted);font-size:13.5px}
+/* class badge: school + class year is the primary identity marker */
+.cb{display:inline-flex;align-items:stretch;border-radius:8px;overflow:hidden;font-weight:700;font-size:12px;line-height:1.2;border:1.5px solid var(--sc);flex:none;vertical-align:middle;white-space:nowrap}
+.cb-s{background:var(--sc);color:#fff;padding:3px 7px;letter-spacing:.05em;text-transform:uppercase}
+.cb-y{padding:3px 7px;color:color-mix(in srgb,var(--sc) 62%,var(--ink));background:var(--surface);font-family:var(--f-mono);font-weight:500}
+.cb-c{padding:3px 7px;background:var(--warm-soft);color:var(--warm);font-size:.85em;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center}
+.cb.lg{font-size:16px;border-radius:11px;border-width:2px}
+.cb.lg .cb-s,.cb.lg .cb-y,.cb.lg .cb-c{padding:6px 11px}
+.cb.md{font-size:13.5px;border-radius:9px}
+.cb.md .cb-s,.cb.md .cb-y{padding:4px 9px}
+.pc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;width:100%}
+.pc-top .cbs{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.srow{display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(0,3fr);gap:10px 16px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.srow:first-of-type{border-top:0}
+.srow .sn{display:flex;align-items:center;gap:10px;font-weight:650;text-align:left}
+.srow .sn small{color:var(--faint);font-family:var(--f-mono);font-weight:400;font-size:12px}
+.sdot{width:12px;height:12px;border-radius:4px;background:var(--sc);flex:none}
+.ychip{font-family:var(--f-mono);font-size:13px;padding:5px 10px;border-radius:8px;border:1.5px solid color-mix(in srgb,var(--sc) 45%,var(--line));color:color-mix(in srgb,var(--sc) 62%,var(--ink));background:var(--surface)}
+.ychip:hover{background:var(--sc);color:#fff;border-color:var(--sc)}
+.ychip .n{opacity:.65;margin-left:4px;font-size:11px}
+@media (max-width:560px){.srow{grid-template-columns:1fr}}
+.phead-body{padding:0 28px 26px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 24px}
+.phead-body > .av{position:relative;z-index:1;margin-top:-56px;border:5px solid var(--surface);box-shadow:var(--shadow)}
+.phead-info{padding-top:16px;min-width:0}
+.phead h1{font-family:var(--f-display);font-weight:750;font-size:clamp(26px,3.6vw,34px);letter-spacing:-.025em;margin:0;line-height:1.1}
+.phead .rl{font-size:16.5px;margin:0 0 8px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.vbadge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--ok-soft);color:var(--ok)}
+.vbadge svg{width:13px;height:13px}
+.vbadge.pref{background:var(--wa-soft);color:var(--wa)}
+.vbadge.pref.email{background:var(--accent-soft);color:var(--accent-text)}
+.pactions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center}
+.pactions .btn{position:relative}
+.pref-dot{position:absolute;top:-7px;right:-7px;font-size:10px;font-weight:700;background:var(--ink);color:var(--bg);padding:2px 6px;border-radius:99px}
+.how{grid-column:1/-1;margin-top:16px;padding:14px 16px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px}
+.how b{font-weight:650}
+.pgrid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:20px;margin-top:20px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px;box-shadow:var(--shadow)}
+.panel h2{font-family:var(--f-display);font-weight:650;font-size:19px;letter-spacing:-.015em;margin:0 0 4px}
+.panel .sub{color:var(--muted);font-size:13.5px;margin:0 0 18px}
+.side{display:flex;flex-direction:column;gap:20px}
+.tl{position:relative;list-style:none;margin:0;padding:0}
+.tl li{position:relative;display:grid;grid-template-columns:92px 22px minmax(0,1fr);gap:0 12px;padding-bottom:22px}
+.tl li:last-child{padding-bottom:0}
+.tl .yr{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);padding-top:9px;text-align:right;font-variant-numeric:tabular-nums}
+.tl .rail-l{position:relative;display:flex;justify-content:center}
+.tl .rail-l::before{content:"";position:absolute;top:22px;bottom:-22px;width:2px;background:var(--line)}
+.tl li:last-child .rail-l::before{display:none}
+.tl .dot{width:14px;height:14px;border-radius:50%;margin-top:9px;background:var(--surface);border:3px solid var(--line);position:relative;z-index:1}
+.tl li.now .dot{border-color:var(--accent);background:var(--accent)}
+.tl li.edu .dot{border-color:var(--sc,var(--warm));border-radius:4px;transform:rotate(45deg)}
+.tl .entry{display:flex;gap:12px;align-items:flex-start;min-width:0}
+.logo{width:38px;height:38px;border-radius:10px;flex:none;display:grid;place-items:center;font-family:var(--f-display);font-weight:750;font-size:16px;color:#fff}
+.tl .co{font-weight:700;font-size:15.5px}
+.tl .ro{color:var(--muted);font-size:14px}
+.tl .now-tag{font-size:11px;font-weight:700;color:var(--accent-text);background:var(--accent-soft);padding:2px 7px;border-radius:6px;margin-left:6px;vertical-align:1px}
+.mlist{display:flex;flex-direction:column;gap:4px}
+.mrow{display:flex;align-items:center;gap:12px;padding:8px;border-radius:12px;text-align:left;width:100%}
+.mrow:hover{background:var(--surface-2)}
+.mrow b{display:block;font-weight:650;font-size:14.5px}
+.mrow small{color:var(--muted);font-size:13px}
+.mrow .chev{color:var(--faint)}
+.mrow .chev svg{width:16px;height:16px}
+.common{display:flex;flex-direction:column;gap:10px}
+.common div{display:flex;gap:10px;align-items:center;font-size:14px}
+.common .ico{width:30px;height:30px;border-radius:9px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;flex:none}
+.common .ico svg{width:15px;height:15px}
+.muted{color:var(--muted)}
+
+/* network */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:18px 0 20px;overflow-x:auto}
+.tabs button{padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;gap:8px;align-items:center;white-space:nowrap}
+.tabs button.on{color:var(--ink);border-color:var(--accent)}
+.stats{display:flex;gap:28px;flex-wrap:wrap}
+.stat b{display:block;font-family:var(--f-display);font-size:28px;font-weight:750;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:13px}
+.req{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;flex-wrap:wrap}
+.req .who{flex:1;min-width:180px;text-align:left}
+.req .note{flex-basis:100%;font-size:13.5px;color:var(--muted);background:var(--surface-2);border-radius:10px;padding:10px 12px;margin:0}
+.page-h1{font-family:var(--f-display);font-weight:750;font-size:30px;letter-spacing:-.025em;margin:0 0 6px}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:3px}
+.seg button{padding:6px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:var(--muted);display:flex;gap:6px;align-items:center}
+.seg button svg{width:14px;height:14px}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+
+/* modal + toast */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:60;display:grid;place-items:center;padding:16px;animation:fade .15s}
+.modal{width:min(480px,100%);background:var(--surface);border-radius:22px;box-shadow:var(--shadow-lg);padding:24px;max-height:90vh;overflow:auto;animation:pop .18s ease-out}
+.modal h3{font-family:var(--f-display);font-weight:650;font-size:21px;margin:0 0 4px;letter-spacing:-.015em}
+.modal .sub{color:var(--muted);font-size:14px;margin:0 0 16px}
+.modal textarea{width:100%;min-height:118px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface-2);resize:vertical;font-size:14px;line-height:1.5}
+.modal textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.modal .row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.mini{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;background:var(--surface-2);margin-bottom:14px}
+.mini b{display:block}
+.mini small{color:var(--muted)}
+.lbl{font-size:12.5px;font-weight:600;color:var(--muted);margin:0 0 6px;display:flex;justify-content:space-between}
+.handoff{display:flex;flex-direction:column;align-items:center;gap:12px;padding:26px 0 10px;text-align:center}
+.spin{width:44px;height:44px;border-radius:50%;border:3px solid var(--line);border-top-color:currentColor;animation:spin .8s linear infinite}
+.wa-chat{background:var(--wa-soft);border-radius:16px;padding:14px;margin:4px 0 14px}
+.bubble{background:var(--surface);border-radius:12px 12px 4px 12px;padding:10px 12px;font-size:14px;margin-left:24px;box-shadow:var(--shadow);white-space:pre-wrap}
+.kv{display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:8px 10px;align-items:center;font-size:14px;padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:12px}
+.kv dt{color:var(--muted);font-size:12.5px;font-weight:600}
+.kv dd{margin:0;min-width:0;overflow-wrap:anywhere;user-select:all}
+.mail-body{white-space:pre-wrap;font-size:14px;background:var(--surface-2);border-radius:12px;padding:12px;margin-bottom:12px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:70;background:var(--ink);color:var(--bg);padding:12px 14px 12px 16px;border-radius:14px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:14px;font-size:14px;font-weight:500;max-width:calc(100% - 32px);animation:up .2s ease-out}
+.toast button{color:var(--bg);background:color-mix(in srgb,var(--bg) 18%,transparent);padding:6px 10px;border-radius:9px;font-weight:700;font-size:13px;white-space:nowrap}
+.demo-note{font-size:12px;color:var(--faint);text-align:center;padding:30px 0 10px}
+/* LinkedIn-style editing */
+.phead-body{position:relative}
+.ibtn{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--muted);flex:none}
+.ibtn:hover{background:var(--surface-2);color:var(--ink)}
+.ibtn svg{width:19px;height:19px}
+.intro-edit{position:absolute;top:12px;right:14px}
+.av-edit{position:relative;z-index:1;margin-top:-56px;border-radius:50%;align-self:start;justify-self:start}
+.av-edit .av{border:5px solid var(--surface);box-shadow:var(--shadow)}
+.av-edit .cam{position:absolute;right:6px;bottom:6px;width:34px;height:34px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink);box-shadow:var(--shadow)}
+.av-edit .cam svg{width:17px;height:17px}
+.av-edit:hover .av{filter:brightness(.94)}
+.panel-h{display:flex;align-items:flex-start;gap:6px}
+.panel-h > div{flex:1;min-width:0}
+.lcol{display:flex;flex-direction:column;gap:20px;min-width:0}
+.about{white-space:pre-wrap;font-size:15px;line-height:1.6;margin:0}
+.tl .row-edit{margin-left:auto;align-self:flex-start;width:34px;height:34px}
+.tl .entry > div{min-width:0;flex:1}
+.addlink{display:inline-flex;align-items:center;gap:6px;color:var(--accent-text);font-weight:600;font-size:14px}
+.addlink svg{width:16px;height:16px}
+.strength .bar{height:8px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden;margin:10px 0 14px}
+.strength .bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.strength .todo{display:flex;align-items:center;gap:10px;width:100%;padding:8px 6px;border-radius:10px;text-align:left;font-size:14px}
+.strength .todo:hover{background:var(--surface-2)}
+.strength .todo .ck{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex:none}
+.strength .todo.done{color:var(--muted);text-decoration:line-through}
+.strength .todo.done .ck{background:var(--ok);border-color:var(--ok);color:#fff}
+.strength .todo .ck svg{width:12px;height:12px}
+.modal.edit{width:min(600px,100%);padding:0;display:flex;flex-direction:column;max-height:min(88vh,820px)}
+.edit-h{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 14px 24px;border-bottom:1px solid var(--line)}
+.edit-h h3{margin:0;font-size:19px}
+.edit-b{padding:14px 24px 22px;overflow:auto;display:flex;flex-direction:column;gap:16px}
+.edit-f{display:flex;align-items:center;gap:10px;padding:12px 24px;border-top:1px solid var(--line)}
+.edit-f .sp{flex:1}
+.req-note{font-size:12.5px;color:var(--muted);margin:0}
+.field{display:flex;flex-direction:column;gap:5px}
+.field > label,.field > .fl{font-size:13.5px;font-weight:600;color:var(--muted)}
+.field input[type=text],.field input[type=email],.field input[type=tel],.field select,.field textarea{height:42px;border:1px solid var(--faint);border-radius:8px;padding:0 12px;background:var(--surface);font-size:15px;width:100%}
+.field textarea{height:auto;min-height:130px;padding:10px 12px;resize:vertical;line-height:1.5}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.field.bad input,.field.bad select,.field.bad textarea{border-color:#C2362F}
+.field .err{color:#C2362F;font-size:12.5px;font-weight:600;margin:0}
+.field .hint{color:var(--faint);font-size:12.5px;margin:0;display:flex;justify-content:space-between}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.checkrow{display:flex;align-items:center;gap:10px;font-size:14.5px;cursor:pointer}
+.checkrow input{width:18px;height:18px;accent-color:var(--accent)}
+.radios{display:flex;gap:10px;flex-wrap:wrap}
+.radios label{display:flex;align-items:center;gap:8px;padding:9px 14px;border:1px solid var(--line);border-radius:10px;font-weight:600;font-size:14px;cursor:pointer}
+.radios label:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:var(--accent-text)}
+.radios input{accent-color:var(--accent)}
+.notice{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:10px;background:var(--accent-soft);color:var(--accent-text);font-size:13.5px}
+.notice svg{width:17px;height:17px;flex:none;margin-top:1px}
+.btn.pill{border-radius:99px}
+.btn.danger{color:var(--muted);background:none;padding:0 6px}
+.btn.danger:hover{color:#C2362F}
+.sec-list{display:flex;flex-direction:column}
+.sec-item{display:flex;align-items:center;gap:14px;padding:14px 4px;border-top:1px solid var(--line);text-align:left;width:100%}
+.sec-item:first-child{border-top:0}
+.sec-item:hover b{color:var(--accent-text)}
+.sec-item .ico{width:38px;height:38px;border-radius:10px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;flex:none}
+.sec-item .ico svg{width:18px;height:18px}
+.sec-item small{display:block;color:var(--muted);font-size:13px}
+.sec-item .chev{margin-left:auto;color:var(--faint)}
+.sec-item .chev svg{width:16px;height:16px}
+.photo-prev{display:grid;place-items:center;padding:12px 0}
+.upload{position:relative;overflow:hidden}
+.upload input{position:absolute;inset:0;opacity:0;cursor:pointer}
+@media (max-width:560px){.two{grid-template-columns:1fr}}
+/* LinkedIn-style search + connections */
+.res-wrap{max-width:880px;margin:0 auto}
+.btn.outline{background:transparent;border:1.5px solid var(--accent);color:var(--accent-text)}
+.btn.outline:hover{background:var(--accent-soft);filter:none}
+.btn.outline.is-pending{border-color:var(--warm);color:var(--warm);background:transparent}
+.btn.outline.is-connected{border-color:var(--ok);color:var(--ok);background:transparent}
+.pillbar{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:20;background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-block:12px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.pillw{position:relative}
+.fpill{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 14px;border-radius:99px;border:1px solid var(--faint);background:var(--surface);font-weight:600;font-size:14px;color:var(--muted);white-space:nowrap}
+.fpill svg{width:15px;height:15px;transition:transform .15s}
+.fpill:hover{border-color:var(--ink);color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.fpill.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.fpill.on:hover{box-shadow:none;filter:brightness(1.08)}
+.fpill.open svg{transform:rotate(180deg)}
+.fpill.type{background:var(--ok);border-color:var(--ok);color:#fff;cursor:default}
+.vsep{width:1px;height:24px;background:var(--line);margin:0 2px}
+.fpanel{position:absolute;top:calc(100% + 8px);left:0;z-index:45;width:300px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;max-height:420px}
+.fopts{padding:10px 8px;overflow:auto}
+.fopt{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:14.5px}
+.fopt:hover{background:var(--surface-2)}
+.fopt input{width:18px;height:18px;accent-color:var(--ok);flex:none}
+.fopt .n{margin-left:auto;font-family:var(--f-mono);font-size:12px;color:var(--faint)}
+.fhead{display:none;padding:14px 16px 0;font-weight:700;font-size:16px}
+.ffoot{display:flex;justify-content:flex-end;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.rbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+.rbox-h{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--line);color:var(--muted);font-size:14px}
+.rbox-h .sp{margin-left:auto}
+.rl2{list-style:none;margin:0;padding:0}
+.rrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:start;padding:16px 20px;border-top:1px solid var(--line)}
+.rrow:first-child{border-top:0}
+.rrow .main{min-width:0;display:flex;flex-direction:column;gap:4px}
+.nmline{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.nmline .nm{font-weight:700;font-size:16.5px;text-align:left}
+.nmline .nm:hover{color:var(--accent-text);text-decoration:underline}
+.deg{color:var(--muted);font-size:14px}
+.rrow .rl{font-size:14.5px}
+.rrow .sub2{font-size:13px;color:var(--muted)}
+.rrow .signal{margin-top:4px}
+button.mut{margin-top:2px}
+button.mut:hover span:last-child{text-decoration:underline;color:var(--accent-text)}
+button.how{width:100%;text-align:left;cursor:pointer}
+button.how:hover{border-color:var(--faint)}
+button.how .chev{margin-left:auto;color:var(--faint)}
+button.how .chev svg{width:16px;height:16px}
+.drawer-scrim{position:fixed;inset:0;background:var(--scrim);z-index:60;display:flex;justify-content:flex-end;animation:fade .15s}
+.drawer{width:min(460px,100%);height:100%;background:var(--surface);display:flex;flex-direction:column;box-shadow:var(--shadow-lg);animation:slide .2s ease-out}
+.drawer .edit-b{gap:0;padding:0 24px}
+.dsec{padding:18px 0;border-bottom:1px solid var(--line)}
+.dsec:last-child{border-bottom:0}
+.dsec h4{margin:0 0 8px;font-size:16px;font-weight:700}
+.dsec .fopts{padding:0;display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}
+.dsec .fopt{padding:6px 4px}
+@keyframes slide{from{transform:translateX(40px);opacity:.5}}
+.conn-head{padding:20px 20px 0}
+.conn-head h1{font-family:var(--f-display);font-weight:650;font-size:22px;margin:0;letter-spacing:-.015em}
+.conn-head p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.conn-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--line)}
+.conn-tools .sp{margin-left:auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.conn-tools label{font-size:13.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.conn-tools select{border:0;background:transparent;font-weight:700;font-size:13.5px;color:var(--ink);cursor:pointer}
+.mini-search{position:relative;flex:1;min-width:180px;max-width:300px}
+.mini-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--faint)}
+.mini-search input{width:100%;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);padding:0 10px 0 34px;font-size:14px}
+.mini-search input:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.seg-tabs{display:flex;gap:6px;padding:14px 20px 0}
+.empty-row{padding:30px 20px;text-align:center;color:var(--muted)}
+@media (max-width:720px){
+  .pillbar{flex-wrap:nowrap;overflow-x:auto;margin-inline:-20px;padding-inline:20px;scrollbar-width:none}
+  .fhead{display:block}
+  .fpanel{position:fixed;left:12px;right:12px;top:auto;bottom:calc(76px + env(safe-area-inset-bottom,0px));width:auto}
+  .rrow{grid-template-columns:auto minmax(0,1fr);gap:12px;padding:14px 16px}
+  .rrow .acts{grid-column:2}
+  .rrow .av{width:52px!important;height:52px!important}
+  .dsec .fopts{grid-template-columns:1fr}
+}
+/* join / LinkedIn import */
+.join{max-width:640px;margin:0 auto;padding-block:28px 80px}
+.steps{display:flex;gap:6px;margin-bottom:22px;list-style:none;padding:0}
+.steps li{flex:1;display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:600;color:var(--faint)}
+.steps li::before{content:"";height:4px;border-radius:99px;background:var(--line)}
+.steps li.on{color:var(--ink)}
+.steps li.on::before,.steps li.done::before{background:var(--accent)}
+.steps li.done{color:var(--muted)}
+.jcard{background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:28px}
+.jcard h1{font-family:var(--f-display);font-weight:750;font-size:clamp(24px,4vw,30px);letter-spacing:-.025em;margin:0 0 8px;text-wrap:balance}
+.jcard .lead{color:var(--muted);font-size:15.5px;margin:0 0 20px;max-width:60ch}
+.jcard .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;align-items:center}
+.invite{display:flex;gap:12px;align-items:center;padding:14px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);margin-bottom:20px}
+.invite b{display:block}
+.invite small{color:var(--muted)}
+.btn.li{background:#0A66C2;color:#fff}
+.btn.li:hover{filter:brightness(1.08)}
+.fine{font-size:12.5px;color:var(--faint);margin:14px 0 0;line-height:1.5}
+.gotlist{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.gotlist li{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line);font-size:14.5px}
+.gotlist li:first-child{border-top:0}
+.gotlist .k{color:var(--muted);width:140px;flex:none;font-size:13.5px}
+.gotlist .v{min-width:0;flex:1;font-weight:600}
+.gotlist .ok{color:var(--ok)}
+.gotlist .ok svg{width:16px;height:16px}
+.src{font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:6px;background:var(--accent-soft);color:var(--accent-text);white-space:nowrap}
+.src.pdf{background:var(--warm-soft);color:var(--warm)}
+.src.you{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.drop{margin-top:16px;border:1.5px dashed var(--faint);border-radius:16px;padding:20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--surface-2)}
+.drop .ico{width:44px;height:44px;border-radius:12px;background:var(--warm-soft);color:var(--warm);display:grid;place-items:center;flex:none}
+.drop .ico svg{width:22px;height:22px}
+.drop .t{flex:1;min-width:200px}
+.drop .t > b{display:block}
+.drop .t small{color:var(--muted);font-size:13px}
+.progress{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px}
+.progress i{display:block;height:100%;width:0;background:var(--warm);animation:fill 1.6s ease-out forwards}
+@keyframes fill{to{width:100%}}
+.jsec{margin-top:22px}
+.jsec h3{font-size:15px;font-weight:700;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.exrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.exrow:first-of-type{border-top:0}
+.exrow .t{flex:1;min-width:0}
+.exrow .t b{display:block;font-size:14.5px}
+.exrow .t small{color:var(--muted);font-size:13px}
+.codebox{display:flex;gap:8px;margin-top:6px}
+.codebox input{width:100%;max-width:220px;height:48px;border:1px solid var(--faint);border-radius:10px;text-align:center;font-family:var(--f-mono);font-size:22px;letter-spacing:.3em;background:var(--surface)}
+.demo-code svg{width:16px;height:16px;flex:none}
+.demo-code{white-space:nowrap;display:inline-flex;gap:8px;align-items:center;font-size:13px;padding:8px 12px;border-radius:10px;background:var(--warm-soft);color:var(--warm);margin-top:12px}
+.alt{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.alt h3{font-size:14.5px;margin:0 0 10px}
+.altopt{display:flex;gap:12px;align-items:center;width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;text-align:left;margin-bottom:8px}
+.altopt:hover{border-color:var(--faint)}
+.altopt .ico{width:34px;height:34px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;flex:none;color:var(--muted)}
+.altopt .ico svg{width:17px;height:17px}
+.altopt small{display:block;color:var(--muted);font-size:13px}
+.vbadge.idv{background:#E6F0FA;color:#0A5BAA}
+.vbadge.pend{background:var(--warm-soft);color:var(--warm)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .vbadge.idv{background:#132A40;color:#8CC2F5}}
+:root[data-theme="dark"] .vbadge.idv{background:#132A40;color:#8CC2F5}
+.welcome-mark{width:58px;height:58px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;margin-bottom:14px}
+.welcome-mark svg{width:28px;height:28px}
+/* membership approval */
+.demo-toggle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--faint);padding:10px 12px;border:1px dashed var(--line);border-radius:12px;margin-bottom:18px}
+.checks{list-style:none;margin:0 0 16px;padding:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.checks li{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-top:1px solid var(--line);font-size:14.5px}
+.checks li:first-child{border-top:0}
+.checks .st{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;margin-top:1px}
+.checks .st svg{width:13px;height:13px}
+.checks .st.ok{background:var(--ok);color:#fff}
+.checks .st.no{background:var(--warm-soft);color:var(--warm)}
+.checks .st.wait{border:2px solid var(--line);border-top-color:var(--accent);animation:spin .8s linear infinite}
+.checks b{display:block;font-weight:650}
+.checks small{color:var(--muted);font-size:13px}
+.track3{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:0}
+.track3 li{display:flex;gap:12px;align-items:flex-start;position:relative;padding-bottom:16px;font-size:14.5px}
+.track3 li:last-child{padding-bottom:0}
+.track3 li::before{content:"";position:absolute;left:11px;top:24px;bottom:0;width:2px;background:var(--line)}
+.track3 li:last-child::before{display:none}
+.track3 .st{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--surface);border:2px solid var(--line);position:relative;z-index:1}
+.track3 .st svg{width:13px;height:13px}
+.track3 li.ok .st{background:var(--ok);border-color:var(--ok);color:#fff}
+.track3 li.now .st{border-color:var(--warm);background:var(--warm-soft)}
+.track3 small{display:block;color:var(--muted);font-size:13px}
+.jr{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.jr-top{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.jr-top .who{flex:1;min-width:180px}
+.jr-top .who b{font-size:16px}
+.ev{display:flex;flex-wrap:wrap;gap:6px}
+.evc{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:4px 9px;border-radius:8px}
+.evc svg{width:13px;height:13px}
+.evc.ok{background:var(--ok-soft);color:var(--ok)}
+.evc.no{background:var(--warm-soft);color:var(--warm)}
+.qa{font-size:14px;background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.qa span{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:2px}
+.jr-acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.jr-acts .fine{margin:0;flex-basis:100%}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fade{from{opacity:0}}
+@keyframes pop{from{transform:translateY(8px) scale(.98);opacity:.6}}
+@keyframes up{from{transform:translate(-50%,10px);opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+@media (max-width:900px){
+  .res-layout{grid-template-columns:1fr}
+  .filters{position:static;display:none}
+  .filters.open{display:flex}
+  .filter-toggle{display:inline-flex}
+  .pgrid{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  .top .nav{display:none}
+  .top .wrap{gap:12px}
+  .brand span.full{display:none}
+  .bottom-nav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+  .bottom-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;font-size:11.5px;font-weight:600;color:var(--muted);position:relative}
+  .bottom-nav button.on{color:var(--accent-text)}
+  .bottom-nav svg{width:21px;height:21px}
+  .bottom-nav .badge{position:absolute;top:2px;left:calc(50% + 6px)}
+  main{padding-bottom:72px}
+  .hero{padding-block:30px 10px}
+  .search.big .search-input{height:58px;font-size:16px;padding-left:48px}
+  .search.big .search-ico{left:16px}
+  .search.big .search-go{display:none}
+  .shortcuts{grid-template-columns:repeat(3,1fr);gap:8px}
+  .shortcut{flex-direction:column;align-items:flex-start;gap:8px;padding:12px}
+  .shortcut small{display:none}
+  .rcard{grid-template-columns:auto minmax(0,1fr);gap:14px}
+  .rcard .acts{grid-column:1/-1;flex-direction:row}
+  .rcard .acts .btn{flex:1}
+  .phead-body{grid-template-columns:1fr;padding:0 18px 20px}
+  .phead-info{padding-top:4px}
+  .tl li{grid-template-columns:22px minmax(0,1fr)}
+  .tl .yr{grid-column:2;text-align:left;padding:0;order:2;margin-top:4px}
+  .tl .rail-l{grid-row:1 / span 2}
+  .tl .entry{grid-column:2}
+  .pactions .btn{flex:1}
+}
+</style>
+
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script>
+/* ---------- icons ---------- */
+const I = {
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  cap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c2 2 10 2 12 0v-5"/></svg>',
+  building:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="3" width="11" height="18" rx="1.5"/><path d="M15 9h4a1 1 0 0 1 1 1v11h-5M8 7h3M8 11h3M8 15h3"/></svg>',
+  layers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5z"/><path d="m2 13 10 5 10-5"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+  mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+  wa:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2A9.8 9.8 0 0 0 3.6 17l-1.4 4.8 5-1.3A9.8 9.8 0 1 0 12 2.2zm0 17.9a8.1 8.1 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.1 8.1 0 1 1 12 20.1zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.6 6.6 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.7 11.7 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.2z"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-7 7-7 1.5 0 2.9.5 4 1.3M19 14v6M16 17h6"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+  right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+  users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/><circle cx="17" cy="9" r="2.6"/><path d="M17 13.6c2.6.3 4.5 2.6 4.5 5.4"/></svg>',
+  compass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z" stroke-linejoin="round"/></svg>',
+  user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>',
+  shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5" stroke-linecap="round"/></svg>',
+  filter:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>',
+  spark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg>',
+  link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
+  pencil:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>',
+  add:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  camera:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
+};
+const markSVG='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg>';
+
+/* ---------- reference data ---------- */
+const NOW_YEAR = 2026;
+const SCHOOLS = {
+  'MIT Sloan':{color:'#A31F34',full:'MIT Sloan School of Management',tag:'Sloan',domain:'sloan.mit.edu',aliases:['mit sloan','sloan','mit']},
+  'Harvard Business School':{color:'#6B1F3A',full:'Harvard Business School',tag:'HBS',domain:'alumni.hbs.edu',aliases:['harvard business school','hbs','harvard']},
+  'Stanford GSB':{color:'#1F6A57',full:'Stanford Graduate School of Business',tag:'GSB',domain:'alumni.gsb.stanford.edu',aliases:['stanford gsb','stanford','gsb']},
+  'Wharton':{color:'#1F3B78',full:'The Wharton School',tag:'Wharton',domain:'wharton.upenn.edu',aliases:['wharton','upenn','penn']},
+  'Columbia Business School':{color:'#2E77A8',full:'Columbia Business School',tag:'CBS',domain:'gsb.columbia.edu',aliases:['columbia business school','columbia','cbs']},
+  'Kellogg':{color:'#5A3A8E',full:'Kellogg School of Management',tag:'Kellogg',domain:'kellogg.northwestern.edu',aliases:['kellogg','northwestern']},
+};
+const INDUSTRIES = {
+  'Technology':['technology','tech','software','big tech'],
+  'Healthcare':['healthcare','health care','digital health','health tech','healthtech','health','biotech','pharma','medtech'],
+  'Consulting':['consulting','management consulting','strategy consulting'],
+  'Fintech':['fintech','payments','insurtech'],
+  'Climate Tech':['climate tech','climate','cleantech','clean energy','energy','sustainability'],
+  'Venture Capital':['venture capital','venture','vc'],
+  'Finance':['finance','banking','investment banking'],
+};
+const ROLES = {
+  'Product':['product managers','product manager','product leaders','product','pms','pm'],
+  'Founder':['founders','founder','co-founder','ceos','ceo','entrepreneurs','entrepreneur'],
+  'Consulting':['consultants','consultant'],
+  'Engineering':['engineers','engineer','engineering'],
+  'Investor':['investors','investor'],
+  'Strategy & Ops':['strategy','operations','ops','chief of staff'],
+  'Business Development':['business development','bd'],
+  'Finance':['bankers','banker'],
+};
+const LOCATIONS = {
+  'New York':['new york city','new york','nyc','ny'],
+  'SF Bay Area':['san francisco','bay area','silicon valley','sf'],
+  'Boston':['boston','cambridge'],
+  'Seattle':['seattle'],
+};
+const STATUS = {'Student':['current students','students','student'],'Alum':['alumni','alums','alum','graduates']};
+const COMPANY_ALIASES = {'McKinsey & Company':['mckinsey'],'Bain & Company':['bain'],'Teva Pharmaceuticals':['teva'],'Elbit Systems':['elbit'],'J.P. Morgan':['jp morgan','jpmorgan','j.p. morgan'],'Flare Capital Partners':['flare capital','flare'],'Flatiron Health':['flatiron'],'Insight Partners':['insight partners'],'Goldman Sachs':['goldman'],'Monday.com':['monday'],'Sheba Medical Center':['sheba'],'Oscar Health':['oscar'],'Form Energy':['form energy'],'Bank Hapoalim':['hapoalim'],'Bank Leumi':['leumi']};
+
+/* id, name, role, company, location, industry, roleCat, status, schools, career (newest first), preferred contact, hair */
+const RAW = [
+ [0,'Noam Levi','MBA Candidate','MIT Sloan','Boston','Technology','Product','Student',[['MIT Sloan','MBA',2027]],[['2021–2025','Monday.com','Product Manager'],['2018–2021','Fiverr','Business Analyst'],['2014–2018','IDF · Unit 8200','Team Lead']],'whatsapp','short'],
+ [1,'Maya Cohen','Senior Product Manager','Google','SF Bay Area','Technology','Product','Alum',[['MIT Sloan','MBA',2023]],[['2026–Present','Google','Senior Product Manager'],['2023–2026','WHOOP','Product Manager'],['2017–2021','McKinsey & Company','Business Analyst']],'whatsapp','long'],
+ [2,'Daniel Mizrahi','Engagement Manager','McKinsey & Company','New York','Consulting','Consulting','Alum',[['Harvard Business School','MBA',2022]],[['2022–Present','McKinsey & Company','Engagement Manager'],['2017–2020','Monday.com','Growth Manager'],['2013–2016','IDF · Armored Corps','Company Commander']],'email','short'],
+ [3,'Noa Shapiro','Product Manager','Oscar Health','New York','Healthcare','Product','Alum',[['MIT Sloan','MBA',2024]],[['2024–Present','Oscar Health','Product Manager'],['2019–2022','Teva Pharmaceuticals','Market Access Analyst']],'whatsapp','bun'],
+ [4,'Eitan Friedman','Co-founder & CEO','Verdant Grid','Boston','Climate Tech','Founder','Alum',[['MIT Sloan','MBA',2021]],[['2022–Present','Verdant Grid','Co-founder & CEO'],['2021–2022','BCG','Consultant'],['2015–2019','SolarEdge','Product Engineer']],'whatsapp','curly'],
+ [5,'Tamar Erez','Head of Strategy, Payments','Stripe','SF Bay Area','Fintech','Strategy & Ops','Alum',[['Stanford GSB','MBA',2019]],[['2023–Present','Stripe','Head of Strategy, Payments'],['2019–2023','Bain & Company','Manager'],['2014–2017','Bank Hapoalim','Analyst']],'email','long'],
+ [6,'Yonatan Katz','Principal','Insight Partners','New York','Venture Capital','Investor','Alum',[['Columbia Business School','MBA',2020]],[['2021–Present','Insight Partners','Principal'],['2020–2021','Goldman Sachs','Associate'],['2014–2018','Check Point','Software Engineer']],'whatsapp','short'],
+ [7,'Shira Avraham','Consultant','BCG','Boston','Consulting','Consulting','Alum',[['MIT Sloan','MBA',2025]],[['2025–Present','BCG','Consultant'],['2019–2023','Fiverr','Product Analyst']],'whatsapp','long'],
+ [8,'Omer Ben-Ami','Product Lead','WHOOP','Boston','Healthcare','Product','Alum',[['Harvard Business School','MBA',2021]],[['2023–Present','WHOOP','Product Lead'],['2021–2023','Apple','Product Manager, Health'],['2015–2019','Mobileye','Algorithm Engineer']],'email','buzz'],
+ [9,'Lior Peretz','Engineering Manager','Apple','SF Bay Area','Technology','Engineering','Alum',[['Stanford GSB','MBA',2022]],[['2022–Present','Apple','Engineering Manager'],['2015–2020','Intel','Software Engineer']],'whatsapp','side'],
+ [10,'Michal Goldberg','Director, Business Development','Moderna','Boston','Healthcare','Business Development','Alum',[['Wharton','EMBA',2018]],[['2020–Present','Moderna','Director, Business Development'],['2012–2020','Teva Pharmaceuticals','Senior Manager, BD']],'email','bun'],
+ [11,'Avi Rosen','Founder & CEO','Ledgerline','New York','Fintech','Founder','Alum',[['Columbia Business School','MBA',2017]],[['2021–Present','Ledgerline','Founder & CEO'],['2017–2021','Goldman Sachs','Vice President'],['2012–2015','Payoneer','Product Analyst']],'whatsapp','buzz'],
+ [12,'Gal Dahan','Product Manager','Ramp','New York','Fintech','Product','Alum',[['Kellogg','MBA',2024]],[['2024–Present','Ramp','Product Manager'],['2018–2022','Monday.com','Product Manager']],'whatsapp','short'],
+ [13,'Roni Azoulay','MBA Candidate','Stanford GSB','SF Bay Area','Technology','Product','Student',[['Stanford GSB','MBA',2027]],[['2026','Bain & Company','Summer Associate'],['2020–2025','Wix','Product Manager']],'email','long'],
+ [14,'Itai Barak','VP Operations','Form Energy','Boston','Climate Tech','Strategy & Ops','Alum',[['Harvard Business School','MBA',2020]],[['2022–Present','Form Energy','VP Operations'],['2020–2022','McKinsey & Company','Associate'],['2013–2018','IDF · Navy','Officer']],'email','short'],
+ [15,'Hila Weiss','Partner','Flare Capital Partners','Boston','Healthcare','Investor','Alum',[['MIT Sloan','MBA',2019]],[['2023–Present','Flare Capital Partners','Partner'],['2019–2023','Flare Capital Partners','Principal'],['2013–2017','Sheba Medical Center','Innovation Manager']],'whatsapp','long'],
+ [16,'Ariel Ohana','Product Manager','Google','New York','Technology','Product','Alum',[['Columbia Business School','MBA',2023]],[['2023–Present','Google','Product Manager'],['2018–2021','Waze','Product Analyst']],'whatsapp','curly'],
+ [17,'Yael Sasson','MBA Candidate','MIT Sloan','Boston','Technology','Product','Student',[['MIT Sloan','MBA',2027]],[['2020–2025','Fiverr','Senior Product Analyst']],'whatsapp','bun'],
+ [18,'Ido Klein','Senior Manager, Strategy','Amazon','Seattle','Technology','Strategy & Ops','Alum',[['Kellogg','MBA',2021]],[['2021–Present','Amazon','Senior Manager, Strategy'],['2015–2019','Elbit Systems','Project Manager']],'email','side'],
+ [19,'Dana Halevi','Principal Product Manager','Microsoft','Seattle','Technology','Product','Alum',[['Wharton','MBA',2022]],[['2022–Present','Microsoft','Principal Product Manager'],['2016–2020','Wix','Product Manager']],'email','long'],
+ [20,'Nadav Elbaz','Vice President, TMT Banking','J.P. Morgan','New York','Finance','Finance','Alum',[['Wharton','MBA',2020]],[['2020–Present','J.P. Morgan','Vice President, TMT Banking'],['2014–2018','Bank Leumi','Analyst']],'whatsapp','short'],
+ [21,'Rotem Amar','Founder','CarbonLoop','SF Bay Area','Climate Tech','Founder','Alum',[['Stanford GSB','MBA',2023]],[['2023–Present','CarbonLoop','Founder'],['2018–2021','Tesla','Battery Supply Chain Manager']],'whatsapp','curly'],
+ [22,'Keren Biton','Director of Product','Flatiron Health','New York','Healthcare','Product','Alum',[['Columbia Business School','MBA',2019]],[['2022–Present','Flatiron Health','Director of Product'],['2019–2022','Google','Product Manager, Health'],['2014–2017','IDF · Medical Corps','Officer']],'email','bun'],
+ [23,'Assaf Lavi','Principal','BCG','New York','Consulting','Consulting','Alum',[['MIT Sloan','Sloan Fellows MBA',2019]],[['2019–Present','BCG','Principal'],['2012–2018','Teva Pharmaceuticals','Strategy Manager']],'email','buzz'],
+ [24,'Neta Carmel','MBA Candidate','MIT Sloan','Boston','Consulting','Consulting','Student',[['MIT Sloan','MBA',2027]],[['2022–2025','McKinsey & Company','Business Analyst']],'whatsapp','long'],
+ [25,'Ofir Segal','Product Manager','Apple','SF Bay Area','Technology','Product','Alum',[['MIT Sloan','MBA',2024]],[['2024–Present','Apple','Product Manager'],['2017–2022','Mobileye','Software Engineer']],'whatsapp','short'],
+ [26,'Liat Hadad','Chief of Staff to the CEO','Lemonade','New York','Fintech','Strategy & Ops','Alum',[['Harvard Business School','MBA',2023]],[['2023–Present','Lemonade','Chief of Staff to the CEO'],['2018–2021','Bain & Company','Associate Consultant']],'email','side'],
+];
+const EDGES = [[0,17],[0,24],[0,7],[0,1],[0,12],[0,4],
+ [1,16],[1,8],[1,2],[1,25],[1,17],[1,24],[1,22],[2,23],[2,14],[2,12],[2,26],[3,22],[3,15],[3,10],[3,8],
+ [4,14],[4,21],[4,7],[4,23],[4,17],[4,24],[5,11],[5,26],[5,13],[5,20],[6,11],[6,21],[6,20],[6,16],
+ [7,23],[7,24],[7,17],[7,12],[8,15],[8,10],[8,25],[9,25],[9,19],[9,18],[10,15],[10,22],[11,20],[11,12],[11,26],
+ [12,26],[12,17],[13,19],[13,21],[14,21],[14,15],[16,22],[16,19],[16,17],[17,24],[17,25],[18,19],[20,26],[23,24]];
+const ME = 0;
+const JOIN_REQS = [
+  {id:101,name:'Tal Ben-David',first:'Tal',last:'Ben-David',hair:'long',role:'Incoming PM',company:'Ramp',schools:[{school:'MIT Sloan',program:'MBA',year:2026}],li:{edu:'MIT Sloan · MBA, 2024–2026',id:false,israeli:'IDF · Intelligence Corps, Wix (Tel Aviv)'},knows:17,answer:'Grew up in Haifa. PM at Wix for 4 years before Sloan, now moving to NYC for a fintech role.',url:'linkedin.com/in/tal-bendavid',asked:'2 hours ago'},
+  {id:102,name:'Shai Mor',first:'Shai',last:'Mor',hair:'short',role:'MBA Candidate',company:'MIT Sloan',schools:[{school:'MIT Sloan',program:'MBA',year:2028}],li:{edu:null,id:true,israeli:'Technion, Intel (Haifa)'},knows:null,answer:'From Tel Aviv, ex-Intel engineer. Started at Sloan this fall and haven’t updated LinkedIn yet.',url:'linkedin.com/in/shaimor',asked:'Yesterday'},
+];
+const EXAMPLES = ['Sloan \'23','Product managers at Google','People from MIT working in healthcare','HBS alumni in New York','Founders in climate tech','People who worked at McKinsey'];
+const INCOMING_NOTES = {25:'Hi Noam! Saw you were at Monday.com before Sloan. I’m a Sloan ’24 at Apple and happy to help with your PM recruiting.',16:'Hey, fellow Waze/Monday alum network here. Would love to swap notes on NYC product roles.'};
+
+/* ---------- build people ---------- */
+const AREA = {'New York':'212','SF Bay Area':'415','Boston':'617','Seattle':'206'};
+const P = RAW.map(([id,name,role,company,location,industry,roleCat,status,schools,career,pref,hair])=>{
+  const [first,...rest] = name.split(' '); const last = rest.join(' ');
+  const sc = schools.map(([school,program,year])=>({school,program,year}));
+  const car = career.map(([years,co,r])=>({years,company:co,role:r}));
+  const curCompany = status==='Student' ? null : company;
+  const prev = [...new Set(car.filter(c=>!/Present/.test(c.years) && !/^IDF/.test(c.company) && c.company!==curCompany).map(c=>c.company))];
+  const email = (first+'.'+last).toLowerCase().replace(/[^a-z.]/g,'')+'@'+SCHOOLS[sc[0].school].domain;
+  const phone = `+1 (${AREA[location]}) 555-01${String(id).padStart(2,'0')}`;
+  const blob = [name,role,company,...car.map(c=>c.role+' '+c.company)].join(' ').toLowerCase();
+  return {id,name,first,last,role,company,location,industry,roleCat,status,schools:sc,career:car,curCompany,prev,email,phone,pref,hair,words:blob.split(/[^a-z0-9]+/).filter(Boolean)};
+});
+P.forEach(p=>{ p.verify = {school: p.id%2?'linkedin':'member', identity: p.id%3!==2, workplace: !!p.curCompany && p.id%4===1}; });
+EDGES.forEach(([a,b])=>{ [[a,b],[b,a]].forEach(([x,y])=>{ const px=P[x], py=P[y]; if(px.verify.school==='member' && px.verify.approver==null && py.schools.some(s=>px.schools.some(t=>t.school===s.school))) px.verify.approver=y; }); });
+P.forEach(p=>{ if(p.verify.school==='member' && p.verify.approver==null) p.verify.school='admin'; });
+const byId = id => P[id];
+const adj = new Map(P.map(p=>[p.id,new Set()]));
+EDGES.forEach(([a,b])=>{adj.get(a).add(b);adj.get(b).add(a)});
+
+/* ---------- state ---------- */
+const S = {
+  view:'home', params:{}, stack:[],
+  pending:new Set(), incoming:new Set([25,16]),
+  viewed:[8,22,14],
+  interacted:[{id:1,label:'WhatsApp · 2d ago'},{id:4,label:'Connected · 5d ago'},{id:17,label:'Emailed · 1w ago'},{id:12,label:'Connected · 2w ago'},{id:7,label:'WhatsApp · 3w ago'}],
+  query:'', filters:{}, sort:'relevance', showFilters:false, browse:null, netTab:'connections', recent:[], pill:null, draft:[], draftAll:null, connQ:'', connSort:'recent',
+  joinReqs: JOIN_REQS.slice(),
+  connOrder:[4,12,7,1,17,24], connAt:{4:'5 days ago',12:'2 weeks ago',7:'3 weeks ago',1:'2 months ago',17:'2 months ago',24:'2 months ago'},
+};
+
+/* ---------- helpers ---------- */
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const yy = y => "'"+String(y).slice(2);
+const schoolTag = s => `${SCHOOLS[s.school].tag} ${yy(s.year)}`;
+function classBadge(s,size=''){
+  const sc=SCHOOLS[s.school], cur=s.year>NOW_YEAR;
+  return `<span class="cb ${size}" style="--sc:${sc.color}" title="${esc(sc.full)} · ${esc(s.program)} · Class of ${s.year}"><span class="cb-s">${sc.tag}</span><span class="cb-y">${yy(s.year)}</span>${cur&&size==='lg'?'<span class="cb-c">Current</span>':''}</span>`;
+}
+const badges = (p,size='') => p.schools.map(s=>classBadge(s,size)).join(' ');
+const mutuals = id => id===ME?[]:[...adj.get(id)].filter(x=>x!==ME && adj.get(ME).has(x));
+const connState = id => adj.get(ME).has(id)?'connected':S.pending.has(id)?'pending':S.incoming.has(id)?'incoming':'none';
+const me = () => byId(ME);
+const sharedSchool = p => p.schools.find(s=>me().schools.some(m=>m.school===s.school));
+const sharedPrev = p => [...p.prev, p.curCompany].filter(Boolean).find(c=>me().prev.includes(c));
+function relevance(p){
+  const m = mutuals(p.id).length;
+  if(m>=2) return {txt:`${m} mutual connections`,ico:'users'};
+  const s = sharedSchool(p); if(s) return {txt:`Also ${SCHOOLS[s.school].tag} · ${yy(s.year)}`,ico:'cap'};
+  const c = sharedPrev(p); if(c) return {txt:`Also ex-${c}`,ico:'building'};
+  if(m===1) return {txt:'1 mutual connection',ico:'users'};
+  return {txt:`${p.industry} · ${p.roleCat}`,ico:'layers'};
+}
+const LOGO_COLORS = ['#2E49C2','#B5641E','#1D7448','#7A3E9D','#B23A48','#2C6E8A','#5B5F2A','#3D3F8F'];
+function logo(name,edu,color,tag){
+  if(edu) return `<span class="logo" style="background:${color};font-size:10.5px;letter-spacing:.04em">${esc(tag.toUpperCase())}</span>`;
+  let h=0; for(const c of name) h=(h*31+c.charCodeAt(0))>>>0;
+  const letter = name.replace(/^IDF · /,'').replace(/^The /,'')[0];
+  return `<span class="logo" style="background:${LOGO_COLORS[h%LOGO_COLORS.length]}">${esc(letter)}</span>`;
+}
+
+/* ---------- avatars ---------- */
+const BG=['#DCE4F7','#F3E1D3','#DDEBDF','#EADCF0','#F5E7C6','#D8EAEE','#F2DCDC'];
+const SKIN=['#F1C9A5','#E3B089','#C99068','#A86E4C','#F5D6BC','#D9A27A'];
+const HAIR=['#2B1D14','#4A3020','#6B4A2E','#17171A','#8E5F35','#3A2A22'];
+const SHIRT=['#2E3A59','#5B6B8C','#7A4E3A','#33554A','#8C3B4A','#3E3E46','#4B5D8A'];
+const avCache={};
+function avatarSVG(p){
+  if(avCache[p.id]) return avCache[p.id];
+  const i=p.id, bg=BG[i%BG.length], skin=SKIN[(i*5+1)%SKIN.length], hair=HAIR[(i*3+2)%HAIR.length], shirt=SHIRT[(i*2+1)%SHIRT.length];
+  let back='',front='';
+  switch(p.hair){
+    case 'long': back=`<path d="M30 44C29 22 40 16 50 16S71 22 70 44L72 72C66 76 60 72 59 64H41C40 72 34 76 28 72Z" fill="${hair}"/>`;
+      front=`<path d="M33 42C32 26 41 21 50 21S68 26 67 42C63 33 56 29 46 30 40 31 36 35 33 42Z" fill="${hair}"/>`; break;
+    case 'bun': front=`<circle cx="50" cy="18" r="8" fill="${hair}"/><path d="M33 42C32 26 41 22 50 22S68 26 67 42C62 33 56 30 50 30S37 33 33 42Z" fill="${hair}"/>`; break;
+    case 'curly': front=[[36,33],[41,27],[48,24],[55,24.5],[61,28],[65,34],[34,39],[66,40]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="6.4" fill="${hair}"/>`).join(''); break;
+    case 'buzz': front=`<path d="M33.5 40C33 27 41 23.5 50 23.5S67 27 66.5 40C62 33 56 31 50 31S38 33 33.5 40Z" fill="${hair}" opacity=".6"/>`; break;
+    case 'side': front=`<path d="M33 43C31 26 41 20 51 20S69 26 67 40C60 36 52 30 44 29 40 33 36 37 33 43Z" fill="${hair}"/>`; break;
+    default: front=`<path d="M33 41C32 25 41 20 50 20S68 25 67 41C64 33 58 29 50 29S36 33 33 41Z" fill="${hair}"/>`;
+  }
+  return avCache[p.id]=`<svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="${bg}"/>${back}<rect x="44" y="52" width="12" height="16" rx="5" fill="${skin}"/><path d="M15 104C15 80 31 68 50 68S85 80 85 104Z" fill="${shirt}"/><path d="M43 68 50 77 57 68Z" fill="${skin}"/><ellipse cx="50" cy="42" rx="16.5" ry="18.5" fill="${skin}"/>${front}</svg>`;
+}
+const av = (p,size,cls='') => `<span class="av ${cls}" style="width:${size}px;height:${size}px" role="img" aria-label="${esc(p.name)}">${p.photo?`<img src="${p.photo}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">`:avatarSVG(p)}</span>`;
+
+/* ---------- search engine ---------- */
+const ENT = {school:[],company:[],industry:[],role:[],location:[],status:[]};
+Object.entries(SCHOOLS).forEach(([k,v])=>v.aliases.forEach(a=>ENT.school.push([a,k])));
+const ALL_COMPANIES = [...new Set(P.flatMap(p=>[p.curCompany,...p.prev]).filter(Boolean))];
+ALL_COMPANIES.forEach(c=>{ENT.company.push([c.toLowerCase(),c]); (COMPANY_ALIASES[c]||[]).forEach(a=>ENT.company.push([a,c]))});
+Object.entries(INDUSTRIES).forEach(([k,v])=>v.forEach(a=>ENT.industry.push([a,k])));
+Object.entries(ROLES).forEach(([k,v])=>v.forEach(a=>ENT.role.push([a,k])));
+Object.entries(LOCATIONS).forEach(([k,v])=>v.forEach(a=>ENT.location.push([a,k])));
+Object.entries(STATUS).forEach(([k,v])=>v.forEach(a=>ENT.status.push([a,k])));
+Object.values(ENT).forEach(l=>l.sort((a,b)=>b[0].length-a[0].length));
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const STOP = new Set('people person from at in who worked working works work the and of with a an for to ex former formerly currently based all show me find someone israelis israeli mba mbas grads live living near area that are is on or my'.split(' '));
+const ORDER = ['school','company','location','industry','role','status'];
+
+function parseQuery(q){
+  let s = ' '+q.toLowerCase().replace(/[\u2018\u2019]/g,"'")+' ';
+  const facets = {school:[],company:[],location:[],industry:[],role:[],status:[],year:[]};
+  const addY = y=>{ if(!facets.year.includes(y)) facets.year.push(y); };
+  s = s.replace(/class of\s*(20\d{2})/g,(m,y)=>{addY(+y);return ' '});
+  s = s.replace(/(^|[^a-z0-9])(20[12]\d)(?=$|[^0-9])/g,(m,a,y)=>{addY(+y);return a+' '});
+  s = s.replace(/'(\d{2})(?=$|[^0-9])/g,(m,y)=>{addY(2000+ +y);return ' '});
+  for(const t of ORDER){
+    for(const [alias,val] of ENT[t]){
+      const re = new RegExp('(^|[^a-z0-9])'+reEsc(alias)+'(?=$|[^a-z0-9])','g');
+      if(re.test(s)){ if(!facets[t].includes(val)) facets[t].push(val); s = s.replace(re,'$1 '); }
+    }
+  }
+  const rest = s.split(/[^a-z0-9]+/).filter(w=>w && !STOP.has(w));
+  return {facets,rest};
+}
+function matchFacets(p,f){
+  if(f.school.length && !p.schools.some(s=>f.school.includes(s.school))) return false;
+  if(f.year && f.year.length && !p.schools.some(s=>f.year.includes(s.year) && (!f.school.length || f.school.includes(s.school)))) return false;
+  if(f.company.length && !f.company.some(c=>p.curCompany===c||p.prev.includes(c))) return false;
+  if(f.industry.length && !f.industry.includes(p.industry)) return false;
+  if(f.role.length && !f.role.includes(p.roleCat)) return false;
+  if(f.location.length && !f.location.includes(p.location)) return false;
+  if(f.status.length && !f.status.includes(p.status)) return false;
+  return true;
+}
+function reasonFor(p,f,rest){
+  const parts=[];
+  f.school.forEach(s=>{const e=p.schools.find(x=>x.school===s); if(e) parts.push(schoolTag(e))});
+  if(!f.school.length && f.year.length){ const e=p.schools.find(x=>f.year.includes(x.year)); if(e) parts.push(schoolTag(e)); }
+  f.company.forEach(c=>{ if(p.curCompany===c) parts.push(`Currently at ${c}`); else if(p.prev.includes(c)) parts.push(`Worked at ${c}`)});
+  f.industry.forEach(i=>{ if(p.industry===i) parts.push(i)});
+  f.role.forEach(r=>{ if(p.roleCat===r) parts.push(r==='Founder'?'Founder':r==='Investor'?'Investor':r+' role')});
+  f.location.forEach(l=>{ if(p.location===l) parts.push(l)});
+  f.status.forEach(s=>{ if(p.status===s) parts.push(s==='Student'?'Current student':'Alum')});
+  if(parts.length===1 && /^(Currently|Worked)/.test(parts[0])) return parts[0];
+  if(parts.length) return 'Matches: '+parts.join(' + ');
+  if(rest.length) return 'Name or title match';
+  return relevance(p).txt;
+}
+const FILTER_DEFS = [
+  ['degree','Connections',p=>[degreeOf(p)]],
+  ['school','School',p=>p.schools.map(s=>s.school)],
+  ['year','Class year',p=>p.schools.map(s=>String(s.year))],
+  ['curCompany','Current company',p=>p.curCompany?[p.curCompany]:[]],
+  ['prevCompany','Previous company',p=>p.prev],
+  ['industry','Industry',p=>[p.industry]],
+  ['role','Role',p=>[p.roleCat]],
+  ['location','Location',p=>[p.location]],
+  ['program','Program',p=>p.schools.map(s=>s.program)],
+  ['status','Student / Alum',p=>[p.status]],
+];
+function runSearch(q){
+  const {facets,rest} = parseQuery(q);
+  const hasFacets = Object.values(facets).some(a=>a.length);
+  let base = P.filter(p=>p.id!==ME && matchFacets(p,facets));
+  if(rest.length){
+    const r = base.filter(p=>rest.every(t=>p.words.some(w=>w.startsWith(t))));
+    if(r.length || !hasFacets) base = r;
+  }
+  let list = base.filter(p=>FILTER_DEFS.every(([k,,get])=>!(S.filters[k]&&S.filters[k].length) || get(p).some(v=>S.filters[k].includes(String(v)))));
+  list = list.map(p=>{
+    const m = mutuals(p.id).length;
+    let score = m*1.5 + (sharedSchool(p)?1:0) + (sharedPrev(p)?1:0);
+    facets.company.forEach(c=>{ if(p.curCompany===c) score+=4; });
+    return {p,score,m,reason:reasonFor(p,facets,rest)};
+  });
+  const yr=p=>Math.max(...p.schools.map(s=>s.year));
+  list.sort((a,b)=> S.sort==='mutuals' ? (b.m-a.m || b.score-a.score) : S.sort==='year' ? (yr(b.p)-yr(a.p) || b.score-a.score) : (b.score-a.score || b.m-a.m));
+  return {base,list,facets,rest};
+}
+
+/* ---------- router ---------- */
+function go(view,params={},push=true){
+  if(push) S.stack.push({view:S.view,params:S.params});
+  S.view=view; S.params=params;
+  if(view==='profile'){ S.viewed = [params.id,...S.viewed.filter(x=>x!==params.id)].slice(0,12); }
+  closeModal(); render(); window.scrollTo(0,0);
+}
+function back(){ const prev=S.stack.pop(); if(prev){S.view=prev.view;S.params=prev.params;render();window.scrollTo(0,0)} else go('home',{},false); }
+function doSearch(q){
+  q=(q||'').trim(); S.query=q; S.filters={}; S.showFilters=false;
+  if(q){ S.recent=[q,...S.recent.filter(x=>x.toLowerCase()!==q.toLowerCase())].slice(0,4); }
+  if(S.view==='results') { S.params={}; render(); window.scrollTo(0,0); } else go('results');
+}
+
+/* ---------- components ---------- */
+function connectBtn(id,size=''){
+  const st = connState(id), p=byId(id);
+  const a = `data-conn="${id}" data-size="${size}"`;
+  if(st==='connected') return `<button class="btn ${size} is-connected" ${a} aria-label="Connected with ${esc(p.first)}">${I.check}Connected</button>`;
+  if(st==='pending') return `<button class="btn ${size} is-pending" ${a} data-act="pending" data-id="${id}">${I.clock}Request sent</button>`;
+  if(st==='incoming') return `<button class="btn ${size} primary" ${a} data-act="accept" data-id="${id}">${I.check}Accept</button>`;
+  return `<button class="btn ${size} primary" ${a} data-act="connect" data-id="${id}">${I.plus}Connect</button>`;
+}
+function searchBox(size,id){
+  const v = S.view==='results' && size!=='compact' ? S.query : (size==='compact'?'':'');
+  return `<div class="search ${size}" data-search>
+    <span class="search-ico">${I.search}</span>
+    <input id="${id}" class="search-input" type="search" autocomplete="off" spellcheck="false" aria-label="Search people" placeholder="${size==='compact'?'Search people, companies, schools…':'Search for a person, company, school, role, or industry…'}" value="${esc(v)}">
+    <button class="btn primary search-go" data-act="search-submit">Search</button>
+    <div class="ac" hidden role="listbox"></div>
+  </div>`;
+}
+function pcard(p,signal,warm){
+  const sg = signal || relevance(p);
+  return `<article class="pcard">
+    <button class="pcard-hit" data-act="profile" data-id="${p.id}">
+      <span class="pc-top">${av(p,64)}<span class="cbs">${badges(p,'md')}</span></span>
+      <div><div class="nm">${esc(p.name)}</div><div class="rl">${esc(p.role)} · ${esc(p.company)}</div></div>
+    </button>
+    <span class="signal ${warm?'warm':''}">${I[sg.ico]||I.users}<span>${esc(sg.txt)}</span></span>
+    <div class="pcard-actions"><button class="btn sm ghost" data-act="profile" data-id="${p.id}">View profile</button>${connectBtn(p.id,'sm')}</div>
+  </article>`;
+}
+const degreeOf = p => p.id===ME?'You':adj.get(ME).has(p.id)?'1st':mutuals(p.id).length?'2nd':'3rd+';
+function mutualText(ms){ const n=ms.length; if(!n) return '';
+  if(n===1) return `${ms[0].first} is a mutual connection`;
+  if(n===2) return `${ms[0].first} and ${ms[1].first} are mutual connections`;
+  return `${ms[0].first}, ${ms[1].first} and ${n-2} other mutual connection${n-2>1?'s':''}`; }
+function rowAction(p){
+  if(connState(p.id)==='connected') return `<button class="btn sm pill outline" data-act="${p.pref==='whatsapp'?'wa':'email'}" data-id="${p.id}">${p.pref==='whatsapp'?I.wa+'WhatsApp':I.mail+'Email'}</button>`;
+  return connectBtn(p.id,'sm pill outline');
+}
+function markConnected(id){ markConnected(id); S.connOrder=[id,...S.connOrder.filter(x=>x!==id)]; S.connAt[id]='just now'; }
+function mutualLineOld(id,max=3){
+  const ms = mutuals(id).map(byId); if(!ms.length) return '';
+  const names = ms.slice(0,max).map(m=>m.first);
+  const more = ms.length-names.length;
+  const txt = names.join(', ') + (more>0?` + ${more} other${more>1?'s':''}`:'');
+  return `<div class="mut"><span class="stack">${ms.slice(0,3).map(m=>av(m,24)).join('')}</span><span>${esc(txt)} ${ms.length===1&&!more?'is a mutual connection':'you both know'}</span></div>`;
+}
+function mutualLine(id){
+  const ms = mutuals(id).map(byId); if(!ms.length) return '';
+  return `<button class="mut" data-act="connections" data-id="${id}" data-mode="mutual"><span class="stack">${ms.slice(0,3).map(m=>av(m,24)).join('')}</span><span>${esc(mutualText(ms))}</span></button>`;
+}
+function rrow(p,extra=''){
+  return `<li class="rrow">
+    <button data-act="profile" data-id="${p.id}" aria-label="Open ${esc(p.name)}">${av(p,64)}</button>
+    <div class="main">
+      <div class="nmline"><button class="nm" data-act="profile" data-id="${p.id}">${esc(p.name)}</button><span class="deg">• ${degreeOf(p)}</span>${badges(p,'md')}${p.status==='Student'?'<span class="tag stu" style="margin:0">STUDENT</span>':''}</div>
+      <div class="rl">${esc(p.role)} · <b>${esc(p.company)}</b></div>
+      <div class="sub2">${esc(p.location)} · ${p.schools.map(s=>esc(`${SCHOOLS[s.school].full}, Class of ${s.year}`)).join(' · ')}</div>
+      ${extra}
+    </div>
+    <div class="acts">${rowAction(p)}</div></li>`;
+}
+function rcard(r){
+  const p=r.p;
+  return `<article class="rcard">
+    <button data-act="profile" data-id="${p.id}" aria-label="Open ${esc(p.name)}">${av(p,72)}</button>
+    <div class="main">
+      <div><button class="nm" data-act="profile" data-id="${p.id}">${esc(p.name)}</button> <span style="margin-left:8px">${badges(p,'md')}</span>${p.status==='Student'?'<span class="tag stu">STUDENT</span>':''}</div>
+      <div class="rl">${esc(p.role)} · <b>${esc(p.company)}</b></div>
+      <div class="meta"><span>${I.cap}${p.schools.map(s=>esc(`${SCHOOLS[s.school].full} · ${s.program}, Class of ${s.year}`)).join(', ')}</span><span>${I.pin}${esc(p.location)}</span><span>${I.layers}${esc(p.industry)}</span></div>
+      <span class="signal">${I.spark}<span>${esc(r.reason)}</span></span>
+      ${mutualLine(p.id)}
+    </div>
+    <div class="acts"><button class="btn sm ghost" data-act="profile" data-id="${p.id}">View profile</button>${connectBtn(p.id,'sm')}</div>
+  </article>`;
+}
+
+/* ---------- carousels ---------- */
+function railData(key){
+  if(key==='interacted') return {title:'Recently interacted with',sub:'People you recently connected with or reached out to',items:S.interacted.map(x=>({p:byId(x.id),sig:{txt:x.label,ico:'clock'}}))};
+  if(key==='school'){
+    const mine=me().schools[0]; const sc=SCHOOLS[mine.school];
+    const items=P.filter(p=>p.id!==ME && p.schools.some(s=>s.school===mine.school)).sort((a,b)=>{const ya=a.schools.find(s=>s.school===mine.school).year, yb=b.schools.find(s=>s.school===mine.school).year; return Math.abs(ya-mine.year)-Math.abs(yb-mine.year) || yb-ya;})
+      .map(p=>{const y=p.schools.find(s=>s.school===mine.school).year; return {p,sig:{txt:y===mine.year?'Your class':`${sc.tag} ${yy(y)} · ${Math.abs(y-mine.year)} yr${Math.abs(y-mine.year)>1?'s':''} ${y<mine.year?'ahead':'behind'}`,ico:'cap'}}});
+    return {title:`Your ${sc.tag} community`,sub:`${sc.full} classmates and alumni, closest class years first`,items};
+  }
+  if(key==='pymk'){
+    const items = P.filter(p=>p.id!==ME && connState(p.id)!=='connected').map(p=>{
+      const s = mutuals(p.id).length*2 + (sharedSchool(p)?3:0) + (sharedPrev(p)?2:0) + (p.industry===me().industry?1:0);
+      return {p,s};
+    }).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>({p:x.p}));
+    return {title:'People you might know',sub:'Based on mutual connections, your school and past companies',items};
+  }
+  if(key==='viewed') return {title:'Recently viewed',sub:'Profiles you opened lately',items:S.viewed.map(id=>({p:byId(id)}))};
+  if(key==='industry') return {title:`People in ${me().industry}`,sub:'Israeli MBAs working in your industry',items:P.filter(p=>p.id!==ME && p.industry===me().industry).sort((a,b)=>mutuals(b.id).length-mutuals(a.id).length).map(p=>({p,sig:{txt:`${p.industry} · ${p.roleCat}`,ico:'layers'}}))};
+}
+function rail(key){
+  const d = railData(key);
+  const items = d.items.slice(0,10);
+  return `<section class="rail">
+    <div class="rail-h"><div><h2>${esc(d.title)}</h2><p>${esc(d.sub)}</p></div>
+      <div class="sp"><button class="link" data-act="see-all" data-key="${key}">See all${d.items.length?` (${d.items.length})`:''}</button>
+      <button class="arrow" data-act="scroll" data-key="${key}" data-dir="-1" aria-label="Scroll left">${I.left}</button>
+      <button class="arrow" data-act="scroll" data-key="${key}" data-dir="1" aria-label="Scroll right">${I.right}</button></div>
+    </div>
+    <div class="track" id="track-${key}">${items.length?items.map(x=>pcard(x.p,x.sig,key==='interacted')).join(''):`<div class="empty-rail">No one here yet. Profiles you open will show up here.</div>`}</div>
+  </section>`;
+}
+
+/* ---------- views ---------- */
+function topbar(){
+  if(S.view==='join') return `<header class="top"><div class="wrap"><span class="brand"><span class="brand-mark">${markSVG}</span><span class="full">Israeli MBA Network</span></span><span style="margin-left:auto"></span>${S.join&&S.join.step!=='done'?`<button class="btn sm ghost pill" data-act="join-exit">Exit preview</button>`:''}</div></header>`;
+  const n = S.incoming.size + S.joinReqs.length;
+  const tab = (v,label,ico)=>`<button class="${S.view===v?'on':''}" data-act="nav" data-view="${v}">${ico}<span>${label}</span>${v==='network'&&n?`<span class="badge">${n}</span>`:''}</button>`;
+  const showSearch = S.view!=='home' && S.view!=='results';
+  return `<header class="top"><div class="wrap">
+    <button class="brand" data-act="nav" data-view="home"><span class="brand-mark">${markSVG}</span><span class="full">Israeli MBA Network</span></button>
+    <div class="top-search">${showSearch?searchBox('compact','q-top'):''}</div>
+    <nav class="nav">${tab('home','Discover',I.compass.replace('<svg','<svg width="17" height="17"'))}${tab('network','My Network',I.users.replace('<svg','<svg width="17" height="17"'))}${tab('me','My Profile',av(me(),22))}</nav>
+  </div></header>
+  <nav class="bottom-nav">${tab('home','Discover',I.compass)}${tab('network','Network',I.users)}${tab('me','Profile',I.user)}</nav>`;
+}
+function viewHome(){
+  const count = P.length-1;
+  const cnt = (fn)=>new Set(P.filter(p=>p.id!==ME).flatMap(fn)).size;
+  const sc = [['school','School & class',I.cap,`${cnt(p=>p.schools.map(s=>s.school))} programs`],['company','Company',I.building,`${ALL_COMPANIES.length} companies`],['industry','Industry',I.layers,`${cnt(p=>[p.industry])} industries`]];
+  return `<main><div class="wrap">
+    <section class="hero">
+      <span class="eyebrow">${I.shield}${count} verified Israeli MBAs across US programs</span>
+      <h1>Find the Israeli who’s <em>already where you’re headed.</em></h1>
+      ${searchBox('big','q-home')}
+      <div class="shortcuts">${sc.map(([k,l,ic,s])=>`<button class="shortcut ${S.browse===k?'on':''}" data-act="browse" data-tab="${k}" aria-expanded="${S.browse===k}"><span class="ico">${ic}</span><span><b>${l}</b><small>Browse ${s}</small></span></button>`).join('')}</div>
+      ${S.browse?browsePanel(S.browse):''}
+      <div class="try"><span>Try:</span>${EXAMPLES.map(e=>`<button data-act="search" data-q="${esc(e)}">${esc(e)}</button>`).join('')}</div>
+    </section>
+    ${rail('interacted')}${rail('school')}${rail('pymk')}${rail('viewed')}${rail('industry')}
+    <p class="demo-note">Prototype with fictional members. Email and WhatsApp hand-offs are simulated. <button class="link" style="font-size:12px" data-act="join-start" data-mode="join">Preview the sign-up flow</button></p>
+  </div></main>`;
+}
+function browsePanel(tab){
+  const ppl = P.filter(p=>p.id!==ME); let items=[], title='';
+  const count = (arr)=>{const m=new Map(); arr.forEach(x=>m.set(x,(m.get(x)||0)+1)); return [...m].sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0])));};
+  if(tab==='school'){ title='Browse by school'; items=count(ppl.flatMap(p=>p.schools.map(s=>s.school))); }
+  if(tab==='company'){ title='Browse by company (current or past)'; items=count(ppl.flatMap(p=>[...new Set([p.curCompany,...p.prev].filter(Boolean))])); }
+  if(tab==='industry'){ title='Browse by industry'; items=count(ppl.map(p=>p.industry)); }
+  if(tab==='school'){
+    const rows = items.map(([k,n])=>{ const sc=SCHOOLS[k]; const ys=count(ppl.flatMap(p=>p.schools.filter(s=>s.school===k).map(s=>s.year))).sort((a,b)=>b[0]-a[0]);
+      return `<div class="srow" style="--sc:${sc.color}"><button class="sn" data-act="search" data-q="${esc(k)}"><span class="sdot"></span>${esc(k)} <small>${n}</small></button>
+        <div class="chips">${ys.map(([y,c])=>`<button class="ychip" data-act="search" data-q="${esc(sc.tag)} '${String(y).slice(2)}">${y>NOW_YEAR?'Class of ':'’'}${y>NOW_YEAR?y:String(y).slice(2)}<span class="n">${c}</span></button>`).join('')}</div></div>`; }).join('');
+    return `<div class="browse"><div class="browse-h"><span>Browse by school and class year</span><button class="arrow" data-act="browse" data-tab="school" aria-label="Close">${I.x}</button></div>${rows}</div>`;
+  }
+  return `<div class="browse"><div class="browse-h"><span>${title}</span><button class="arrow" data-act="browse" data-tab="${tab}" aria-label="Close">${I.x}</button></div>
+    <div class="chips">${items.map(([k,n])=>`<button class="chip" data-act="search" data-q="${esc(k)}">${esc(k)}<span class="n">${n}</span></button>`).join('')}</div></div>`;
+}
+const PILLS=['degree','school','year','curCompany','industry','location'];
+const FL = Object.fromEntries(FILTER_DEFS.map(([k,l])=>[k,l]));
+FL.location='Locations'; FL.degree='Connections';
+const optLabel=(k,v)=> k==='year'?`Class of ${v}`: k==='degree'?({'1st':'1st','2nd':'2nd','3rd+':'3rd+'}[v]||v) : v;
+function filterOptions(base,k){
+  const def=FILTER_DEFS.find(d=>d[0]===k); const m=new Map();
+  base.forEach(p=>[...new Set(def[2](p).map(String))].forEach(v=>m.set(v,(m.get(v)||0)+1)));
+  let opts=[...m];
+  if(k==='degree') opts=['1st','2nd','3rd+'].map(v=>[v,m.get(v)||0]);
+  else if(k==='year') opts.sort((a,b)=>b[0]-a[0]);
+  else opts.sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+  (S.filters[k]||[]).forEach(v=>{ if(!m.has(v)&&k!=='degree') opts.unshift([v,0]); });
+  return opts;
+}
+const activeCount=()=>Object.values(S.filters).reduce((n,a)=>n+(a?a.length:0),0);
+function pill(k,base){
+  const sel=S.filters[k]||[], open=S.pill===k;
+  const txt = sel.length===1 ? optLabel(k,sel[0]) : sel.length?`${FL[k]} (${sel.length})`:FL[k];
+  return `<div class="pillw"><button class="fpill ${sel.length?'on':''} ${open?'open':''}" data-act="pill" data-k="${k}" aria-expanded="${open}">${esc(txt)}${I.down}</button>${open?`<div class="fpanel" role="dialog" aria-label="${esc(FL[k])}"><div class="fhead">${esc(FL[k])}</div>
+    <div class="fopts">${filterOptions(base,k).map(([v,n])=>`<label class="fopt"><input type="checkbox" data-draft="${esc(v)}" ${S.draft.includes(v)?'checked':''}><span>${esc(optLabel(k,v))}</span><span class="n">${n}</span></label>`).join('')}</div>
+    <div class="ffoot"><button class="btn sm ghost pill" data-act="pill-cancel">Cancel</button><button class="btn sm primary pill" data-act="pill-apply" data-k="${k}">Show results</button></div></div>`:''}</div>`;
+}
+function openAllFilters(){
+  const {base}=runSearch(S.query); if(!S.draftAll) S.draftAll=JSON.parse(JSON.stringify(S.filters));
+  const n=Object.values(S.draftAll).reduce((x,a)=>x+(a?a.length:0),0);
+  document.getElementById('modal-root').innerHTML=`<div class="drawer-scrim" data-act="drawer-scrim"><aside class="drawer" role="dialog" aria-modal="true" aria-label="All filters">
+    <div class="edit-h"><h3>All filters</h3><button class="ibtn" data-act="drawer-close" aria-label="Dismiss">${I.x}</button></div>
+    <div class="edit-b">${FILTER_DEFS.map(([k,l])=>{ const opts=filterOptions(base,k); if(!opts.length) return '';
+      return `<div class="dsec"><h4>${esc(k==='location'?'Locations':l)}</h4><div class="fopts">${opts.map(([v,c])=>`<label class="fopt"><input type="checkbox" data-dk="${k}" data-dv="${esc(v)}" ${(S.draftAll[k]||[]).includes(v)?'checked':''}><span>${esc(optLabel(k,v))}</span><span class="n">${c}</span></label>`).join('')}</div></div>`; }).join('')}</div>
+    <div class="edit-f"><button class="btn ghost pill" data-act="drawer-reset">Reset${n?` (${n})`:''}</button><span class="sp"></span><button class="btn primary pill" data-act="drawer-apply">Show results</button></div>
+  </aside></div>`;
+}
+function viewResults(){
+  const {base,list} = runSearch(S.query);
+  const n=activeCount();
+  let body;
+  if(list.length) body = `<ul class="rl2">${list.map(r=>rrow(r.p,`<span class="signal">${I.spark}<span>${esc(r.reason)}</span></span>${mutualLine(r.p.id)}`)).join('')}</ul>`;
+  else body = `<div class="noresults" style="border:0;box-shadow:none"><h2>No results found</h2>
+    <p>${n?'Try removing a filter, or broaden the search.':'Try a broader search. The network grows every week as members vouch for new people.'}</p>
+    ${n?`<p><button class="btn ghost pill" data-act="clear-filters">Reset filters</button></p>`:''}
+    <div class="chips">${EXAMPLES.map(e=>`<button class="chip" data-act="search" data-q="${esc(e)}">${esc(e)}</button>`).join('')}</div></div>`;
+  return `<main><div class="wrap page"><div class="res-wrap">
+    ${searchBox('mid','q-results')}
+    <div class="pillbar">
+      <span class="fpill type">People</span><span class="vsep"></span>
+      ${PILLS.map(k=>pill(k,base)).join('')}
+      <button class="fpill" data-act="all-filters">${I.filter}All filters${n?` (${n})`:''}</button>
+      ${n?`<button class="btn sm danger" data-act="clear-filters">Reset</button>`:''}
+    </div>
+    <div class="rbox">
+      <div class="rbox-h"><span>${S.query?`About ${list.length} result${list.length===1?'':'s'} for “${esc(S.query)}”`:`${list.length} member${list.length===1?'':'s'}`}</span>
+        <span class="sp"><select class="sel" id="sort" data-sort aria-label="Sort"><option value="relevance" ${S.sort==='relevance'?'selected':''}>Most relevant</option><option value="year" ${S.sort==='year'?'selected':''}>Class year (newest)</option><option value="mutuals" ${S.sort==='mutuals'?'selected':''}>Most mutual connections</option></select></span></div>
+      ${body}
+    </div>
+  </div></div></main>`;
+}
+/* ---------- connections page (LinkedIn-style) ---------- */
+function connRows(id,mode){
+  let ids = mode==='mutual' ? mutuals(id) : [...adj.get(id)].filter(x=>x!==ME);
+  const q=S.connQ.trim().toLowerCase();
+  let ppl = ids.map(byId).filter(m=>!q || m.name.toLowerCase().split(' ').some(w=>w.startsWith(q)) || (q.includes(' ') && m.name.toLowerCase().startsWith(q)));
+  const ord=x=>{const i=S.connOrder.indexOf(x.id); return i<0?999:i;};
+  if(S.connSort==='first') ppl.sort((a,b)=>a.first.localeCompare(b.first));
+  else if(S.connSort==='last') ppl.sort((a,b)=>a.last.localeCompare(b.last));
+  else if(S.connSort==='year') ppl.sort((a,b)=>Math.max(...b.schools.map(s=>s.year))-Math.max(...a.schools.map(s=>s.year)));
+  else if(id===ME) ppl.sort((a,b)=>ord(a)-ord(b));
+  if(!ppl.length) return `<li class="empty-row">${q?`No connections named “${esc(S.connQ)}”.`:'No connections here yet.'}</li>`;
+  return ppl.map(m=>rrow(m, id===ME&&S.connAt[m.id]?`<span class="sub2">Connected ${esc(S.connAt[m.id])}</span>`:(id!==ME?mutualLine(m.id):''))).join('');
+}
+function connBox(id,mode,embedded){
+  const p=byId(id), isMe=id===ME;
+  const all=[...adj.get(id)].filter(x=>x!==ME).length, mut=mutuals(id).length;
+  const title = isMe ? `${adj.get(ME).size} connections` : mode==='mutual' ? `Mutual connections with ${p.first}` : `${p.first}’s connections`;
+  const sub = isMe ? 'Israeli MBAs you’re connected with' : mode==='mutual' ? `You and ${p.first} both know ${mut} ${mut===1?'person':'people'}` : `${all} connections${connState(id)==='connected'?' · includes you':''}`;
+  return `<div class="rbox">
+    ${embedded?'':`<div class="conn-head"><h1>${esc(title)}</h1><p>${esc(sub)}</p></div>`}
+    ${!isMe?`<div class="seg-tabs"><button class="fpill ${mode==='mutual'?'on':''}" data-act="connections" data-id="${id}" data-mode="mutual">Mutual · ${mut}</button><button class="fpill ${mode==='all'?'on':''}" data-act="connections" data-id="${id}" data-mode="all">All · ${all}</button></div>`:''}
+    <div class="conn-tools">
+      ${embedded?`<b style="font-size:15px">${esc(title)}</b>`:''}
+      <div class="mini-search">${I.search}<input type="search" id="conn-q" placeholder="Search by name" value="${esc(S.connQ)}" aria-label="Search connections by name" autocomplete="off"></div>
+      <span class="sp"><label for="conn-sort">Sort by: <select id="conn-sort">${[['recent',isMe?'Recently added':'Default'],['first','First name'],['last','Last name'],['year','Class year']].map(([v,l])=>`<option value="${v}" ${S.connSort===v?'selected':''}>${l}</option>`).join('')}</select></label>
+      ${isMe?`<button class="link" data-act="conn-filters">Search with filters</button>`:''}</span>
+    </div>
+    <ul class="rl2" id="conn-list" data-id="${id}" data-mode="${mode}">${connRows(id,mode)}</ul>
+  </div>`;
+}
+function viewConnections(){
+  const {id,mode}=S.params;
+  return `<main><div class="wrap page"><div class="res-wrap"><button class="back" data-act="back">${I.left}Back</button>${connBox(id,mode)}</div></div></main>`;
+}
+function viewList(){
+  const d = railData(S.params.key);
+  return `<main><div class="wrap page">
+    <button class="back" data-act="back">${I.left}Back</button>
+    <h1 class="page-h1">${esc(d.title)}</h1><p class="muted" style="margin:0 0 22px">${esc(d.sub)}</p>
+    ${d.items.length?`<div class="grid">${d.items.map(x=>pcard(x.p,x.sig,S.params.key==='interacted')).join('')}</div>`:`<div class="empty-rail">No one here yet.</div>`}
+  </div></main>`;
+}
+function commonGround(p){
+  if(p.id===ME) return [];
+  const out=[]; const m=me();
+  p.schools.forEach(s=>{ const mine=m.schools.find(x=>x.school===s.school); if(mine) out.push([I.cap, s.year===mine.year?`Same class: ${SCHOOLS[s.school].tag} ${yy(s.year)}`:`Both ${SCHOOLS[s.school].tag} (${yy(s.year)} and ${yy(mine.year)})`]); });
+  [p.curCompany,...p.prev].filter(Boolean).forEach(c=>{ if(m.prev.includes(c)) out.push([I.building,`You both worked at ${c}`]); });
+  if(p.industry===m.industry) out.push([I.layers,`Both in ${p.industry}`]);
+  if(p.location===m.location) out.push([I.pin,`Both based in ${p.location}`]);
+  const ms = mutuals(p.id).length; if(ms) out.push([I.users,`${ms} mutual connection${ms>1?'s':''}`]);
+  const unit = p.career.find(c=>c.company.startsWith('IDF')); const myUnit = m.career.find(c=>c.company.startsWith('IDF'));
+  if(unit && myUnit && unit.company===myUnit.company) out.push([I.shield,`Both served in ${unit.company.replace('IDF · ','')}`]);
+  return out;
+}
+function timeline(p,editable){
+  const items = p.career.map((c,i)=>({...c,edu:false,idx:i,role:c.role+(c.location?` · ${c.location}`:'')}));
+  p.schools.forEach((s,i)=>{ const cur=s.year>NOW_YEAR; items.push({idx:i,start:s.start,years:cur?`${s.start||s.year-2}–Present`:`${s.start||s.year-2}–${s.year}`,company:SCHOOLS[s.school].full,color:SCHOOLS[s.school].color,tag:SCHOOLS[s.school].tag,role:cur?`${s.program} candidate · Class of ${s.year}`:`${s.program} · Class of ${s.year}`,edu:true}); });
+  const span = y=>{const m=y.split('–'),st=+m[0],en=m[1]?(m[1]==='Present'?9999:+m[1]):st; return [st,en]};
+  items.sort((a,b)=>{const A=span(a.years),B=span(b.years); return B[1]-A[1]||B[0]-A[0]});
+  return `<ol class="tl">${items.map(it=>{
+    const now = /Present/.test(it.years);
+    return `<li class="${now?'now':''} ${it.edu?'edu':''}" ${it.edu?`style="--sc:${it.color}"`:''}><span class="yr">${esc(it.years)}</span><span class="rail-l"><span class="dot"></span></span>
+      <div class="entry">${logo(it.company,it.edu,it.color,it.tag)}<div><div class="co">${esc(it.company)}${it.edu?' <span style="margin-left:6px">'+classBadge({school:Object.keys(SCHOOLS).find(k=>SCHOOLS[k].full===it.company),year:+it.role.match(/\d{4}/)[0],program:''})+'</span>':''}${now&&!it.edu?'<span class="now-tag">NOW</span>':''}</div><div class="ro">${esc(it.role)}</div></div>${editable?`<button class="ibtn row-edit" data-act="edit" data-kind="${it.edu?'edu':'exp'}" data-idx="${it.idx}" aria-label="Edit ${esc(it.company)}">${I.pencil}</button>`:''}</div></li>`;
+  }).join('')}</ol>`;
+}
+function viewProfile(id){
+  const p = byId(id), isMe = id===ME;
+  const ms = mutuals(id).map(byId);
+  const cg = commonGround(p);
+  const prefLabel = p.pref==='whatsapp'?'Prefers WhatsApp':'Prefers email';
+  const names = ms.slice(0,3).map(m=>m.first); const more = ms.length-names.length;
+  const how = isMe ? '' : ms.length
+    ? `<button class="how" data-act="connections" data-id="${id}" data-mode="mutual"><span class="stack">${ms.slice(0,4).map(m=>av(m,30)).join('')}</span><span><b>${esc(mutualText(ms))}</b></span><span class="link" style="margin-left:auto">Show all</span><span class="chev" style="margin-left:0">${I.right}</span></button>`
+    : `<div class="how">${I.spark.replace('<svg','<svg width="18" height="18"')}<span>No mutual connections yet. ${cg.length?`You share: <b>${esc(cg[0][1])}</b>.`:'Everyone here joined to be reached, so a short intro goes a long way.'}</span></div>`;
+  const actions = isMe ? `<div class="pactions"><button class="btn primary pill" data-act="add-section">Add profile section</button>
+      <button class="btn ghost pill" data-act="edit" data-kind="contact">${I.mail}Contact info</button>
+      <button class="btn ghost pill" data-act="join-start" data-mode="sync">${I.link}Update from LinkedIn</button></div>`
+    : `<div class="pactions">${connectBtn(id,'lg')}
+      <button class="btn lg mail" data-act="email" data-id="${id}">${I.mail}Email${p.pref==='email'?'<span class="pref-dot">PREFERRED</span>':''}</button>
+      <button class="btn lg wa" data-act="wa" data-id="${id}">${I.wa}WhatsApp${p.pref==='whatsapp'?'<span class="pref-dot">PREFERRED</span>':''}</button></div>`;
+  return `<main><div class="wrap page">
+    ${isMe?'':`<button class="back" data-act="back">${I.left}Back</button>`}
+    <section class="phead" style="--sc:${SCHOOLS[p.schools[0].school].color}"><div class="phead-band"><span class="band-label"><b>${esc(SCHOOLS[p.schools[0].school].full)}</b><span>${esc(p.schools[0].program)} · CLASS OF ${p.schools[0].year}</span></span><span class="band-mark">${esc(SCHOOLS[p.schools[0].school].tag)} ${yy(p.schools[0].year)}</span></div><div class="phead-body">
+      ${isMe?`<button class="av-edit" data-act="edit" data-kind="photo" aria-label="Edit photo">${av(p,132)}<span class="cam">${I.camera}</span></button><button class="ibtn intro-edit" data-act="edit" data-kind="intro" aria-label="Edit intro">${I.pencil}</button>`:av(p,132)}
+      <div class="phead-info">
+        <h1>${esc(p.name)}${isMe?' <span class="tag">YOU</span>':''}</h1>
+        <div class="school-line">${badges(p,'lg')}<span class="txt"><b>${p.schools.map(s=>esc(SCHOOLS[s.school].full)).join(', ')}</b><span>${p.schools.map(s=>esc(`${s.program} · ${s.year>NOW_YEAR?'Graduating':'Class of'} ${s.year}`)).join(', ')}</span></span></div>
+        <div class="rl">${esc(p.role)} · <b>${esc(p.company)}</b></div>
+        <div class="meta"><span>${I.pin}${esc(p.location)}</span><span>${I.layers}${esc(p.industry)}</span><button class="link" data-act="connections" data-id="${id}" data-mode="all">${adj.get(id).size} connections</button></div>
+        <div class="badges">${verifyBadges(p)}<span class="vbadge pref ${p.pref}">${p.pref==='whatsapp'?I.wa:I.mail}${prefLabel}</span></div>
+      </div>
+      ${actions}
+      ${how}
+    </div></section>
+    <div class="pgrid">
+      <div class="lcol">
+      ${p.about||isMe?`<section class="panel"><div class="panel-h"><div><h2>About</h2>${!p.about?'<p class="sub" style="margin:4px 0 0">Tell members what you’re working on and how they can help.</p>':''}</div>${isMe?`<button class="ibtn" data-act="edit" data-kind="about" aria-label="Edit about">${p.about?I.pencil:I.add}</button>`:''}</div>${p.about?`<p class="about" style="margin-top:10px">${esc(p.about)}</p>`:''}</section>`:''}
+      <section class="panel"><div class="panel-h"><div><h2>Career path</h2><p class="sub">${isMe?'Your journey, as members see it':esc(p.first)+'’s journey, most recent first'}</p></div>${isMe?`<button class="ibtn" data-act="add-section" aria-label="Add position or education">${I.add}</button>`:''}</div>${timeline(p,isMe)}
+      ${isMe?`<div style="display:flex;gap:18px;margin-top:18px;flex-wrap:wrap"><button class="addlink" data-act="edit" data-kind="exp">${I.add}Add position</button><button class="addlink" data-act="edit" data-kind="edu">${I.add}Add education</button></div>`:''}</section>
+      </div>
+      <div class="side">
+        ${isMe?strengthPanel(p):`<section class="panel"><h2>Why you’d talk</h2><p class="sub">What you have in common</p>
+          ${cg.length?`<div class="common">${cg.map(([ic,t])=>`<div><span class="ico">${ic}</span>${esc(t)}</div>`).join('')}</div>`:`<p class="muted" style="margin:0">Different paths, same community. Worth a hello.</p>`}</section>`}
+      </div>
+    </div>
+    ${isMe?`<p class="demo-note">Edits are saved in this browser only. <button class="link" style="font-size:12px" data-act="reset-me">Reset sample profile</button></p>`:''}
+  </div></main>`;
+}
+function viewNetwork(){
+  const conns = [...adj.get(ME)].map(byId);
+  const tabs = [['connections','Connections',conns.length],['requests','Requests',S.incoming.size],['joinreqs','Join requests',S.joinReqs.length],['sent','Sent',S.pending.size]];
+  let body='';
+  if(S.netTab==='connections') body = connBox(ME,'all',true);
+  if(S.netTab==='requests') body = S.incoming.size?`<div class="rlist">${[...S.incoming].map(id=>{const p=byId(id);return `<div class="req">${av(p,52)}<button class="who" data-act="profile" data-id="${id}"><b>${esc(p.name)}</b> ${badges(p)}<div class="muted" style="font-size:13.5px">${esc(p.role)} · ${esc(p.company)}</div></button>
+      <button class="btn ghost sm" data-act="decline" data-id="${id}">Ignore</button><button class="btn primary sm" data-act="accept" data-id="${id}">${I.check}Accept</button>
+      ${INCOMING_NOTES[id]?`<p class="note">“${esc(INCOMING_NOTES[id])}”</p>`:''}</div>`}).join('')}</div>`:`<div class="empty-rail">No pending requests. You’re all caught up.</div>`;
+  if(S.netTab==='joinreqs'){
+    const sch=me().schools[0]; const tag=SCHOOLS[sch.school].tag;
+    body = `<p class="muted" style="margin:-6px 0 14px;font-size:14px">People asking to join as ${esc(tag)} students or alumni. Approve someone only if you’re confident they’re Israeli and studied at ${esc(tag)}. If an approved member is later removed, their approver is flagged.</p>`
+      + (S.joinReqs.length?`<div class="rlist">${S.joinReqs.map(r=>{ const k=r.knows!=null?byId(r.knows):null; return `<div class="jr">
+        <div class="jr-top">${av(r,52)}<span class="who"><b>${esc(r.name)}</b> ${badges(r,'md')}<div class="muted" style="font-size:13.5px">${esc(r.role)} · ${esc(r.company)} · asked ${esc(r.asked)}</div></span></div>
+        <div class="ev"><span class="evc ${r.li.edu?'ok':'no'}">${r.li.edu?I.check:I.x}${r.li.edu?'LinkedIn: '+esc(r.li.edu):'School not listed on LinkedIn'}</span>
+          <span class="evc ${r.li.id?'ok':'no'}">${r.li.id?I.check:I.x}${r.li.id?'ID verified on LinkedIn':'ID not verified'}</span>
+          <span class="evc ok">${I.check}Israeli background: ${esc(r.li.israeli)}</span>
+          ${k?`<span class="evc ok">${I.users}Says ${esc(k.first)} can confirm${adj.get(ME).has(k.id)?' (your connection)':''}</span>`:''}</div>
+        <div class="qa"><span>Where in Israel are you from, and what did you do before your MBA?</span>${esc(r.answer)}</div>
+        <div class="jr-acts"><button class="btn sm primary pill" data-act="jr-approve" data-id="${r.id}">${I.check}Approve</button><button class="btn sm ghost pill" data-act="jr-skip" data-id="${r.id}">I don’t know them</button><button class="btn sm danger" data-act="jr-decline" data-id="${r.id}">Decline</button><span class="sp" style="flex:1"></span><span class="link" style="font-size:13px;font-weight:500">${esc(r.url)}</span></div>
+      </div>`; }).join('')}</div>`:`<div class="empty-rail">No one is waiting. You’re all caught up.</div>`);
+  }
+  if(S.netTab==='sent') body = S.pending.size?`<div class="rlist">${[...S.pending].map(id=>{const p=byId(id);return `<div class="req">${av(p,52)}<button class="who" data-act="profile" data-id="${id}"><b>${esc(p.name)}</b> ${badges(p)}<div class="muted" style="font-size:13.5px">${esc(p.role)} · ${esc(p.company)}</div></button>
+      <span class="btn sm is-pending">${I.clock}Waiting for ${esc(p.first)}</span><button class="btn ghost sm" data-act="withdraw" data-id="${id}">Withdraw</button></div>`}).join('')}</div>`:`<div class="empty-rail">No requests waiting. Find someone on <button class="link" data-act="nav" data-view="home">Discover</button>.</div>`;
+  return `<main><div class="wrap page">
+    <h1 class="page-h1">My Network</h1>
+    <div class="stats"><div class="stat"><b>${conns.length}</b><span>Connections</span></div><div class="stat"><b>${S.incoming.size}</b><span>Requests to review</span></div><div class="stat"><b>${S.pending.size}</b><span>Waiting on reply</span></div></div>
+    <div class="tabs" role="tablist">${tabs.map(([k,l,n])=>`<button role="tab" class="${S.netTab===k?'on':''}" data-act="net-tab" data-tab="${k}">${l}${n?`<span class="badge" style="${k==='requests'?'':'background:var(--faint)'}">${n}</span>`:''}</button>`).join('')}</div>
+    ${body}
+  </div></main>`;
+}
+
+/* ---------- render ---------- */
+function render(){
+  let v='';
+  if(S.view==='home') v=viewHome();
+  else if(S.view==='results') v=viewResults();
+  else if(S.view==='profile') v=viewProfile(S.params.id);
+  else if(S.view==='list') v=viewList();
+  else if(S.view==='network') v=viewNetwork();
+  else if(S.view==='me') v=viewProfile(ME);
+  else if(S.view==='connections') v=viewConnections();
+  else if(S.view==='join') v=viewJoin();
+  document.getElementById('app').innerHTML = topbar()+v;
+  document.querySelectorAll('[data-search]').forEach(bindSearch);
+}
+function refreshConn(id){
+  document.querySelectorAll(`[data-conn="${id}"]`).forEach(el=>{el.outerHTML=connectBtn(id,el.dataset.size)});
+  document.querySelectorAll('.nav, .bottom-nav').forEach(n=>{});
+}
+function softRender(id){
+  const a=document.activeElement;
+  if(a && (a.tagName==='INPUT'||a.tagName==='TEXTAREA')) refreshConn(id);
+  else { const y=window.scrollY; const tracks=[...document.querySelectorAll('.track')].map(t=>[t.id,t.scrollLeft]); render(); tracks.forEach(([tid,x])=>{const t=document.getElementById(tid); if(t) t.scrollLeft=x}); window.scrollTo(0,y); }
+}
+
+/* ---------- autocomplete ---------- */
+const TYPE_META = {school:['School',I.cap],company:['Company',I.building],industry:['Industry',I.layers],role:['Role',I.user],location:['Location',I.pin],status:['Member type',I.users]};
+function hl(text,q){ if(!q) return esc(text); const i=text.toLowerCase().indexOf(q.toLowerCase()); if(i<0) return esc(text); return esc(text.slice(0,i))+'<mark>'+esc(text.slice(i,i+q.length))+'</mark>'+esc(text.slice(i+q.length)); }
+function suggestions(v){
+  const q=v.trim().toLowerCase(); const groups=[];
+  if(!q){
+    if(S.recent.length) groups.push(['Recent searches',S.recent.map(r=>({kind:'q',q:r,html:esc(r),ico:I.clock}))]);
+    groups.push(['Try a search',EXAMPLES.map(e=>({kind:'q',q:e,html:esc(e),ico:I.spark}))]);
+    return groups;
+  }
+  const last = q.split(/\s+/).pop();
+  const people = P.filter(p=>p.id!==ME && (p.name.toLowerCase().includes(q) || p.name.toLowerCase().split(' ').some(w=>w.startsWith(last)&&last.length>1))).slice(0,4);
+  const ents=[]; const seen=new Set();
+  for(const t of ORDER){ for(const [alias,val] of ENT[t]){ const key=t+val; if(seen.has(key)) continue;
+    if(val.toLowerCase().includes(q) || alias.startsWith(q) || (last.length>1 && (alias.startsWith(last)||val.toLowerCase().startsWith(last)))){ seen.add(key); ents.push({t,val}); } } }
+  const n = val => P.filter(p=>p.id!==ME && matchFacets(p,{...{school:[],company:[],location:[],industry:[],role:[],status:[],year:[]},[ents.find(e=>e.val===val).t]:[val]})).length;
+  const items=[{kind:'q',q:v.trim(),html:`Search for “<b>${esc(v.trim())}</b>”`,ico:I.search,sub:runSearch(v.trim()).list.length+' matches'}];
+  EXAMPLES.filter(e=>e.toLowerCase().includes(q)&&e.toLowerCase()!==q).forEach(e=>items.push({kind:'q',q:e,html:hl(e,v.trim()),ico:I.spark}));
+  groups.push(['',items]);
+  if(people.length) groups.push(['People',people.map(p=>({kind:'p',id:p.id,html:hl(p.name,last.length>1&&!p.name.toLowerCase().includes(q)?last:v.trim()),sub:`${p.schools.map(schoolTag).join(', ')} · ${p.role} · ${p.company}`,av:p}))]);
+  const schoolsHit = ents.filter(e=>e.t==='school').map(e=>e.val);
+  const {facets:qf} = parseQuery(v);
+  const schoolsQ = [...new Set([...schoolsHit,...qf.school])];
+  if(schoolsQ.length){
+    const combos=[]; schoolsQ.forEach(k=>{ const sc=SCHOOLS[k]; const ys=[...new Set(P.filter(p=>p.id!==ME).flatMap(p=>p.schools.filter(s=>s.school===k).map(s=>s.year)))].sort((a,b)=>b-a);
+      ys.forEach(y=>{ if(qf.year.length && !qf.year.includes(y)) return; const c=P.filter(p=>p.id!==ME&&p.schools.some(s=>s.school===k&&s.year===y)).length; combos.push({kind:'q',q:`${sc.tag} '${String(y).slice(2)}`,html:`${esc(sc.tag)} <span style="font-family:var(--f-mono)">'${String(y).slice(2)}</span>`,badge:classBadge({school:k,year:y,program:''}),sub:`${sc.full} · Class of ${y} · ${c} member${c>1?'s':''}`}); }); });
+    if(combos.length) groups.splice(1,0,['Class years',combos.slice(0,6)]);
+  }
+  if(ents.length){
+    // if the query already contains a recognised entity, offer combos
+    groups.push(['Companies, schools & more',ents.slice(0,6).map(e=>{
+      const prefix = q.endsWith(last) && q!==last ? v.trim().slice(0,v.trim().length-last.length).trim() : '';
+      const full = prefix ? `${prefix} ${e.val}` : e.val;
+      return {kind:'q',q:full,html:(prefix?esc(prefix)+' ':'')+hl(e.val,last),ico:TYPE_META[e.t][1],kindLabel:TYPE_META[e.t][0],sub:`${n(e.val)} members`};
+    })]);
+  }
+  return groups;
+}
+function bindSearch(box){
+  const input=box.querySelector('input'), ac=box.querySelector('.ac'); let items=[], idx=-1;
+  const draw=()=>{
+    const groups=suggestions(input.value); items=[];
+    ac.innerHTML = groups.map(([h,list])=>(h?`<div class="ac-h">${h}</div>`:'')+list.map(it=>{const i=items.push(it)-1;
+      return `<button class="ac-i ${i===idx?'on':''}" data-i="${i}" role="option" tabindex="-1">${it.av?av(it.av,32):it.badge?`<span style="width:64px;display:flex">${it.badge}</span>`:`<span class="ico">${it.ico}</span>`}<span><b>${it.html}</b>${it.sub?`<small>${esc(it.sub)}</small>`:''}</span>${it.kindLabel?`<span class="kind">${it.kindLabel}</span>`:''}</button>`}).join('')).join('');
+    ac.hidden=false;
+  };
+  const pick=it=>{ ac.hidden=true; if(it.kind==='p') go('profile',{id:it.id}); else doSearch(it.q); };
+  input.addEventListener('focus',()=>{idx=-1;draw()});
+  input.addEventListener('input',()=>{idx=-1;draw()});
+  input.addEventListener('blur',()=>setTimeout(()=>{ac.hidden=true},120));
+  input.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'){e.preventDefault(); idx=Math.min(items.length-1,idx+1); draw();}
+    else if(e.key==='ArrowUp'){e.preventDefault(); idx=Math.max(-1,idx-1); draw();}
+    else if(e.key==='Enter'){e.preventDefault(); if(idx>=0&&items[idx]) pick(items[idx]); else doSearch(input.value);}
+    else if(e.key==='Escape'){ac.hidden=true; input.blur();}
+  });
+  ac.addEventListener('mousedown',e=>{const b=e.target.closest('.ac-i'); if(b){e.preventDefault(); pick(items[+b.dataset.i]);}});
+  box.querySelector('.search-go')?.addEventListener('click',()=>doSearch(input.value));
+}
+
+/* ---------- modals, toasts, contact ---------- */
+function openModal(html){ document.getElementById('modal-root').innerHTML=`<div class="scrim" data-act="scrim"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`; setTimeout(()=>document.querySelector('.modal textarea, .modal .btn.primary')?.focus(),30); }
+function closeModal(){ document.getElementById('modal-root').innerHTML=''; }
+let toastTimer;
+function toast(msg,action){
+  const root=document.getElementById('toast-root');
+  root.innerHTML=`<div class="toast" role="status"><span>${msg}</span>${action?`<button data-act="${action.act}" data-id="${action.id}">${action.label}</button>`:''}</div>`;
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>root.innerHTML='',action?6500:3200);
+}
+function introText(p){
+  const m=me(); const s=sharedSchool(p); const c=sharedPrev(p);
+  const hook = s?`fellow ${SCHOOLS[s.school].tag}`:c?`also ex-${c}`:'found you on Israeli MBA Network';
+  return `Hi ${p.first}! I’m ${m.first}, MIT Sloan ’27 (ex-PM at Monday.com), ${hook}. I’m exploring ${p.industry.toLowerCase()} roles and would love 15 minutes to hear how you got to ${p.company}.`;
+}
+function openConnect(id){
+  const p=byId(id); const ms=mutuals(id).length;
+  openModal(`<h3>Connect with ${esc(p.first)}</h3><p class="sub">Connections are mutual. Once ${esc(p.first)} accepts, you’ll see each other in My Network.</p>
+    <div class="mini">${av(p,46)}<span><b>${esc(p.name)}</b><small>${esc(p.role)} · ${esc(p.company)}${ms?` · ${ms} mutual`:''}</small></span></div>
+    <p class="lbl"><label for="intro-note">Short intro</label><span>Who you are · what you’re asking</span></p>
+    <textarea id="intro-note" maxlength="300">${esc(introText(p))}</textarea>
+    <div class="row"><button class="btn ghost" data-act="close">Cancel</button><button class="btn primary" data-act="send-request" data-id="${id}">${I.plus}Send request</button></div>`);
+}
+function logInteraction(id,label){ S.interacted=[{id,label},...S.interacted.filter(x=>x.id!==id)].slice(0,12); }
+function openContact(id,ch){
+  const p=byId(id); const msg=introText(p);
+  const isWa = ch==='wa';
+  openModal(`<div class="handoff" style="color:${isWa?'var(--wa)':'var(--accent)'}"><div class="spin"></div><b style="color:var(--ink)">${isWa?'Opening WhatsApp…':'Opening your email app…'}</b><span class="muted" style="font-size:13.5px">Handing off to ${isWa?'WhatsApp':'your default mail client'}</span></div>`);
+  setTimeout(()=>{
+    if(!document.querySelector('.modal')) return;
+    logInteraction(id, isWa?'WhatsApp · just now':'Emailed · just now');
+    const digits=p.phone.replace(/\D/g,'');
+    const body = isWa
+      ? `<h3 style="display:flex;gap:8px;align-items:center"><span style="color:var(--wa)">${I.wa.replace('<svg','<svg width="22" height="22"')}</span>WhatsApp with ${esc(p.first)}</h3>
+         <p class="sub">In the live app this opens WhatsApp with your intro ready to send.</p>
+         <div class="wa-chat"><div class="mini" style="background:transparent;margin:0 0 10px;padding:0">${av(p,36)}<span><b>${esc(p.name)}</b><small>${esc(p.phone)}</small></span></div><div class="bubble">${esc(msg)}</div></div>
+         <dl class="kv"><dt>Number</dt><dd>${esc(p.phone)}</dd><button class="btn sm ghost" data-act="copy" data-text="${esc(p.phone)}">${I.copy}Copy</button></dl>
+         <div class="row"><button class="btn ghost" data-act="close">Done</button><a class="btn primary" style="background:var(--wa);color:#fff;text-decoration:none" href="https://wa.me/${digits}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${I.wa}Continue in WhatsApp</a></div>`
+      : `<h3 style="display:flex;gap:8px;align-items:center"><span style="color:var(--accent)">${I.mail.replace('<svg','<svg width="22" height="22"')}</span>New email to ${esc(p.first)}</h3>
+         <p class="sub">In the live app this opens your mail client with a draft.</p>
+         <dl class="kv"><dt>To</dt><dd>${esc(p.email)}</dd><button class="btn sm ghost" data-act="copy" data-text="${esc(p.email)}">${I.copy}Copy</button>
+         <dt>Subject</dt><dd style="grid-column:span 2">Fellow Israeli MBA, quick hello</dd></dl>
+         <div class="mail-body">${esc(msg)}\n\nThanks,\n${esc(me().first)}</div>
+         <div class="row"><button class="btn ghost" data-act="close">Done</button><a class="btn primary" style="text-decoration:none" href="mailto:${esc(p.email)}?subject=${encodeURIComponent('Fellow Israeli MBA, quick hello')}&body=${encodeURIComponent(msg)}">${I.mail}Open email app</a></div>`;
+    document.querySelector('.modal').innerHTML=body;
+  },1100);
+}
+function sendRequest(id){
+  S.pending.add(id); closeModal(); softRender(id);
+  const p=byId(id);
+  toast(`Request sent to ${esc(p.first)}`);
+  setTimeout(()=>{ // demo: simulate acceptance
+    if(!S.pending.has(id)) return;
+    S.pending.delete(id); markConnected(id); logInteraction(id,'Connected · just now');
+    softRender(id);
+    toast(`${esc(p.first)} accepted your request`, {act:p.pref==='whatsapp'?'wa':'email', id, label:p.pref==='whatsapp'?'Continue on WhatsApp':'Send an email'});
+  },7000);
+}
+
+/* ---------- profile editing (LinkedIn-style) ---------- */
+const STORE_KEY='imn-my-profile-v1';
+const ME_FIELDS=['first','last','role','location','industry','schools','career','email','phone','pref','photo','about','verify'];
+const ME_DEFAULT = JSON.parse(JSON.stringify(Object.fromEntries(ME_FIELDS.map(k=>[k,P[ME][k]]))));
+const LOC_OPTIONS=['Boston','New York','SF Bay Area','Seattle','Los Angeles','Chicago','Washington, DC','Austin','Miami'];
+const PROGRAMS=['MBA','EMBA','Sloan Fellows MBA','Part-time MBA','MBA/MS'];
+const ySpan = y=>{const m=String(y).split('–'),st=+m[0],en=m[1]?(m[1]==='Present'?null:+m[1]):st; return [st,en]};
+const fmtYears = (st,en)=> en==null?`${st}–Present`: st===en?`${st}`:`${st}–${en}`;
+function recompute(p){
+  p.name=`${p.first} ${p.last}`.trim();
+  p.career.sort((a,b)=>{const A=ySpan(a.years),B=ySpan(b.years); return (B[1]??9999)-(A[1]??9999)||B[0]-A[0]});
+  p.schools.sort((a,b)=>b.year-a.year);
+  p.status = p.schools.some(s=>s.year>NOW_YEAR)?'Student':'Alum';
+  const cur = p.career.find(c=>/Present/.test(c.years));
+  p.curCompany = p.status==='Student'?null:(cur?cur.company:null);
+  p.company = p.status==='Student' ? p.schools.find(s=>s.year>NOW_YEAR).school : (cur?cur.company:p.schools[0].school);
+  p.prev=[...new Set(p.career.filter(c=>!/Present/.test(c.years)&&!/^IDF/.test(c.company)&&c.company!==p.curCompany).map(c=>c.company))];
+  p.words=[p.name,p.role,p.company,...p.career.map(c=>c.role+' '+c.company)].join(' ').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+}
+function saveMe(){ try{ localStorage.setItem(STORE_KEY,JSON.stringify(Object.fromEntries(ME_FIELDS.map(k=>[k,me()[k]])))); }catch(_){ } }
+function loadMe(){ try{ const d=JSON.parse(localStorage.getItem(STORE_KEY)||'null'); if(d&&d.schools&&d.schools.length){ Object.assign(me(),d); recompute(me()); } }catch(_){ } }
+function strengthPanel(p){
+  const items=[['photo','Add a profile photo',!!p.photo],['intro','Write a headline that says what you do',!!p.role&&p.role!=='MBA Candidate'],['about','Write an About section',!!(p.about&&p.about.trim())],['exp','Add your experience',p.career.length>0],['contact','Add your WhatsApp number',!!p.phone]];
+  const done=items.filter(i=>i[2]).length; const lvl=done===items.length?'All-star':done>=3?'Intermediate':'Beginner';
+  return `<section class="panel strength"><h2>Profile strength: ${lvl}</h2><p class="sub" style="margin:2px 0 0">Complete profiles get more replies to intros.</p>
+    <div class="bar"><i style="width:${done/items.length*100}%"></i></div>
+    ${items.map(([k,t,d])=>`<button class="todo ${d?'done':''}" data-act="edit" data-kind="${k}"><span class="ck">${d?I.check:''}</span>${t}</button>`).join('')}</section>`;
+}
+const yearOpts=(sel,from=NOW_YEAR+3,to=1990)=>{let o='';for(let y=from;y>=to;y--) o+=`<option value="${y}" ${+sel===y?'selected':''}>${y}</option>`;return o;};
+const fld=(id,label,input,hint='')=>`<div class="field" id="fw-${id}"><label for="${id}">${label}</label>${input}<p class="err" hidden></p>${hint}</div>`;
+function editShell(title,body,{del=null,saveKind,idx=''}={}){
+  return `<div class="edit-h"><h3>${title}</h3><button class="ibtn" data-act="close" aria-label="Dismiss">${I.x}</button></div>
+    <div class="edit-b">${body}</div>
+    <div class="edit-f">${del?`<button class="btn danger" data-act="delete-item" data-kind="${saveKind}" data-idx="${idx}">${del}</button>`:''}<span class="sp"></span><button class="btn primary pill" data-act="save-edit" data-kind="${saveKind}" data-idx="${idx}">Save</button></div>`;
+}
+let photoDraft;
+function openEdit(kind,idx){
+  const p=me(); let html='';
+  if(kind==='intro'){
+    html=editShell('Edit intro',`<p class="req-note">* Indicates required</p>
+      <div class="two">${fld('e-first','First name*',`<input type="text" id="e-first" value="${esc(p.first)}" maxlength="40">`)}${fld('e-last','Last name*',`<input type="text" id="e-last" value="${esc(p.last)}" maxlength="40">`)}</div>
+      ${fld('e-head','Headline*',`<input type="text" id="e-head" value="${esc(p.role)}" maxlength="120" data-count="c-head">`,`<p class="hint"><span>Shown under your name, e.g. “MBA Candidate · ex-PM at Monday.com”</span><span id="c-head">${p.role.length}/120</span></p>`)}
+      <div class="field"><span class="fl">Current position</span><div class="notice">${I.building}<span>${p.curCompany?`<b>${esc(p.curCompany)}</b> comes from your Experience.`:'Shown from your Experience.'} <button class="link" data-act="edit" data-kind="exp">Add a new position</button></span></div></div>
+      <div class="field"><span class="fl">Education</span><div class="notice">${I.cap}<span>${p.schools.map(s=>esc(`${SCHOOLS[s.school].full} · ${s.program} ’${String(s.year).slice(2)}`)).join(', ')} <button class="link" data-act="edit" data-kind="edu" data-idx="0">Edit education</button></span></div></div>
+      <div class="two">${fld('e-loc','Location*',`<select id="e-loc">${LOC_OPTIONS.map(l=>`<option ${l===p.location?'selected':''}>${l}</option>`).join('')}</select>`)}${fld('e-ind','Industry*',`<select id="e-ind">${Object.keys(INDUSTRIES).map(l=>`<option ${l===p.industry?'selected':''}>${l}</option>`).join('')}</select>`)}</div>`,{saveKind:'intro'});
+  }
+  if(kind==='contact'){
+    html=editShell('Edit contact info',`<p class="req-note">* Indicates required. Members use this to reach you after finding you.</p>
+      ${fld('e-email','Email*',`<input type="email" id="e-email" value="${esc(p.email)}">`)}
+      ${fld('e-phone','WhatsApp number',`<input type="tel" id="e-phone" value="${esc(p.phone||'')}" placeholder="+1 (617) 555-0100">`,'<p class="hint"><span>Include the country code. Israeli numbers work too.</span></p>')}
+      <div class="field" id="fw-e-pref"><span class="fl">Preferred way to be reached*</span><div class="radios"><label><input type="radio" name="e-pref" value="whatsapp" ${p.pref==='whatsapp'?'checked':''}>WhatsApp</label><label><input type="radio" name="e-pref" value="email" ${p.pref==='email'?'checked':''}>Email</label></div><p class="err" hidden></p></div>`,{saveKind:'contact'});
+  }
+  if(kind==='about'){
+    html=editShell('Edit about',`<p class="req-note">Share what you did before your MBA, what you’re exploring now, and how other members can help.</p>
+      ${fld('e-about','About',`<textarea id="e-about" maxlength="1000" data-count="c-about" placeholder="Ex: Sloan ’27, ex-PM at Monday.com. Recruiting for product roles in fintech and health tech. Always happy to talk Israeli startups and the move to Boston.">${esc(p.about||'')}</textarea>`,`<p class="hint"><span></span><span id="c-about">${(p.about||'').length}/1,000</span></p>`)}`,{saveKind:'about'});
+  }
+  if(kind==='exp'){
+    const isNew = idx===undefined||idx===''; const c=isNew?{role:'',company:'',location:'',years:`${NOW_YEAR}–Present`}:p.career[+idx];
+    const [st,en]=ySpan(c.years);
+    html=editShell(isNew?'Add experience':'Edit experience',`<p class="req-note">* Indicates required</p>
+      ${fld('e-title','Title*',`<input type="text" id="e-title" value="${esc(c.role)}" placeholder="Ex: Product Manager" maxlength="100">`)}
+      ${fld('e-co','Company*',`<input type="text" id="e-co" value="${esc(c.company)}" placeholder="Ex: Wix" maxlength="100" list="co-list"><datalist id="co-list">${ALL_COMPANIES.map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`)}
+      ${fld('e-cloc','Location',`<input type="text" id="e-cloc" value="${esc(c.location||'')}" placeholder="Ex: Tel Aviv, Israel" maxlength="60">`)}
+      <label class="checkrow"><input type="checkbox" id="e-current" ${en==null?'checked':''}>I am currently working in this role</label>
+      <div class="two">${fld('e-start','Start year*',`<select id="e-start">${yearOpts(st,NOW_YEAR)}</select>`)}${fld('e-end','End year*',`<select id="e-end" ${en==null?'disabled':''}>${en==null?'<option>Present</option>':''}${yearOpts(en??NOW_YEAR,NOW_YEAR)}</select>`)}</div>`,
+      {saveKind:'exp',idx:isNew?'':idx,del:isNew?null:'Delete experience'});
+  }
+  if(kind==='edu'){
+    const isNew = idx===undefined||idx===''; const s=isNew?{school:'',program:'MBA',year:NOW_YEAR+1}:p.schools[+idx];
+    const only = !isNew && p.schools.length===1;
+    html=editShell(isNew?'Add education':'Edit education',`<p class="req-note">* Indicates required</p>
+      ${fld('e-school','School*',`<select id="e-school"><option value="">Select your US MBA program</option>${Object.keys(SCHOOLS).map(k=>`<option value="${esc(k)}" ${k===s.school?'selected':''}>${esc(SCHOOLS[k].full)}</option>`).join('')}</select>`)}
+      ${fld('e-prog','Program*',`<select id="e-prog">${PROGRAMS.map(x=>`<option ${x===s.program?'selected':''}>${x}</option>`).join('')}</select>`)}
+      <div class="two">${fld('e-ystart','Start year*',`<select id="e-ystart">${yearOpts(s.start||s.year-2,NOW_YEAR)}</select>`)}${fld('e-yend','Class year (or expected)*',`<select id="e-yend">${yearOpts(s.year)}</select>`)}</div>
+      <div class="notice">${I.shield}<span>Your school and class year are the first thing members see. ${isNew?'A new school is marked verified once you confirm your school email.':'Changing your school sends a new verification link to your school email.'}</span></div>
+      ${only?'<p class="req-note">You need at least one US MBA program on your profile, so this entry can’t be deleted.</p>':''}`,
+      {saveKind:'edu',idx:isNew?'':idx,del:isNew||only?null:'Delete education'});
+  }
+  if(kind==='photo'){
+    photoDraft = p.photo||null;
+    html=editShell('Profile photo',`<div class="photo-prev" id="photo-prev">${av({...p,photo:photoDraft},180)}</div>
+      <p class="req-note" style="text-align:center">A clear photo of your face helps members recognize you. JPG or PNG.</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><span class="btn ghost pill upload">${I.camera}Upload photo<input type="file" id="photo-file" accept="image/*" aria-label="Upload photo"></span>
+      <button class="btn danger" data-act="photo-remove">Delete photo</button></div>`,{saveKind:'photo'});
+  }
+  document.getElementById('modal-root').innerHTML=`<div class="scrim" data-act="scrim"><div class="modal edit" role="dialog" aria-modal="true">${html}</div></div>`;
+  setTimeout(()=>document.querySelector('.modal.edit input[type=text], .modal.edit textarea, .modal.edit select')?.focus(),30);
+}
+function fieldErr(id,msg){ const w=document.getElementById('fw-'+id); if(!w) return; w.classList.toggle('bad',!!msg); const e=w.querySelector('.err'); e.hidden=!msg; e.textContent=msg||''; }
+const val=id=>(document.getElementById(id)?.value||'').trim();
+function saveEdit(kind,idx){
+  const p=me(); let ok=true; const need=(id,msg)=>{ const bad=!val(id); fieldErr(id,bad?msg:''); if(bad) ok=false; };
+  if(kind==='intro'){ need('e-first','Enter your first name'); need('e-last','Enter your last name'); need('e-head','Enter a headline'); if(!ok) return;
+    Object.assign(p,{first:val('e-first'),last:val('e-last'),role:val('e-head'),location:val('e-loc'),industry:val('e-ind')}); }
+  if(kind==='contact'){
+    const em=val('e-email'); const emOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em); fieldErr('e-email',!em?'Enter your email':!emOk?'Enter a valid email address':''); if(!emOk) ok=false;
+    const ph=val('e-phone'); const digits=ph.replace(/\D/g,''); const phOk=!ph||digits.length>=9; fieldErr('e-phone',phOk?'':'Enter a full number with country code'); if(!phOk) ok=false;
+    const pref=document.querySelector('input[name=e-pref]:checked')?.value;
+    if(pref==='whatsapp'&&!ph){ fieldErr('e-pref','Add a WhatsApp number, or choose email'); ok=false; } else fieldErr('e-pref','');
+    if(!ok) return; Object.assign(p,{email:em,phone:ph,pref}); }
+  if(kind==='about'){ p.about=document.getElementById('e-about').value.trim(); }
+  if(kind==='exp'){
+    need('e-title','Enter a title'); need('e-co','Enter a company');
+    const cur=document.getElementById('e-current').checked, st=+val('e-start'), en=cur?null:+val('e-end');
+    if(!cur && en<st){ fieldErr('e-end','End year can’t be before start year'); ok=false; } else fieldErr('e-end','');
+    if(!ok) return;
+    const entry={years:fmtYears(st,en),company:val('e-co'),role:val('e-title'),location:val('e-cloc')};
+    if(idx==='') p.career.push(entry); else p.career[+idx]=entry; }
+  if(kind==='edu'){
+    need('e-school','Select your school');
+    const st=+val('e-ystart'), y=+val('e-yend'); if(y<=st){ fieldErr('e-yend','Class year must be after start year'); ok=false; } else fieldErr('e-yend','');
+    if(!ok) return;
+    const entry={school:val('e-school'),program:val('e-prog'),year:y,start:st};
+    if(idx==='') p.schools.push(entry); else p.schools[+idx]=entry; }
+  if(kind==='photo'){ p.photo=photoDraft||null; }
+  recompute(p); saveMe(); closeModal(); render();
+  toast(kind==='photo'?'Photo updated':'Profile updated');
+}
+function deleteItem(kind,idx){
+  const p=me(); if(kind==='exp') p.career.splice(+idx,1); if(kind==='edu'&&p.schools.length>1) p.schools.splice(+idx,1);
+  recompute(p); saveMe(); closeModal(); render(); toast(kind==='exp'?'Experience deleted':'Education deleted');
+}
+function openAddSection(){
+  const row=(kind,ico,t,sub)=>`<button class="sec-item" data-act="edit" data-kind="${kind}"><span class="ico">${ico}</span><span><b>${t}</b><small>${sub}</small></span><span class="chev">${I.right}</span></button>`;
+  document.getElementById('modal-root').innerHTML=`<div class="scrim" data-act="scrim"><div class="modal edit" role="dialog" aria-modal="true">
+    <div class="edit-h"><h3>Add to profile</h3><button class="ibtn" data-act="close" aria-label="Dismiss">${I.x}</button></div>
+    <div class="edit-b"><div class="sec-list">
+      ${row('about',I.doc,'Add about','What you’re working on and how members can help')}
+      ${row('edu',I.cap,'Add education','Your US MBA program and class year')}
+      ${row('exp',I.building,'Add position','A current or past role')}
+      ${row('photo',I.camera,'Add profile photo','Help members recognize you')}
+    </div></div></div></div>`;
+}
+function readPhoto(file){
+  if(!file||!file.type.startsWith('image/')){ toast('Choose an image file (JPG or PNG)'); return; }
+  const fr=new FileReader(); fr.onload=()=>{ const img=new Image(); img.onload=()=>{
+    const c=document.createElement('canvas'), n=360; c.width=c.height=n; const k=Math.min(img.width,img.height);
+    c.getContext('2d').drawImage(img,(img.width-k)/2,(img.height-k)/2,k,k,0,0,n,n);
+    photoDraft=c.toDataURL('image/jpeg',.85); document.getElementById('photo-prev').innerHTML=av({...me(),photo:photoDraft},180);
+  }; img.src=fr.result; }; fr.readAsDataURL(file);
+}
+
+/* ---------- sign-up: LinkedIn import + school verification ---------- */
+function verifyBadges(p){
+  const v=p.verify||{}; const sch=SCHOOLS[p.schools[0].school].tag;
+  let out='';
+  if(v.school==='linkedin') out+=`<span class="vbadge">${I.shield}${esc(sch)} confirmed on LinkedIn</span>`;
+  else if(v.school==='member') { const a=byId(v.approver); out+=`<span class="vbadge">${I.shield}Approved by ${esc(a?a.first+' '+a.last[0]+'.':'a member')}${a?' · '+esc(schoolTag(a.schools[0])):''}</span>`; }
+  else if(v.school==='email') out+=`<span class="vbadge">${I.shield}Verified · ${esc(sch)} email</span>`;
+  else if(v.school==='vouch') out+=`<span class="vbadge">${I.shield}Vouched by a ${esc(sch)} member</span>`;
+  else if(v.school==='admin') out+=`<span class="vbadge">${I.shield}Verified by admin</span>`;
+  else out+=`<span class="vbadge pend">${I.clock}School verification pending</span>`;
+  if(v.identity) out+=`<span class="vbadge idv">${I.user}ID verified on LinkedIn</span>`;
+  if(v.workplace) out+=`<span class="vbadge idv">${I.building}Workplace verified</span>`;
+  return out;
+}
+const SCHOOL_DOMAINS = {
+  'MIT Sloan':['mit.edu'], 'Harvard Business School':['hbs.edu','harvard.edu'], 'Stanford GSB':['stanford.edu'],
+  'Wharton':['upenn.edu'], 'Columbia Business School':['columbia.edu'], 'Kellogg':['northwestern.edu'],
+};
+/* What the real integration would return. OIDC = Sign In with LinkedIn; VOL = Verified on LinkedIn (Plus tier adds current job + recent education). */
+const LI_MOCK = {
+  oidc:{first:'Noam',last:'Levi',email:'noam.levi@gmail.com',photo:false},
+  vol:{identity:true,workplace:false,current:{role:'MBA Candidate',company:'MIT Sloan School of Management'},education:{school:'MIT Sloan',program:'MBA',year:2027,start:2025}},
+  pdf:[{years:'2021–2025',company:'Monday.com',role:'Product Manager',location:'Tel Aviv, Israel'},{years:'2018–2021',company:'Fiverr',role:'Business Analyst',location:'Tel Aviv, Israel'},{years:'2014–2018',company:'IDF · Unit 8200',role:'Team Lead',location:'Israel'}],
+};
+const JOIN_STEPS=[['connect','Connect LinkedIn'],['review','Review profile'],['verify','Get approved'],['done','Done']];
+function joinStart(mode){
+  const m=me();
+  S.join={mode, step: mode==='sync'?'connecting':'welcome', pdf:'none', email:'', sent:false, code:'', err:'', alt:null,
+    draft:{first:'',last:'',role:'',location:m.location,industry:m.industry,phone:'',pref:'whatsapp',schools:[],career:[],src:{}}};
+  go('join');
+  if(mode==='sync') joinConnect();
+}
+function joinConnect(){
+  S.join.step='connecting'; render();
+  setTimeout(()=>{ if(!S.join||S.join.step!=='connecting') return;
+    const d=S.join.draft, li=LI_MOCK;
+    Object.assign(d,{first:li.oidc.first,last:li.oidc.last,role:`${li.vol.current.role}`});
+    d.schools=[{...li.vol.education}]; d.src={name:'li',edu:'li',role:'li'};
+    if(S.join.mode==='sync'){ d.career=me().career.map(c=>({...c,src:'you'})); d.phone=me().phone; d.pref=me().pref; d.location=me().location; d.industry=me().industry; d.about=me().about; }
+    S.join.step='imported'; render();
+  },1500);
+}
+function joinPdf(){
+  S.join.pdf='reading'; render();
+  setTimeout(()=>{ if(!S.join) return; const d=S.join.draft;
+    LI_MOCK.pdf.forEach(c=>{ if(!d.career.some(x=>x.company===c.company&&x.years===c.years)) d.career.push({...c,src:'pdf'}); });
+    S.join.pdf='done'; render(); },1700);
+}
+function stepIdx(st){ return st==='welcome'||st==='connecting'||st==='imported'?0: st==='review'?1: st==='verify'?2:3; }
+function viewJoin(){
+  const J=S.join; if(!J) return '';
+  const cur=stepIdx(J.step);
+  const steps = J.mode==='sync' ? JOIN_STEPS.slice(0,2) : JOIN_STEPS;
+  const head=`<ol class="steps">${steps.map(([k,l],i)=>`<li class="${i===cur?'on':i<cur?'done':''}">${l}</li>`).join('')}</ol>`;
+  const d=J.draft; let body='';
+  if(J.step==='welcome'){
+    const v=byId(1);
+    body=`<div class="jcard">
+      <div class="invite">${av(v,44)}<span><b>${esc(v.name)} vouched for you</b><small>${esc(schoolTag(v.schools[0]))} · ${esc(v.role)} at ${esc(v.company)}</small></span></div>
+      <h1>Join the network of Israeli MBAs in the US</h1>
+      <p class="lead">Connect LinkedIn to fill in your profile in about a minute. Then confirm your school with your school email.</p>
+      <div class="row"><button class="btn lg li pill" data-act="join-connect">${I.link}Continue with LinkedIn</button><button class="btn lg ghost pill" data-act="join-manual">Fill in manually</button></div>
+      <p class="fine">We import your name, photo, email, current role and most recent school. We never post for you, and we don’t read your messages or LinkedIn connections. You can edit everything before it goes live.</p>
+    </div>`;
+  }
+  if(J.step==='connecting'){
+    body=`<div class="jcard"><div class="handoff" style="color:#0A66C2"><div class="spin"></div><b style="color:var(--ink)">Waiting for LinkedIn…</b>
+      <span class="muted" style="font-size:13.5px;max-width:44ch">In the live app, LinkedIn’s own sign-in window opens here and asks you to approve sharing. This preview skips that step.</span></div></div>`;
+  }
+  if(J.step==='imported'){
+    const e=d.schools[0];
+    body=`<div class="jcard">
+      <h1>${J.mode==='sync'?'Here’s what LinkedIn has now':'LinkedIn shared your basics'}</h1>
+      <p class="lead">Check these, then add the rest of your career path.</p>
+      <ul class="gotlist">
+        <li><span class="k">Name</span><span class="v">${esc(d.first+' '+d.last)}</span><span class="ok">${I.check}</span></li>
+        <li><span class="k">Email</span><span class="v">${esc(LI_MOCK.oidc.email)}</span><span class="ok">${I.check}</span></li>
+        <li><span class="k">Identity</span><span class="v">${LI_MOCK.vol.identity?'Verified with government ID on LinkedIn':'Not verified on LinkedIn'}</span><span class="ok">${LI_MOCK.vol.identity?I.check:''}</span></li>
+        <li><span class="k">Current role</span><span class="v">${esc(LI_MOCK.vol.current.role)} · ${esc(LI_MOCK.vol.current.company)}</span><span class="ok">${I.check}</span></li>
+        <li><span class="k">Recent education</span><span class="v">${classBadge(e)} ${esc(SCHOOLS[e.school].full)}</span><span class="src">CHECK IN STEP 3</span></li>
+      </ul>
+      <div class="drop">
+        <span class="ico">${I.doc}</span>
+        <span class="t"><b>Add your full career path</b><small>LinkedIn only shares your current job. On your LinkedIn profile, click <b>More → Save to PDF</b>, then upload it here.</small>
+          ${J.pdf==='reading'?'<div class="progress"><i></i></div><small>Reading your profile…</small>':''}
+          ${J.pdf==='done'?`<small style="color:var(--ok);font-weight:600">Found ${LI_MOCK.pdf.length} positions. Review them next.</small>`:''}</span>
+        ${J.pdf==='none'?`<span class="btn ghost pill upload">${I.doc}Upload PDF<input type="file" id="li-pdf" accept="application/pdf,.pdf" aria-label="Upload LinkedIn profile PDF"></span>`:''}
+      </div>
+      <p class="fine">Preview only: the file isn’t read here and sample positions are used.</p>
+      <div class="row"><button class="btn lg primary pill" data-act="join-go" data-step="review" ${J.pdf==='reading'?'disabled':''}>Review profile</button>${J.pdf==='none'?'<button class="link" data-act="join-go" data-step="review">Skip, I’ll add jobs later</button>':''}</div>
+    </div>`;
+  }
+  if(J.step==='review'){
+    const srcTag=s=>s==='li'?'<span class="src">LINKEDIN</span>':s==='pdf'?'<span class="src pdf">PDF</span>':'<span class="src you">YOU</span>';
+    const e=d.schools[0]||{school:'',program:'MBA',year:NOW_YEAR+1,start:NOW_YEAR-1};
+    body=`<div class="jcard">
+      <h1>Review your profile</h1><p class="lead">This is what members will see. Edit anything that’s off.</p>
+      <div class="two">${fld('j-first','First name*',`<input type="text" id="j-first" value="${esc(d.first)}">`)}${fld('j-last','Last name*',`<input type="text" id="j-last" value="${esc(d.last)}">`)}</div>
+      <div class="jsec">${fld('j-head','Headline*',`<input type="text" id="j-head" value="${esc(d.role)}" maxlength="120" placeholder="Ex: MBA Candidate · ex-PM at Monday.com">`)}</div>
+      <div class="jsec"><h3>${I.cap.replace('<svg','<svg width="17" height="17"')}Your MBA ${d.src.edu==='li'?srcTag('li'):''}</h3>
+        <div class="two">${fld('j-school','School*',`<select id="j-school"><option value="">Select your US MBA program</option>${Object.keys(SCHOOLS).map(k=>`<option value="${esc(k)}" ${k===e.school?'selected':''}>${esc(SCHOOLS[k].full)}</option>`).join('')}</select>`)}
+        ${fld('j-year','Class year*',`<select id="j-year">${yearOpts(e.year)}</select>`)}</div></div>
+      <div class="jsec"><h3>${I.building.replace('<svg','<svg width="17" height="17"')}Career path</h3>
+        ${d.career.length?d.career.map((c,i)=>`<div class="exrow">${logo(c.company)}<span class="t"><b>${esc(c.role)} · ${esc(c.company)}</b><small>${esc(c.years)}${c.location?' · '+esc(c.location):''}</small></span>${srcTag(c.src)}<button class="ibtn" data-act="join-rm" data-idx="${i}" aria-label="Remove ${esc(c.company)}">${I.x}</button></div>`).join(''):'<p class="muted" style="margin:0;font-size:14px">No positions yet. You can add them from your profile anytime.</p>'}
+      </div>
+      <div class="jsec two">${fld('j-loc','Location*',`<select id="j-loc">${LOC_OPTIONS.map(l=>`<option ${l===d.location?'selected':''}>${l}</option>`).join('')}</select>`)}${fld('j-ind','Industry*',`<select id="j-ind">${Object.keys(INDUSTRIES).map(l=>`<option ${l===d.industry?'selected':''}>${l}</option>`).join('')}</select>`)}</div>
+      <div class="jsec">${fld('j-phone','WhatsApp number',`<input type="tel" id="j-phone" value="${esc(d.phone||'')}" placeholder="+1 (617) 555-0100">`,'<p class="hint"><span>Members you connect with can reach you here. LinkedIn doesn’t share phone numbers, so add it yourself.</span></p>')}</div>
+      <div class="row"><button class="btn lg primary pill" data-act="join-review-next">${J.mode==='sync'?'Save changes':'Continue'}</button>${J.mode==='sync'?'':'<button class="link" data-act="join-go" data-step="imported">Back</button>'}</div>
+    </div>`;
+  }
+  if(J.step==='verify'){
+    const e=d.schools[0], sc=SCHOOLS[e.school], viaLI=!!d.src.edu, match=viaLI&&J.liMatch;
+    const members=P.filter(x=>x.id!==ME&&x.schools.some(s=>s.school===e.school));
+    const st=(k)=>k==='ok'?`<span class="st ok">${I.check}</span>`:k==='no'?`<span class="st no">${I.x}</span>`:`<span class="st wait"></span>`;
+    const running=J.check==='running';
+    const checks = viaLI ? `<ul class="checks">
+        <li>${st(running?'w':match?'ok':'no')}<span><b>${esc(sc.tag)} ${yy(e.year)} on your LinkedIn</b><small>${running?'Checking education…':match?`${esc(sc.full)} · ${esc(e.program)}, ${e.start||e.year-2}–${e.year}`:`No ${esc(sc.full)} education with class year ${e.year} found`}</small></span></li>
+        <li>${st(running?'w':'ok')}<span><b>Real person</b><small>${running?'Checking identity…':'Identity verified with government ID on LinkedIn'}</small></span></li>
+        <li>${st(running?'w':'ok')}<span><b>Israeli background</b><small>${running?'Looking for Israeli experience…':'IDF · Unit 8200, Monday.com and Fiverr in Tel Aviv'}</small></span></li>
+      </ul>` : '';
+    let main='';
+    if(!running && match){
+      main=`<div class="notice" style="background:var(--ok-soft);color:var(--ok)">${I.check}<span><b>You’re approved automatically.</b> Your LinkedIn shows ${esc(sc.tag)} ${yy(e.year)}, your ID is verified and your background shows Israeli experience.</span></div>
+        <div class="row"><button class="btn lg primary pill" data-act="join-finish" data-status="linkedin">Finish</button></div>`;
+    } else if(!running && J.reqSent){
+      const v = J.voucher? byId(+J.voucher):null;
+      main=`<div class="notice" style="background:var(--warm-soft);color:var(--warm)">${I.clock}<span><b>Request sent.</b> ${v?`${esc(v.name)} gets it first. `:''}Any of the ${members.length} verified ${esc(sc.tag)} members or an admin can approve it. Most requests are approved within a day.</span></div>
+        <ol class="track3"><li class="ok"><span class="st">${I.check}</span><span><b>Request submitted</b><small>Just now</small></span></li>
+          <li class="now"><span class="st"></span><span><b>A ${esc(sc.tag)} member reviews it</b><small>They confirm you’re Israeli and studied at ${esc(sc.tag)}</small></span></li>
+          <li><span class="st"></span><span><b>You’re in</b><small>Your profile becomes visible and members can connect with you</small></span></li></ol>
+        <div class="row"><button class="btn lg primary pill" data-act="join-finish" data-status="pending">Finish</button></div>`;
+    } else if(!running){
+      main=`${viaLI?`<div class="notice">${I.users}<span>We couldn’t confirm ${esc(sc.tag)} ${yy(e.year)} on your LinkedIn. That’s common for new students. Send a request to join instead, like a private group: a verified ${esc(sc.tag)} member or an admin approves it.</span></div>`:`<p class="lead" style="margin:0">Like a private group: a verified ${esc(sc.tag)} member or an admin approves your request.</p>`}
+        <div class="jsec">${fld('j-voucher','Who in the network can confirm you? (optional)',`<select id="j-voucher"><option value="">Any ${esc(sc.tag)} member</option>${members.map(x=>`<option value="${x.id}" ${+J.voucher===x.id?'selected':''}>${esc(x.name)} · ${esc(schoolTag(x.schools.find(s=>s.school===e.school)))}</option>`).join('')}</select>`,'<p class="hint"><span>They get your request first, which usually makes it faster.</span></p>')}</div>
+        <div class="jsec">${fld('j-liurl','Your LinkedIn profile URL*',`<input type="text" id="j-liurl" value="${esc(J.liurl||(viaLI?'linkedin.com/in/noam-levi':''))}" placeholder="linkedin.com/in/your-name">`)}</div>
+        <div class="jsec">${fld('j-answer','Where in Israel are you from, and what did you do before your MBA?*',`<textarea id="j-answer" maxlength="400" placeholder="Ex: Grew up in Haifa, served in 8200, then PM at Monday.com for 4 years.">${esc(J.answer||'')}</textarea>`)}</div>
+        <div class="jsec field" id="fw-j-agree"><label class="checkrow"><input type="checkbox" id="j-agree" ${J.agree?'checked':''}>I’m Israeli and I study or studied at ${esc(sc.full)}.</label><p class="err" hidden></p></div>
+        <div class="row"><button class="btn lg primary pill" data-act="join-request-send">Send request to join</button></div>`;
+    }
+    body=`<div class="jcard">
+      ${viaLI?`<div class="demo-toggle">Preview outcome: <div class="seg"><button class="${J.liMatch?'on':''}" data-act="join-demo-match" data-v="1">LinkedIn shows the school</button><button class="${!J.liMatch?'on':''}" data-act="join-demo-match" data-v="0">It doesn’t</button></div></div>`:''}
+      <h1>Get approved to join ${esc(sc.tag)} ${yy(e.year)}</h1>
+      <p class="lead">${viaLI?'First we check your LinkedIn. If it shows your school, you’re in right away. If not, a member from your school approves you.':''}</p>
+      ${checks}${main}
+    </div>`;
+  }
+  if(J.step==='done'){
+    body=`<div class="jcard" style="text-align:center"><div style="display:flex;justify-content:center"><span class="welcome-mark">${I.check}</span></div>
+      <h1>Welcome, ${esc(me().first)}</h1><p class="lead" style="margin-inline:auto">${me().verify.school==='pending'?'You can browse and search now. Your profile goes live and members can connect with you once a member approves your request.':'Your profile is live. Start by searching for people at the companies you’re targeting.'}</p>
+      <div style="display:flex;justify-content:center;margin:6px 0 18px">${pcard(me(),{txt:me().schools[0].school+' · Class of '+me().schools[0].year,ico:'cap'})}</div>
+      <div class="row" style="justify-content:center"><button class="btn lg primary pill" data-act="nav" data-view="home">${I.search}Find people</button><button class="btn lg ghost pill" data-act="nav" data-view="me">View my profile</button></div></div>`;
+  }
+  return `<main><div class="wrap join">${head}${body}</div></main>`;
+}
+function joinRunCheck(){ const J=S.join; J.check = J.draft.src.edu ? 'running' : 'done'; render(); if(J.check==='running') setTimeout(()=>{ if(S.join&&S.join.step==='verify'){ S.join.check='done'; render(); } },1500); }
+function members0(){ const sch=me().schools[0].school; const c=[...adj.get(ME)].find(x=>byId(x).schools.some(s=>s.school===sch)); return c??1; }
+function joinReadReview(){
+  const J=S.join, d=J.draft; let ok=true;
+  const need=(id,msg)=>{ const bad=!val(id); fieldErr(id,bad?msg:''); if(bad) ok=false; };
+  need('j-first','Enter your first name'); need('j-last','Enter your last name'); need('j-head','Enter a headline'); need('j-school','Select your school');
+  const ph=val('j-phone'); if(ph && ph.replace(/\D/g,'').length<9){ fieldErr('j-phone','Enter a full number with country code'); ok=false; } else fieldErr('j-phone','');
+  if(!ok) return false;
+  const y=+val('j-year'), sch=val('j-school'), prev=d.schools[0]||{};
+  Object.assign(d,{first:val('j-first'),last:val('j-last'),role:val('j-head'),location:val('j-loc'),industry:val('j-ind'),phone:ph,pref:ph?d.pref:'email'});
+  d.schools=[{school:sch,program:prev.program||'MBA',year:y,start:prev.start||y-2}];
+  return true;
+}
+function joinApply(schoolStatus){
+  const d=S.join.draft, m=me();
+  Object.assign(m,{first:d.first,last:d.last,role:d.role,location:d.location,industry:d.industry,phone:d.phone,pref:d.pref,
+    schools:d.schools.map(s=>({...s})), career:d.career.map(({src,...c})=>c)});
+  if(d.about) m.about=d.about;
+  m.verify={school:schoolStatus||m.verify.school, identity:LI_MOCK.vol.identity, workplace:LI_MOCK.vol.workplace};
+  recompute(m); saveMe();
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  if(S.pill && !e.target.closest('.pillw')){ S.pill=null; if(!e.target.closest('[data-act]')){ render(); return; } }
+  const t=e.target.closest('[data-act]'); if(!t) return;
+  const id = t.dataset.id!==undefined ? +t.dataset.id : null;
+  switch(t.dataset.act){
+    case 'scrim': if(e.target===t) closeModal(); break;
+    case 'close': closeModal(); break;
+    case 'nav': S.browse=null; go(t.dataset.view); break;
+    case 'back': back(); break;
+    case 'profile': go('profile',{id}); break;
+    case 'search': doSearch(t.dataset.q); break;
+    case 'search-submit': break;
+    case 'browse': S.browse = S.browse===t.dataset.tab?null:t.dataset.tab; render(); break;
+    case 'see-all': go('list',{key:t.dataset.key}); break;
+    case 'scroll': { const tr=document.getElementById('track-'+t.dataset.key); tr.scrollBy({left:+t.dataset.dir*tr.clientWidth*.8,behavior:'smooth'}); break; }
+    case 'connect': openConnect(id); break;
+    case 'send-request': sendRequest(id); break;
+    case 'pending': toast(`Waiting for ${esc(byId(id).first)} to accept`); break;
+    case 'accept': S.incoming.delete(id); markConnected(id); logInteraction(id,'Connected · just now'); softRender(id); toast(`You and ${esc(byId(id).first)} are now connected`,{act:byId(id).pref==='whatsapp'?'wa':'email',id,label:'Say hello'}); break;
+    case 'decline': S.incoming.delete(id); render(); toast('Request ignored'); break;
+    case 'withdraw': S.pending.delete(id); render(); toast('Request withdrawn'); break;
+    case 'email': openContact(id,'email'); break;
+    case 'wa': openContact(id,'wa'); break;
+    case 'copy': { const txt=t.dataset.text; const done=()=>{t.innerHTML=I.check+'Copied'}; try{ navigator.clipboard.writeText(txt).then(done,()=>{done()}); }catch(_){ done(); } break; }
+    case 'net-tab': S.netTab=t.dataset.tab; render(); break;
+    case 'toggle-filters': S.showFilters=!S.showFilters; render(); break;
+    case 'rm-filter': delete S.filters[t.dataset.k]; render(); break;
+    case 'clear-filters': S.filters={}; S.pill=null; render(); break;
+    case 'set-pref': me().pref=t.dataset.v; render(); toast(`Members will see you prefer ${t.dataset.v==='whatsapp'?'WhatsApp':'email'}`); break;
+    case 'toast': toast(esc(t.dataset.msg)); break;
+    case 'edit': openEdit(t.dataset.kind,t.dataset.idx); break;
+    case 'join-start': joinStart(t.dataset.mode); break;
+    case 'join-exit': S.join=null; go(S.stack.length?S.stack[S.stack.length-1].view:'home',S.stack.length?S.stack[S.stack.length-1].params:{}); break;
+    case 'join-connect': joinConnect(); break;
+    case 'join-manual': Object.assign(S.join.draft,{first:'',last:'',role:'',schools:[],career:[],src:{}}); S.join.step='review'; render(); break;
+    case 'join-go': S.join.step=t.dataset.step; render(); window.scrollTo(0,0); break;
+    case 'join-rm': S.join.draft.career.splice(+t.dataset.idx,1); render(); break;
+    case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else { S.join.step='verify'; S.join.reqSent=false; if(S.join.liMatch===undefined) S.join.liMatch=true; joinRunCheck(); window.scrollTo(0,0); } } break;
+    case 'join-send': { const em=val('j-email').toLowerCase(), sch=S.join.draft.schools[0].school; const okFmt=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+      const okDom= okFmt && SCHOOL_DOMAINS[sch].some(dm=>em.endsWith('@'+dm)||em.endsWith('.'+dm));
+      if(!okFmt){ fieldErr('j-email','Enter a valid email address'); break; }
+      if(!okDom){ fieldErr('j-email',`Use an email ending in ${SCHOOL_DOMAINS[sch].join(' or ')} (subdomains like alum. or sloan. work)`); break; }
+      S.join.email=em; S.join.sent=true; S.join.code=String(Math.floor(100000+Math.random()*900000)); render(); setTimeout(()=>document.getElementById('j-code')?.focus(),30); break; }
+    case 'join-resend': S.join.sent=false; render(); break;
+    case 'join-check': { if(val('j-code')===S.join.code){ S.join.verified=true; render(); } else fieldErr('j-code','That code doesn’t match. Check the email and try again.'); break; }
+    case 'join-alt': S.join.alt=t.dataset.v||null; render(); break;
+    case 'join-vouch-send': S.join.voucher=val('j-voucher'); S.join.alt='vouch-sent'; render(); break;
+    case 'join-admin-send': S.join.alt='admin-sent'; render(); break;
+    case 'join-finish': { const stt=t.dataset.status; joinApply(stt); S.join.step='done'; render(); window.scrollTo(0,0);
+      if(stt==='pending'){ const vid=+S.join.voucher||members0(); setTimeout(()=>{ const m=me(); if(m.verify.school!=='pending') return; m.verify.school='member'; m.verify.approver=vid; saveMe(); softRender(-1); toast(`${esc(byId(vid).first)} approved your request. You’re verified.`); },6000); }
+      break; }
+    case 'join-demo-match': S.join.liMatch = t.dataset.v==='1'; S.join.reqSent=false; joinRunCheck(); break;
+    case 'join-request-send': { const J=S.join; J.voucher=val('j-voucher'); J.liurl=val('j-liurl'); J.answer=val('j-answer'); J.agree=document.getElementById('j-agree').checked; let ok=true;
+      if(!J.liurl){ fieldErr('j-liurl','Add your LinkedIn URL so reviewers can check it'); ok=false; } else fieldErr('j-liurl','');
+      if(J.answer.length<10){ fieldErr('j-answer','Write a sentence or two for the reviewers'); ok=false; } else fieldErr('j-answer','');
+      if(!J.agree){ fieldErr('j-agree','Confirm this to send your request'); ok=false; } else fieldErr('j-agree','');
+      if(ok){ J.reqSent=true; render(); } break; }
+    case 'jr-approve': case 'jr-decline': case 'jr-skip': { const r=S.joinReqs.find(x=>x.id===id); S.joinReqs=S.joinReqs.filter(x=>x.id!==id); render();
+      toast(t.dataset.act==='jr-approve'?`${esc(r.first)} is in. You’re listed as their approver.`:t.dataset.act==='jr-decline'?`Request from ${esc(r.first)} declined`:`Skipped. Other ${esc(SCHOOLS[r.schools[0].school].tag)} members can still review it.`); break; }
+    case 'connections': S.connQ=''; if(S.view==='connections'&&S.params.id===id){ S.params={id,mode:t.dataset.mode}; render(); } else go('connections',{id,mode:t.dataset.mode}); break;
+    case 'conn-filters': S.query=''; S.filters={degree:['1st']}; go('results'); break;
+    case 'pill': { const k=t.dataset.k; if(S.pill===k){ S.pill=null; } else { S.pill=k; S.draft=[...(S.filters[k]||[])]; } render(); break; }
+    case 'pill-cancel': S.pill=null; render(); break;
+    case 'pill-apply': { const k=t.dataset.k; if(S.draft.length) S.filters[k]=[...S.draft]; else delete S.filters[k]; S.pill=null; render(); break; }
+    case 'all-filters': S.pill=null; S.draftAll=null; render(); openAllFilters(); break;
+    case 'drawer-scrim': if(e.target===t){ S.draftAll=null; closeModal(); } break;
+    case 'drawer-close': S.draftAll=null; closeModal(); break;
+    case 'drawer-reset': S.draftAll={}; openAllFilters(); break;
+    case 'drawer-apply': S.filters=Object.fromEntries(Object.entries(S.draftAll||{}).filter(([,v])=>v&&v.length)); S.draftAll=null; closeModal(); render(); window.scrollTo(0,0); break;
+    case 'save-edit': saveEdit(t.dataset.kind,t.dataset.idx); break;
+    case 'delete-item': deleteItem(t.dataset.kind,t.dataset.idx); break;
+    case 'add-section': openAddSection(); break;
+    case 'photo-remove': photoDraft=null; document.getElementById('photo-prev').innerHTML=av({...me(),photo:null},180); break;
+    case 'reset-me': Object.assign(me(),JSON.parse(JSON.stringify(ME_DEFAULT))); recompute(me()); try{localStorage.removeItem(STORE_KEY)}catch(_){ } render(); toast('Sample profile restored'); break;
+  }
+});
+document.addEventListener('input',e=>{ if(e.target.id==='conn-q'){ S.connQ=e.target.value; const l=document.getElementById('conn-list'); l.innerHTML=connRows(+l.dataset.id,l.dataset.mode); return; } const c=e.target.dataset.count; if(c){ const max=e.target.maxLength; document.getElementById(c).textContent=`${e.target.value.length}/${max.toLocaleString()}`; } });
+document.addEventListener('change',e=>{
+  if(e.target.id==='photo-file'){ readPhoto(e.target.files[0]); return; }
+  if(e.target.id==='li-pdf'){ if(e.target.files[0]) joinPdf(); return; }
+  if(e.target.id==='e-current'){ const end=document.getElementById('e-end'); end.disabled=e.target.checked; if(e.target.checked){ end.insertAdjacentHTML('afterbegin','<option>Present</option>'); end.value='Present'; } else { [...end.options].filter(o=>o.text==='Present').forEach(o=>o.remove()); end.value=String(NOW_YEAR); } return; }
+  if(e.target.dataset.draft!==undefined){ const v=e.target.dataset.draft; S.draft = e.target.checked ? [...S.draft,v] : S.draft.filter(x=>x!==v); return; }
+  if(e.target.dataset.dk!==undefined){ const k=e.target.dataset.dk, v=e.target.dataset.dv, cur=S.draftAll[k]||[]; S.draftAll[k]= e.target.checked?[...cur,v]:cur.filter(x=>x!==v); return; }
+  if(e.target.id==='conn-sort'){ S.connSort=e.target.value; const l=document.getElementById('conn-list'); l.innerHTML=connRows(+l.dataset.id,l.dataset.mode); return; }
+  if(e.target.dataset.sort!==undefined){ S.sort=e.target.value; render(); }
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); S.draftAll=null; if(S.pill){ S.pill=null; render(); } } });
+loadMe();
+render();
+</script>
+
+</body></html>
