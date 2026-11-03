@@ -1536,9 +1536,13 @@ function verifyBadges(p){
   return out;
 }
 /* The real "Sign in with LinkedIn" (OpenID Connect) only returns name, email and photo, and needs a backend.
-   This prototype simulates the sign-in and reads everything else from the member's own LinkedIn profile PDF. */
+   Sign-up simulates the sign-in and reads everything else from the member's own LinkedIn profile PDF.
+   Log in uses the real thing: LinkedIn confirms the member's email and the backend matches it to an approved request. */
 /* Sign-up backend: the Google Apps Script web app URL (see backend/README.md). Empty = demo mode, nothing is sent. */
 const BACKEND_URL='https://script.google.com/macros/s/AKfycbwwRILZLmGF77kaMp61jlNGAdDStwuD0Mai5XagkUGsbE3tHNpw2ZbKNZ2D6OANfp0/exec';
+/* Client ID of the LinkedIn developer app (public; the secret lives only in the backend). Empty = LinkedIn login is off. */
+const LINKEDIN_CLIENT_ID='';
+const LI_STATE_KEY='imn-li-state';
 const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 let pdfjsReady=null;
 function loadPdfJs(){
@@ -1607,7 +1611,7 @@ const JOIN_STEPS=[['connect','Sign up'],['review','Review profile'],['verify','A
 /* Registration email sent to an applicant once an admin approves them. In the live app the server sends it. */
 function regEmail(first,email){
   return {to:email, subject:'You’re approved: welcome to Israeli MBA Network',
-    body:`Hi ${first},\n\nGood news: an admin reviewed your request and approved you. Your registration is complete and your profile is now live in the network.\n\nWhat you can do now:\n• Search for Israeli MBAs by school, company or industry\n• Connect with members and ask for warm intros\n• Keep your profile current with “Update from LinkedIn”\n\nSign in anytime with “Continue with LinkedIn”.\n\nWelcome aboard,\nThe Israeli MBA Network team`};
+    body:`Hi ${first},\n\nGood news: an admin reviewed your request and approved you. Your registration is complete and your profile is now live in the network.\n\nWhat you can do now:\n• Search for Israeli MBAs by school, company or industry\n• Connect with members and ask for warm intros\n• Keep your profile current with “Update from LinkedIn”\n\nLog in on any device with “Log in” and this email address.\n\nWelcome aboard,\nThe Israeli MBA Network team`};
 }
 function openRegEmail(first,email,note){
   const m=regEmail(first,email);
@@ -1653,14 +1657,34 @@ function viewJoin(){
   const J=S.join; if(!J) return '';
   const cur=stepIdx(J.step);
   const steps = J.mode==='sync' ? JOIN_STEPS.slice(0,2) : JOIN_STEPS;
-  const head=`<ol class="steps">${steps.map(([k,l],i)=>`<li class="${i===cur?'on':i<cur?'done':''}">${l}</li>`).join('')}</ol>`;
+  const head=J.step==='login'?'':`<ol class="steps">${steps.map(([k,l],i)=>`<li class="${i===cur?'on':i<cur?'done':''}">${l}</li>`).join('')}</ol>`;
   const d=J.draft; let body='';
   if(J.step==='welcome'){
     body=`<div class="jcard">
       <h1>Join the network of Israeli MBAs in the US</h1>
       <p class="lead">Connect LinkedIn and we fill in your profile for you, or sign up with email and fill it in yourself. An admin reviews every request, and we email you as soon as you’re approved.</p>
       <div class="row"><button class="btn lg li pill" data-act="join-connect">${I.link}Continue with LinkedIn</button><button class="btn lg ghost pill" data-act="join-manual">${I.mail}Sign up with email</button></div>
+      <p class="fine" style="font-size:14px;color:var(--muted)">Already a member? <button class="link" data-act="join-login">Log in</button></p>
       <p class="fine">We import your name, photo, email, current role and most recent school. We never post for you, and we don’t read your messages or LinkedIn connections. You can edit everything before you submit.</p>
+    </div>`;
+  }
+  if(J.step==='login'){
+    const L=J.login||{};
+    body=`<div class="jcard">
+      <h1>Log in</h1>
+      ${L.liBusy?`<p class="lead">Checking your LinkedIn account…</p>`
+      :!L.emailMode?`<p class="lead">Log in with the LinkedIn account that uses the email you signed up with.</p>
+        ${L.err?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${L.err}</span></div>`:''}
+        <div class="row"><button class="btn lg li pill" data-act="login-li">${I.link}Log in with LinkedIn</button><button class="link" data-act="join-go" data-step="welcome">Back</button></div>
+        <p class="fine" style="font-size:14px;color:var(--muted)">LinkedIn uses a different email? <button class="link" data-act="login-email-mode">Get a code by email instead</button></p>`
+      :!L.sent?`<p class="lead">Enter the email you signed up with. We’ll email you a 6-digit code.</p>
+        ${L.err?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${L.err}</span></div>`:''}
+        <div class="jsec">${fld('l-email','Email',`<input type="email" id="l-email" value="${esc(L.email||'')}" placeholder="you@example.com" autocomplete="email">`)}</div>
+        <div class="row"><button class="btn lg primary pill" data-act="login-send" ${L.busy?'disabled':''}>${L.busy?'Sending…':'Email me a code'}</button><button class="link" data-act="login-li-mode">Back</button></div>`
+      :`<p class="lead">We sent a code to <b>${esc(L.email)}</b>. It expires in 10 minutes.</p>
+        ${L.err?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${L.err}</span></div>`:''}
+        <div class="jsec">${fld('l-code','Code',`<input type="text" id="l-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">`)}</div>
+        <div class="row"><button class="btn lg primary pill" data-act="login-verify" ${L.busy?'disabled':''}>${L.busy?'Checking…':'Log in'}</button><button class="link" data-act="login-restart">Use a different email</button></div>`}
     </div>`;
   }
   if(J.step==='connecting'){
@@ -1764,6 +1788,71 @@ async function joinSubmit(){
   }catch(err){ J.sendErr='We couldn’t send your request. Check your connection and try again.'; }
   J.sending=false; render(); window.scrollTo(0,0);
 }
+/* Log in on any device: email a code, then exchange it for the member's saved profile. */
+async function loginPost(body){
+  return (await fetch(BACKEND_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})).json();
+}
+async function loginSendCode(){
+  const L=S.join.login; L.email=val('l-email').trim(); L.err='';
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(L.email)){ fieldErr('l-email','Enter a valid email address'); return; }
+  if(!BACKEND_URL){ L.err='Logging in needs the live backend. This copy is in demo mode.'; render(); return; }
+  L.busy=true; render();
+  try{
+    const r=await loginPost({action:'login-code',email:L.email});
+    if(r.ok) L.sent=true;
+    else L.err=r.error==='not-member'?'We don’t have a member with that email. Check for typos, or go back and sign up.':'Something went wrong. Try again.';
+  }catch(_){ L.err='We couldn’t reach the server. Check your connection and try again.'; }
+  L.busy=false; render();
+}
+function loginLinkedIn(){
+  const L=S.join.login; L.err='';
+  if(!BACKEND_URL||!LINKEDIN_CLIENT_ID){ L.err='LinkedIn login isn’t set up yet. Get a code by email instead.'; render(); return; }
+  const state=crypto.randomUUID();
+  try{ sessionStorage.setItem(LI_STATE_KEY,state); }catch(_){ }
+  location.href='https://www.linkedin.com/oauth/v2/authorization?'+new URLSearchParams({response_type:'code',client_id:LINKEDIN_CLIENT_ID,
+    redirect_uri:location.origin+location.pathname,scope:'openid profile email',state});
+}
+/* Back from LinkedIn: the page URL carries ?code&state (or ?error). Returns true if this load is a LinkedIn return. */
+function handleLinkedInReturn(){
+  const q=new URLSearchParams(location.search); if(!q.has('state')||!(q.has('code')||q.has('error'))) return false;
+  history.replaceState(null,'',location.pathname);
+  let want=null; try{ want=sessionStorage.getItem(LI_STATE_KEY); sessionStorage.removeItem(LI_STATE_KEY); }catch(_){ }
+  S.firstRun=!loadMe(); joinStart('join'); const L=S.join.login={}; S.join.step='login';
+  if(q.get('state')!==want){ L.err='That LinkedIn login didn’t come from this page. Try again.'; render(); return true; }
+  if(q.has('error')){ L.err='LinkedIn login was cancelled.'; render(); return true; }
+  L.liBusy=true; render();
+  loginPost({action:'linkedin-login',code:q.get('code'),redirectUri:location.origin+location.pathname}).then(r=>{
+    if(r.ok){ loginApply(r.profile); return; }
+    L.err=r.error==='not-member'?`No approved member uses ${esc(r.email)}. Sign up first, or get a code by email if you signed up with a different address.`
+      :r.error==='no-email'?'Your LinkedIn account has no verified email. Get a code by email instead.'
+      :r.error==='not-configured'?'LinkedIn login isn’t set up on the server yet. Get a code by email instead.'
+      :'LinkedIn login didn’t work. Try again, or get a code by email.';
+    L.liBusy=false; render();
+  }).catch(()=>{ L.err='We couldn’t reach the server. Check your connection and try again.'; L.liBusy=false; render(); });
+  return true;
+}
+async function loginVerify(){
+  const L=S.join.login, code=val('l-code').replace(/\D/g,''); L.err='';
+  if(code.length!==6){ fieldErr('l-code','Enter the 6-digit code from the email'); return; }
+  L.busy=true; render();
+  try{
+    const r=await loginPost({action:'login',email:L.email,code});
+    if(r.ok){ loginApply(r.profile); return; }
+    if(r.error==='expired'){ L.sent=false; L.err='That code expired. Request a new one.'; }
+    else L.err=r.error==='wrong-code'?'That code isn’t right. Check the email and try again.':'Something went wrong. Try again.';
+  }catch(_){ L.err='We couldn’t reach the server. Check your connection and try again.'; }
+  L.busy=false; render();
+}
+function loginApply(p){
+  const m=me(), y=+p.classYear||NOW_YEAR;
+  const school=Object.keys(SCHOOLS).find(k=>SCHOOLS[k].full===p.school)||matchSchool(p.school||'')||Object.keys(SCHOOLS)[0];
+  Object.assign(m,{first:p.first,last:p.last,role:p.headline,email:p.email,location:p.location||'Boston',industry:p.industry||Object.keys(INDUSTRIES)[0],
+    phone:String(p.phone||''),pref:p.phone?'whatsapp':'email',about:p.about||'',photo:/^https:\/\//.test(p.photo||'')?p.photo:(m.email===p.email?m.photo:null),reqId:p.id,
+    schools:[{school,program:'MBA',year:y,start:y-2}], career:p.career||[],
+    verify:{school:p.status==='approved'?'admin':'pending',identity:false,workplace:false}});
+  recompute(m); saveMe(); S.firstRun=false; S.join=null; go('home',{},false);
+  toast(p.status==='approved'?`Welcome back, ${esc(p.first)}`:'You’re logged in. Your request is still waiting for an admin.');
+}
 /* Pending members: ask the backend whether an admin has decided yet. */
 async function checkApproval(){
   const m=me(); if(!BACKEND_URL||m.verify.school!=='pending'||!m.reqId) return;
@@ -1818,6 +1907,13 @@ document.addEventListener('click',e=>{
     case 'join-exit': S.join=null; go(S.stack.length?S.stack[S.stack.length-1].view:'home',S.stack.length?S.stack[S.stack.length-1].params:{}); break;
     case 'join-connect': joinConnect(); break;
     case 'join-pdf-again': S.join.pdf='none'; S.join.found=null; render(); break;
+    case 'join-login': S.join.login=LINKEDIN_CLIENT_ID?{}:{emailMode:true}; S.join.step='login'; render(); window.scrollTo(0,0); break;
+    case 'login-send': loginSendCode(); break;
+    case 'login-li': loginLinkedIn(); break;
+    case 'login-email-mode': S.join.login={emailMode:true}; render(); break;
+    case 'login-li-mode': if(LINKEDIN_CLIENT_ID){ S.join.login={}; } else S.join.step='welcome'; render(); break;
+    case 'login-verify': loginVerify(); break;
+    case 'login-restart': S.join.login={emailMode:true,email:S.join.login.email}; render(); break;
     case 'join-manual': S.join.manual=true; S.join.draft.src={}; S.join.step='review'; render(); window.scrollTo(0,0); break;
     case 'join-go': S.join.step=t.dataset.step; render(); window.scrollTo(0,0); break;
     case 'join-rm': S.join.draft.career.splice(+t.dataset.idx,1); render(); break;
@@ -1857,8 +1953,8 @@ document.addEventListener('change',e=>{
   if(e.target.id==='conn-sort'){ S.connSort=e.target.value; const l=document.getElementById('conn-list'); l.innerHTML=connRows(+l.dataset.id,l.dataset.mode); return; }
   if(e.target.dataset.sort!==undefined){ S.sort=e.target.value; render(); }
 });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); S.draftAll=null; if(S.pill){ S.pill=null; render(); } } });
-if(!loadMe()){ S.firstRun=true; joinStart('join'); } else checkApproval();
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target.id==='l-email'){ e.preventDefault(); loginSendCode(); } if(e.key==='Enter'&&e.target.id==='l-code'){ e.preventDefault(); loginVerify(); } if(e.key==='Escape'){ closeModal(); S.draftAll=null; if(S.pill){ S.pill=null; render(); } } });
+if(!handleLinkedInReturn()){ if(!loadMe()){ S.firstRun=true; joinStart('join'); } else checkApproval(); }
 render();
 </script>
 

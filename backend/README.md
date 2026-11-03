@@ -22,6 +22,16 @@ Emails are sent from the Google account that sets this up. Free Gmail accounts c
 5. **Copy the Web app URL.** It ends in `/exec`.
 6. **Connect the app.** In `index.html`, find `const BACKEND_URL='';` and paste the URL between the quotes. Commit that change on a feature branch, like any other.
 
+## Log in with LinkedIn (one-time setup)
+
+Members log in with LinkedIn, and the backend lets them in if their LinkedIn email matches an approved request. Members can also get a login code by email instead.
+
+1. **Create a LinkedIn app.** Go to [linkedin.com/developers/apps](https://www.linkedin.com/developers/apps) → **Create app**. LinkedIn requires a LinkedIn Page for the app. If you don't have one, the form links to creating one.
+2. **Turn on sign-in.** On the app's **Products** tab, request **Sign In with LinkedIn using OpenID Connect**. Access is granted right away.
+3. **Add redirect URLs.** On the **Auth** tab, under **Authorized redirect URLs**, add every address the app runs at, exactly as it appears in the browser, e.g. `http://localhost:8010/index.html`. Add the hosted address too once the site is live.
+4. **Give the backend the keys.** From the **Auth** tab, copy the **Client ID** and **Primary Client Secret**. In Apps Script, open **Project Settings → Script properties** and add `LINKEDIN_CLIENT_ID` and `LINKEDIN_CLIENT_SECRET`. The secret must never go in `index.html` or GitHub.
+5. **Give the app the Client ID.** In `index.html`, set `const LINKEDIN_CLIENT_ID='...';`. The Client ID is public, so this is safe.
+
 ## Updating the script
 
 After editing `Code.gs`, paste it into Apps Script again, then click **Deploy → Manage deployments → Edit (pencil) → Version: New version → Deploy**. This keeps the same URL.

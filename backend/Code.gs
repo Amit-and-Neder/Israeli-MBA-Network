@@ -6,6 +6,9 @@
  * - The approve link opens a confirmation page. Approving marks the row approved
  *   and sends the member their official welcome email from this Google account.
  * - The app can ask for a request's status (pending / approved / declined).
+ * - Members log in on any device with LinkedIn: the app sends the LinkedIn sign-in code here,
+ *   we look up their verified LinkedIn email, and return their profile if they're a member.
+ *   As a fallback they can log in with a 6-digit code sent to their email.
  *
  * Setup: see backend/README.md.
  */
@@ -56,6 +59,9 @@ function esc_(s) {
 function doPost(e) {
   let d;
   try { d = JSON.parse(e.postData.contents); } catch (err) { return json_({ ok: false, error: 'Bad request' }); }
+  if (d.action === 'login-code') return sendLoginCode_(d.email);
+  if (d.action === 'login') return login_(d.email, d.code);
+  if (d.action === 'linkedin-login') return linkedinLogin_(d.code, d.redirectUri);
   const need = ['first', 'last', 'email', 'headline', 'school', 'classYear'];
   const missing = need.filter(k => !String(d[k] || '').trim());
   if (missing.length) return json_({ ok: false, error: 'Missing: ' + missing.join(', ') });
@@ -106,6 +112,91 @@ function sendAdminEmail_(r) {
   });
 }
 
+/* ---------- log in with an emailed code ---------- */
+const CODE_TTL_SECONDS = 600;
+const MAX_CODE_TRIES = 5;
+
+/* The member's most recent request, matched by email. */
+function findByEmail_(email) {
+  const want = String(email || '').trim().toLowerCase();
+  if (!want) return null;
+  const values = sheet_().getDataRange().getValues();
+  const col = COLUMNS.indexOf('email');
+  for (let i = values.length - 1; i >= 1; i--) {
+    if (String(values[i][col]).trim().toLowerCase() === want) {
+      const rec = {};
+      COLUMNS.forEach((c, j) => rec[c] = values[i][j]);
+      return rec;
+    }
+  }
+  return null;
+}
+
+function sendLoginCode_(email) {
+  const r = findByEmail_(email);
+  if (!r || r.status === 'declined') return json_({ ok: false, error: 'not-member' });
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const key = 'login:' + r.email.toLowerCase();
+  CacheService.getScriptCache().put(key, JSON.stringify({ code, tries: 0 }), CODE_TTL_SECONDS);
+  MailApp.sendEmail({
+    to: r.email, subject: `${code} is your ${NETWORK_NAME} login code`, name: NETWORK_NAME,
+    htmlBody: `<div style="font-family:Arial,sans-serif;font-size:15px;color:#161A26;max-width:480px">
+      <p>Hi ${esc_(r.first)},</p><p>Your login code is:</p>
+      <p style="font-size:28px;font-weight:bold;letter-spacing:4px;margin:8px 0 16px">${code}</p>
+      <p style="color:#5C6272">It expires in 10 minutes. If you didn't try to log in, you can ignore this email.</p></div>`,
+  });
+  return json_({ ok: true });
+}
+
+function login_(email, code) {
+  const r = findByEmail_(email);
+  if (!r) return json_({ ok: false, error: 'not-member' });
+  const cache = CacheService.getScriptCache(), key = 'login:' + r.email.toLowerCase();
+  const saved = JSON.parse(cache.get(key) || 'null');
+  if (!saved) return json_({ ok: false, error: 'expired' });
+  if (saved.code !== String(code || '').trim()) {
+    saved.tries++;
+    if (saved.tries >= MAX_CODE_TRIES) cache.remove(key); else cache.put(key, JSON.stringify(saved), CODE_TTL_SECONDS);
+    return json_({ ok: false, error: saved.tries >= MAX_CODE_TRIES ? 'expired' : 'wrong-code' });
+  }
+  cache.remove(key);
+  return json_({ ok: true, profile: profile_(r) });
+}
+
+/* What the app gets back after a successful login. Never includes the review token. */
+function profile_(r) {
+  const profile = {};
+  ['id', 'status', 'first', 'last', 'email', 'headline', 'school', 'classYear', 'location', 'industry', 'phone', 'linkedin', 'about']
+    .forEach(k => profile[k] = r[k]);
+  try { profile.career = JSON.parse(r.career || '[]'); } catch (err) { profile.career = []; }
+  return profile;
+}
+
+/* ---------- log in with LinkedIn (OpenID Connect) ----------
+ * Needs the script properties LINKEDIN_CLIENT_ID and LINKEDIN_CLIENT_SECRET (see README).
+ * LinkedIn only accepts redirectUri if it's one of the app's registered redirect URLs. */
+function linkedinLogin_(code, redirectUri) {
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty('LINKEDIN_CLIENT_ID'), secret = props.getProperty('LINKEDIN_CLIENT_SECRET');
+  if (!id || !secret) return json_({ ok: false, error: 'not-configured' });
+  const tok = UrlFetchApp.fetch('https://www.linkedin.com/oauth/v2/accessToken', {
+    method: 'post', muteHttpExceptions: true,
+    payload: { grant_type: 'authorization_code', code: String(code || ''), redirect_uri: String(redirectUri || ''), client_id: id, client_secret: secret },
+  });
+  if (tok.getResponseCode() !== 200) return json_({ ok: false, error: 'linkedin-failed' });
+  const info = UrlFetchApp.fetch('https://api.linkedin.com/v2/userinfo', {
+    headers: { Authorization: 'Bearer ' + JSON.parse(tok.getContentText()).access_token }, muteHttpExceptions: true,
+  });
+  if (info.getResponseCode() !== 200) return json_({ ok: false, error: 'linkedin-failed' });
+  const u = JSON.parse(info.getContentText());
+  if (!u.email || u.email_verified === false) return json_({ ok: false, error: 'no-email' });
+  const r = findByEmail_(u.email);
+  if (!r || r.status === 'declined') return json_({ ok: false, error: 'not-member', email: u.email });
+  const profile = profile_(r);
+  profile.photo = u.picture || '';
+  return json_({ ok: true, profile });
+}
+
 /* ---------- admin review page + status ---------- */
 function doGet(e) {
   const p = e.parameter || {};
@@ -153,6 +244,7 @@ function sendWelcomeEmail_(r) {
         <li>Connect with members and ask for warm intros</li>
         <li>Keep your profile current, so others can find you</li>
       </ul>
+      <p>To log in on any device, choose <b>Log in</b> in the app and enter ${esc_(r.email)}. We'll email you a code.</p>
       <p>Welcome aboard,<br>The ${NETWORK_NAME} team</p>
     </div>`;
   MailApp.sendEmail({
