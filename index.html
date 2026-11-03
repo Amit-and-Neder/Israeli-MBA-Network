@@ -1538,7 +1538,7 @@ function verifyBadges(p){
 /* The real "Sign in with LinkedIn" (OpenID Connect) only returns name, email and photo, and needs a backend.
    This prototype simulates the sign-in and reads everything else from the member's own LinkedIn profile PDF. */
 /* Sign-up backend: the Google Apps Script web app URL (see backend/README.md). Empty = demo mode, nothing is sent. */
-const BACKEND_URL='';
+const BACKEND_URL='https://script.google.com/macros/s/AKfycbwwRILZLmGF77kaMp61jlNGAdDStwuD0Mai5XagkUGsbE3tHNpw2ZbKNZ2D6OANfp0/exec';
 const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 let pdfjsReady=null;
 function loadPdfJs(){
