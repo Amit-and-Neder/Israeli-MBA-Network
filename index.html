@@ -290,6 +290,10 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .ftype{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid var(--line);background:var(--surface-2);font-size:13.5px;font-weight:600;color:var(--muted)}
 .ftype .dot{width:8px;height:8px;border-radius:50%;background:var(--tc)}
 .ftype.on{background:var(--tc-soft);border-color:var(--tc);color:var(--tc)}
+.compose-photo{position:relative;margin:12px 0 0 52px;display:inline-block}
+.compose-photo img{display:block;max-width:100%;max-height:220px;border-radius:var(--r-md);border:1px solid var(--line)}
+.compose-photo .ibtn{position:absolute;top:6px;right:6px;background:var(--surface);border-radius:50%;box-shadow:var(--shadow)}
+.post-img{display:block;width:100%;max-height:440px;object-fit:cover;border-radius:var(--r-md);border:1px solid var(--line);margin-top:12px}
 .compose .err{color:#C2362F;font-size:12.5px;font-weight:600;margin:8px 0 0}
 .feed-filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
 .post{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px}
@@ -1269,6 +1273,7 @@ const FEED_TYPES=[['job','Looking for a job','Open to work? Say what role, indus
   ['event','Event','What’s happening, when and where?']];
 const FEED_LABEL=Object.fromEntries(FEED_TYPES.map(([k,l])=>[k,l]));
 const FEED_MAX=280, FEED_KEY='imn-feed-v1', HOUR=3600e3;
+const FEED_PHOTO_TYPES=['hiring','event'], FEED_PHOTO_PX=1080;
 /* Sample posts from the sample members: [author id, type, hours ago, text] */
 const FEED_SAMPLE=[
   [5,'hiring',3,'Our Payments Strategy team at Stripe is hiring a Strategy & Ops lead in SF. Happy to refer Israeli MBAs and grab a coffee to tell you about the team.'],
@@ -1290,9 +1295,19 @@ function loadFeed(){
   return {posts:[...saved.mine,...sample].sort((a,b)=>b.ts-a.ts), interested:new Set(saved.interested)};
 }
 function saveFeed(){
-  try{ localStorage.setItem(FEED_KEY,JSON.stringify({mine:S.feed.posts.filter(p=>p.author===ME),interested:[...S.feed.interested]})); }catch(_){ }
+  try{ localStorage.setItem(FEED_KEY,JSON.stringify({mine:S.feed.posts.filter(p=>p.author===ME),interested:[...S.feed.interested]})); return true; }catch(_){ return false; }
 }
-S.feed=loadFeed(); S.feedFilter='all'; S.feedDraft={type:null,text:''};
+/* Shrink a post photo so its longer side is at most FEED_PHOTO_PX, keeping its shape. */
+function readFeedPhoto(file){
+  if(!file||!file.type.startsWith('image/')){ toast('Choose an image file (JPG or PNG)'); return; }
+  const fr=new FileReader(); fr.onload=()=>{ const img=new Image(); img.onload=()=>{
+    const k=Math.min(1,FEED_PHOTO_PX/Math.max(img.width,img.height)), c=document.createElement('canvas');
+    c.width=Math.round(img.width*k); c.height=Math.round(img.height*k);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    S.feedDraft.text=val('feed-text'); S.feedDraft.photo=c.toDataURL('image/jpeg',.82); render();
+  }; img.src=fr.result; }; fr.readAsDataURL(file);
+}
+S.feed=loadFeed(); S.feedFilter='all'; S.feedDraft={type:null,text:'',photo:null};
 function ago(ts){
   const m=Math.max(0,Math.round((Date.now()-ts)/60000));
   if(m<1) return 'Just now'; if(m<60) return m+'m ago';
@@ -1307,7 +1322,9 @@ function viewFeed(){
   const hint=D.type?FEED_TYPES.find(t=>t[0]===D.type)[2]:'Pick a type, then share a short update with the network.';
   const compose=`<div class="compose">
     <div class="compose-top">${av(me(),40)}<textarea id="feed-text" maxlength="${FEED_MAX}" placeholder="${esc(hint)}" aria-label="Your status">${esc(D.text)}</textarea></div>
+    ${D.photo?`<div class="compose-photo"><img src="${D.photo}" alt="Photo for your post"><button class="ibtn" data-act="feed-photo-rm" aria-label="Remove photo">${I.x}</button></div>`:''}
     <div class="compose-foot">${FEED_TYPES.map(([k,l])=>`<button class="ftype t-${k} ${D.type===k?'on':''}" data-act="feed-type" data-type="${k}" aria-pressed="${D.type===k}"><span class="dot"></span>${l}</button>`).join('')}
+      ${FEED_PHOTO_TYPES.includes(D.type)&&!D.photo?`<span class="btn sm ghost pill upload">${I.camera}Add photo<input type="file" id="feed-photo" accept="image/*" aria-label="Add a photo"></span>`:''}
       <span class="sp"></span><span class="muted" style="font-size:12.5px">Up to ${FEED_MAX} characters</span>
       <button class="btn primary pill" data-act="feed-post">Post</button></div>
     <p class="err" id="feed-err" hidden></p></div>`;
@@ -1320,7 +1337,7 @@ function viewFeed(){
     return `<article class="post t-${p.type}">
       <div class="post-h">${av(a,44)}<button class="who" data-act="${mine?'nav':'profile'}" ${mine?'data-view="me"':`data-id="${a.id}"`}><b>${esc(a.name)}</b>${mine?' <span class="muted" style="font-size:13px">(you)</span>':''}<small>${esc(a.role)}${a.curCompany?' · '+esc(a.curCompany):''}</small></button>
         <span class="ptag"><span class="dot" style="width:7px;height:7px;border-radius:50%;background:currentColor"></span>${FEED_LABEL[p.type]}</span></div>
-      <p class="post-b">${esc(p.text)}</p>
+      <p class="post-b">${esc(p.text)}</p>${p.photo?`<img class="post-img" src="${p.photo}" alt="Photo shared by ${esc(a.first)}" loading="lazy">`:''}
       <div class="post-f">${acts}<span class="when">${ago(p.ts)}</span></div></article>`; };
   return `<main><div class="wrap page feed">
     <h1 class="page-h1">Feed</h1><p class="muted" style="margin:0;font-size:15px">Who’s looking, who’s hiring, and what’s happening in the network.</p>
@@ -1332,9 +1349,12 @@ function feedPost(){
   const D=S.feedDraft, err=document.getElementById('feed-err'); D.text=val('feed-text').trim();
   const msg=!D.type?'Choose Looking for a job, Hiring or Event.':!D.text?'Write your status first.':'';
   if(msg){ err.textContent=msg; err.hidden=false; return; }
-  S.feed.posts.unshift({id:'m'+Date.now(),author:ME,type:D.type,text:D.text.slice(0,FEED_MAX),ts:Date.now()});
-  S.feedDraft={type:null,text:''}; if(S.feedFilter!=='all'&&S.feedFilter!==D.type) S.feedFilter='all';
-  saveFeed(); render(); toast('Posted to the feed');
+  const post={id:'m'+Date.now(),author:ME,type:D.type,text:D.text.slice(0,FEED_MAX),ts:Date.now()};
+  if(D.photo&&FEED_PHOTO_TYPES.includes(D.type)) post.photo=D.photo;
+  S.feed.posts.unshift(post);
+  if(!saveFeed()&&post.photo){ S.feed.posts.shift(); err.textContent='This browser is out of room for more photos. Delete an older photo post, or post without the photo.'; err.hidden=false; return; }
+  S.feedDraft={type:null,text:'',photo:null}; if(S.feedFilter!=='all'&&S.feedFilter!==D.type) S.feedFilter='all';
+  render(); toast('Posted to the feed');
 }
 
 /* ---------- render ---------- */
@@ -1821,8 +1841,9 @@ document.addEventListener('click',e=>{
     case 'decline': S.incoming.delete(id); render(); toast('Request ignored'); break;
     case 'withdraw': S.pending.delete(id); render(); toast('Request withdrawn'); break;
     case 'feed-filter': S.feedFilter=t.dataset.filter; render(); break;
-    case 'feed-type': S.feedDraft.text=val('feed-text'); S.feedDraft.type=S.feedDraft.type===t.dataset.type?null:t.dataset.type; render(); document.getElementById('feed-text').focus(); break;
+    case 'feed-type': { const D=S.feedDraft; D.text=val('feed-text'); D.type=D.type===t.dataset.type?null:t.dataset.type; if(!FEED_PHOTO_TYPES.includes(D.type)) D.photo=null; render(); } document.getElementById('feed-text').focus(); break;
     case 'feed-post': feedPost(); break;
+    case 'feed-photo-rm': S.feedDraft.text=val('feed-text'); S.feedDraft.photo=null; render(); break;
     case 'feed-del': S.feed.posts=S.feed.posts.filter(p=>p.id!==t.dataset.post); saveFeed(); render(); toast('Post deleted'); break;
     case 'feed-interest': { const k=t.dataset.post, F=S.feed; F.interested.has(k)?F.interested.delete(k):F.interested.add(k); saveFeed(); render(); break; }
     case 'email': openContact(id,'email'); break;
@@ -1883,6 +1904,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('input',e=>{ if(e.target.id==='conn-q'){ S.connQ=e.target.value; const l=document.getElementById('conn-list'); l.innerHTML=connRows(+l.dataset.id,l.dataset.mode); return; } const c=e.target.dataset.count; if(c){ const max=e.target.maxLength; document.getElementById(c).textContent=`${e.target.value.length}/${max.toLocaleString()}`; } });
 document.addEventListener('change',e=>{
   if(e.target.id==='photo-file'){ readPhoto(e.target.files[0]); return; }
+  if(e.target.id==='feed-photo'){ readFeedPhoto(e.target.files[0]); return; }
   if(e.target.id==='li-pdf'){ if(e.target.files[0]) joinPdf(); return; }
   if(e.target.id==='e-current'){ const end=document.getElementById('e-end'); end.disabled=e.target.checked; if(e.target.checked){ end.insertAdjacentHTML('afterbegin','<option>Present</option>'); end.value='Present'; } else { [...end.options].filter(o=>o.text==='Present').forEach(o=>o.remove()); end.value=String(NOW_YEAR); } return; }
   if(e.target.dataset.draft!==undefined){ const v=e.target.dataset.draft; S.draft = e.target.checked ? [...S.draft,v] : S.draft.filter(x=>x!==v); return; }
