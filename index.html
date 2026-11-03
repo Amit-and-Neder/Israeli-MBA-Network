@@ -147,6 +147,7 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .signal.warm{color:var(--warm);background:var(--warm-soft)}
 .pcard-actions{display:flex;gap:8px;margin-top:auto}
 .pcard-actions .btn{flex:1}
+.sec-group{font-family:var(--f-display);font-weight:750;font-size:22px;letter-spacing:-.02em;margin:34px 0 -4px;padding-top:22px;border-top:1px solid var(--line)}
 .empty-rail{padding:22px;border:1px dashed var(--line);border-radius:var(--r-lg);color:var(--muted);font-size:14px;text-align:center;width:100%}
 
 /* results */
@@ -693,12 +694,21 @@ const RAW = [
  [24,'Neta Carmel','MBA Candidate','MIT Sloan','Boston','Consulting','Consulting','Student',[['MIT Sloan','MBA',2027]],[['2022–2025','McKinsey & Company','Business Analyst']],'whatsapp','long'],
  [25,'Ofir Segal','Product Manager','Apple','SF Bay Area','Technology','Product','Alum',[['MIT Sloan','MBA',2024]],[['2024–Present','Apple','Product Manager'],['2017–2022','Mobileye','Software Engineer']],'whatsapp','short'],
  [26,'Liat Hadad','Chief of Staff to the CEO','Lemonade','New York','Fintech','Strategy & Ops','Alum',[['Harvard Business School','MBA',2023]],[['2023–Present','Lemonade','Chief of Staff to the CEO'],['2018–2021','Bain & Company','Associate Consultant']],'email','side'],
+ [27,'Yoav Shamir','Associate, Technology M&A','Goldman Sachs','New York','Finance','Finance','Alum',[['Wharton','MBA',2024]],[['2024–Present','Goldman Sachs','Associate, Technology M&A'],['2018–2022','Bank Leumi','Investment Analyst']],'email','short'],
+ [28,'Adi Levin','Vice President, Healthcare Banking','Morgan Stanley','New York','Finance','Finance','Alum',[['Columbia Business School','MBA',2021]],[['2021–Present','Morgan Stanley','Vice President, Healthcare Banking'],['2015–2019','Teva Pharmaceuticals','Financial Analyst']],'whatsapp','long'],
+ [29,'Matan Gross','MBA Candidate','Harvard Business School','Boston','Finance','Finance','Student',[['Harvard Business School','MBA',2027]],[['2026','Lazard','Summer Associate'],['2020–2025','Israel Ministry of Finance','Economist']],'whatsapp','buzz'],
+ [30,'Noga Ben-Haim','Vice President','Pitango','SF Bay Area','Venture Capital','Investor','Alum',[['Stanford GSB','MBA',2022]],[['2022–Present','Pitango','Vice President'],['2017–2020','Check Point','Product Manager']],'whatsapp','long'],
+ [31,'Guy Halperin','Investor','General Catalyst','Boston','Venture Capital','Investor','Alum',[['Harvard Business School','MBA',2023]],[['2023–Present','General Catalyst','Investor'],['2018–2021','Bain & Company','Consultant']],'email','side'],
+ [32,'Yuval Tal','Co-founder','Stealth Startup','SF Bay Area','Technology','Founder','Alum',[['Stanford GSB','MBA',2025]],[['2025–Present','Stealth Startup','Co-founder · AI agents for finance teams'],['2019–2023','Meta','Product Manager']],'whatsapp','curly'],
+ [33,'Inbar Doron','Founder','Stealth Startup','Boston','Healthcare','Founder','Alum',[['MIT Sloan','MBA',2025]],[['2025–Present','Stealth Startup','Founder · Digital health'],['2018–2023','Teva Pharmaceuticals','Product Manager']],'whatsapp','bun'],
+ [34,'Erez Navon','Co-founder & CTO','Stealth Startup','New York','Fintech','Founder','Alum',[['Columbia Business School','MBA',2024]],[['2024–Present','Stealth Startup','Co-founder & CTO · Fintech infrastructure'],['2016–2022','Check Point','Engineering Team Lead']],'email','short'],
+ [35,'Maayan Rubin','MBA Candidate','MIT Sloan','Boston','Climate Tech','Founder','Student',[['MIT Sloan','MBA',2027]],[['2026–Present','Stealth Startup','Founder · Grid storage software'],['2020–2025','SolarEdge','Product Manager']],'whatsapp','long'],
 ];
 const EDGES = [[0,17],[0,24],[0,7],[0,1],[0,12],[0,4],
  [1,16],[1,8],[1,2],[1,25],[1,17],[1,24],[1,22],[2,23],[2,14],[2,12],[2,26],[3,22],[3,15],[3,10],[3,8],
  [4,14],[4,21],[4,7],[4,23],[4,17],[4,24],[5,11],[5,26],[5,13],[5,20],[6,11],[6,21],[6,20],[6,16],
  [7,23],[7,24],[7,17],[7,12],[8,15],[8,10],[8,25],[9,25],[9,19],[9,18],[10,15],[10,22],[11,20],[11,12],[11,26],
- [12,26],[12,17],[13,19],[13,21],[14,21],[14,15],[16,22],[16,19],[16,17],[17,24],[17,25],[18,19],[20,26],[23,24]];
+ [12,26],[12,17],[27,20],[27,11],[28,20],[28,2],[29,2],[29,14],[30,9],[30,21],[31,14],[31,6],[32,9],[32,25],[33,7],[33,4],[33,15],[34,11],[34,16],[35,24],[35,4],[35,17],[13,19],[13,21],[14,21],[14,15],[16,22],[16,19],[16,17],[17,24],[17,25],[18,19],[20,26],[23,24]];
 const ME = 0;
 const JOIN_REQS = [
   {id:101,name:'Tal Ben-David',first:'Tal',last:'Ben-David',hair:'long',role:'Incoming PM',company:'Ramp',schools:[{school:'MIT Sloan',program:'MBA',year:2026}],li:{edu:'MIT Sloan · MBA, 2024–2026',id:false,israeli:'IDF · Intelligence Corps, Wix (Tel Aviv)'},knows:17,answer:'Grew up in Haifa. PM at Wix for 4 years before Sloan, now moving to NYC for a fintech role.',url:'linkedin.com/in/tal-bendavid',asked:'2 hours ago'},
@@ -983,8 +993,30 @@ function railData(key){
     }).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>({p:x.p}));
     return {title:'People you might know',sub:'Based on mutual connections, your school and past companies',items};
   }
+  const sec=SECTORS.find(x=>x[0]===key);
+  if(sec) return {title:sec[1],sub:sec[2],items:sectorItems(sec[3])};
   if(key==='viewed') return {title:'Recently viewed',sub:'Profiles you opened lately',items:S.viewed.map(id=>({p:byId(id)}))};
   if(key==='industry') return {title:`People in ${me().industry}`,sub:'Israeli MBAs working in your industry',items:P.filter(p=>p.id!==ME && p.industry===me().industry).sort((a,b)=>mutuals(b.id).length-mutuals(a.id).length).map(p=>({p,sig:{txt:`${p.industry} · ${p.roleCat}`,ico:'layers'}}))};
+}
+/* Industry sections on Discover. Alumni count by their current company; students by their most recent job. */
+const SECTORS = [
+  ['consulting','Consulting','Israeli MBAs at McKinsey, BCG, Bain and other strategy firms',['McKinsey & Company','BCG','Bain & Company']],
+  ['ib','Investment Banking','Bankers at Goldman Sachs, J.P. Morgan, Morgan Stanley and more',['Goldman Sachs','J.P. Morgan','Morgan Stanley','Lazard','Evercore']],
+  ['bigtech','Big Tech','Israelis at Google, Apple, Microsoft, Amazon and Meta',['Google','Apple','Microsoft','Amazon','Meta','NVIDIA']],
+  ['startups','Startups','At high-growth startups, or founding their own',['WHOOP','Ramp','Stripe','Lemonade','Oscar Health','Form Energy','Flatiron Health','Verdant Grid','Ledgerline','CarbonLoop','Monday.com','Fiverr','Wix','Waze']],
+  ['vc','Venture Capital','Investors at Israeli and US venture funds',['Insight Partners','Flare Capital Partners','Pitango','General Catalyst']],
+  ['stealth','Builders (Stealth)','Building something new that isn’t public yet. Reach out to trade notes or join early',['Stealth Startup']],
+];
+function sectorItems(companies){
+  return P.filter(p=>p.id!==ME).map(p=>{
+    const job = p.curCompany ? {company:p.curCompany} : p.career[0];
+    if(!job||!companies.includes(job.company)) return null;
+    const sc=p.schools[0], tag=`${SCHOOLS[sc.school].tag} ${yy(sc.year)}`;
+    if(job.company==='Stealth Startup') return {p,sig:{txt:(p.career[0].role.split(' · ')[1]||'Building in stealth')+(p.curCompany?'':' · '+tag),ico:'spark'}};
+    if(p.curCompany) return {p,sig:{txt:`${tag} alum`,ico:'cap'}};
+    const current = /Present/.test(job.years) || +job.years.slice(-4)>=NOW_YEAR;
+    return {p,sig:{txt:`${tag} · ${current?'':'ex-'}${job.role} · ${job.company}`,ico:'building'}};
+  }).filter(Boolean).sort((a,b)=>(!!b.p.curCompany-!!a.p.curCompany)||mutuals(b.p.id).length-mutuals(a.p.id).length);
 }
 function rail(key){
   const d = railData(key);
@@ -1025,7 +1057,10 @@ function viewHome(){
       ${S.browse?browsePanel(S.browse):''}
       <div class="try"><span>Try:</span>${EXAMPLES.map(e=>`<button data-act="search" data-q="${esc(e)}">${esc(e)}</button>`).join('')}</div>
     </section>
-    ${rail('interacted')}${rail('school')}${rail('pymk')}${rail('viewed')}${rail('industry')}
+    ${rail('interacted')}${rail('school')}
+    <h2 class="sec-group">Explore by industry</h2>
+    ${SECTORS.map(x=>rail(x[0])).join('')}
+    ${rail('pymk')}${rail('viewed')}${rail('industry')}
     <p class="demo-note">Prototype with fictional members. Email and WhatsApp hand-offs are simulated. <button class="link" style="font-size:12px" data-act="join-start" data-mode="join">Preview the sign-up flow</button></p>
   </div></main>`;
 }
