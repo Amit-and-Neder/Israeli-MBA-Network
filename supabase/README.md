@@ -30,11 +30,11 @@ The database enforces all of this itself. The page can't override it, and nobody
 ## One-time setup (about an hour)
 
 ### 1. Create the project
-1. Go to [supabase.com](https://supabase.com), sign up, and create a project. Pick the US East region. Save the database password somewhere safe.
+1. Go to [supabase.com](https://supabase.com), sign up, and create a project. Pick the US East region. Under Security, turn **off** "Automatically expose new tables" (the migration grants access explicitly). *(Done: organization "Israeli MBA Network", project `israeli-mba-network`, US East.)*
 2. Under **Organization → Team**, invite your partner.
 
 ### 2. Create the database
-**SQL Editor → New query**, paste all of `migrations/20261116000000_init.sql`, then click **Run**. It should finish with "Success. No rows returned".
+**SQL Editor → New query**, paste all of `migrations/20261116000000_init.sql`, then click **Run**. Supabase warns that the query is "destructive" (it contains revoke/delete statements); on a new project that's expected. It should finish with "Success. No rows returned". *(Done on Nov 16, 2026.)*
 
 ### 3. Set up email sending (required)
 Supabase's built-in email only delivers to your own Supabase team, so real members would never get their codes.
@@ -64,7 +64,7 @@ Then, under **Edge Functions → Secrets**, add:
 | `APP_URL` | the site's address, e.g. `https://neder-nesel.github.io/israeli-mba-network/` |
 
 ### 6. Connect the app and add admins
-1. **Project Settings → API**: copy the **Project URL** and the **anon public** key into the top of the backend section in `index.html` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`). Both are public by design. **Never** put the `service_role` key in the page or in GitHub.
+1. Copy the **Project URL** (project home page) and the **Publishable key** (**Settings → API Keys**) into the top of the backend section in `index.html` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`). Both are public by design. **Never** put a secret key (or the legacy `service_role` key) in the page or in GitHub. *(Already done for project `ipslqfrtebxtugcoechb`.)*
 2. **Authentication → URL Configuration**: set **Site URL** to the site's address, and add it under **Redirect URLs**. Add `http://localhost:8000` too, for testing.
 3. Sign up through the app yourself. Then, in **Table Editor → admins**, add a row with your user id (find it under **Authentication → Users**). In **Table Editor → members**, set your own `status` to `approved`. After that, approve everyone else from the app.
 

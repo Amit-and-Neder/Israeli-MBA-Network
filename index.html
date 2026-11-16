@@ -1734,8 +1734,8 @@ function readPhoto(file){
    so changing backends means rewriting only this block. Setup: supabase/README.md.
    Both values are public by design: the database's privacy rules decide what each logged-in member can read.
    Leave them empty to run in demo mode (nothing is sent anywhere). */
-const SUPABASE_URL='';          // e.g. 'https://abcdefgh.supabase.co'
-const SUPABASE_ANON_KEY='';     // Project Settings → API → "anon public" key. Never the service_role key.
+const SUPABASE_URL='https://ipslqfrtebxtugcoechb.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable__Ka4KLe6RCbwMb-4kOlTqA_trhLGtK8';  // Settings → API Keys → Publishable key. Never a secret key.
 const LINKEDIN_LOGIN=false;     // true once LinkedIn is turned on under Authentication → Providers
 const LIVE=!!(SUPABASE_URL&&SUPABASE_ANON_KEY);
 const SUPABASE_JS='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js';

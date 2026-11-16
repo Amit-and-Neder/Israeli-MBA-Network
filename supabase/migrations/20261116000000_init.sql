@@ -184,9 +184,14 @@ create policy "see own intros" on public.intro_requests for select to authentica
 
 create policy "see own admin row" on public.admins for select to authenticated using (user_id = auth.uid());
 
+-- Table access, set explicitly so it doesn't depend on the project's "automatically expose new tables" setting.
 -- Logged-out visitors get nothing, not even the table shapes through the API.
-revoke all on all tables in schema public from anon;
-revoke insert, update, delete, truncate on all tables in schema public from authenticated;
+-- Logged-in users may only read, and the policies above decide which rows.
+-- service_role is the email function's server-side key (never in the page).
+revoke all on all tables in schema public from anon, authenticated;
+grant select on all tables in schema public to authenticated;
+grant all on all tables in schema public to service_role;
+grant usage, select on all sequences in schema public to service_role;
 
 -- ---------------------------------------------------------------- write functions (phase 1)
 

@@ -14,7 +14,8 @@ create function auth.jwt() returns jsonb language sql stable as
 grant usage on schema auth to anon, authenticated, service_role;
 grant execute on all functions in schema auth to anon, authenticated, service_role;
 grant usage on schema public to anon, authenticated, service_role;
--- Supabase grants these by default on new tables and functions
+-- Supabase grants these by default on new tables and functions. (Projects with "automatically expose
+-- new tables" turned off skip the table grants; the migration sets table access explicitly either way.)
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
 alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
