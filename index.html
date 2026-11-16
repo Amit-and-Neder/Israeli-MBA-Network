@@ -1130,7 +1130,7 @@ function viewHome(){
       <div class="try"><span>Try:</span>${EXAMPLES.map(e=>`<button data-act="search" data-q="${esc(e)}">${esc(e)}</button>`).join('')}</div>
     </section>
     ${rail('interacted')}${rail('school')}${rail('pymk')}${rail('viewed')}${rail('industry')}
-    <p class="demo-note">Prototype with fictional members. Email and WhatsApp hand-offs are simulated. <button class="link" style="font-size:12px" data-act="reset-me">Start over as a new user</button></p>
+    <p class="demo-note">Prototype with fictional members. Email and WhatsApp hand-offs are simulated. <button class="link" style="font-size:12px" data-act="reset-me">${LIVE?'Log out':'Start over as a new user'}</button></p>
   </div></main>`;
 }
 function browsePanel(tab){
@@ -1356,27 +1356,29 @@ function viewProfile(id){
           ${cg.length?`<div class="common">${cg.map(([ic,t])=>`<div><span class="ico">${ic}</span>${esc(t)}</div>`).join('')}</div>`:`<p class="muted" style="margin:0">Different paths, same community. Worth a hello.</p>`}</section>`}
       </div>
     </div>
-    ${isMe?`<p class="demo-note">Edits are saved in this browser only. <button class="link" style="font-size:12px" data-act="reset-me">Start over as a new user</button></p>`:''}
+    ${isMe?`<p class="demo-note">Edits are saved in this browser only. <button class="link" style="font-size:12px" data-act="reset-me">${LIVE?'Log out':'Start over as a new user'}</button></p>`:''}
   </div></main>`;
 }
 function viewNetwork(){
   const conns = [...adj.get(ME)].map(byId);
-  const tabs = [['connections','Connections',conns.length],['requests','Intro requests',S.incoming.size],['joinreqs','Admin: join requests',S.joinReqs.length],['sent','Sent intros',S.pending.size]];
+  const tabs = [['connections','Connections',conns.length],['requests','Intro requests',S.incoming.size],...(!LIVE||S.isAdmin?[['joinreqs','Admin: join requests',S.joinReqs.length]]:[]),['sent','Sent intros',S.pending.size]];
   let body='';
   if(S.netTab==='connections') body = connBox(ME,'all',true);
   if(S.netTab==='requests') body = S.incoming.size?`<div class="rlist">${[...S.incoming].map(id=>{const p=byId(id);return `<div class="req">${av(p,52)}<button class="who" data-act="profile" data-id="${id}"><b>${esc(p.name)}</b> ${badges(p)}<div class="muted" style="font-size:13.5px">${esc(p.role)} · ${esc(p.company)}</div></button>
       <button class="btn ghost sm" data-act="decline" data-id="${id}">Ignore</button><button class="btn primary sm" data-act="accept" data-id="${id}">${I.check}Accept</button>
       ${INCOMING_NOTES[id]?`<p class="note">“${esc(INCOMING_NOTES[id])}”</p>`:''}</div>`}).join('')}</div>`:`<div class="empty-rail">No pending requests. You’re all caught up.</div>`;
   if(S.netTab==='joinreqs'){
-    body = `<div class="notice" style="margin:-6px 0 14px">${I.shield}<span><b>Admins only.</b> Every new member is approved here by hand. Approve someone only if you’re confident they’re Israeli and studied where they say. Approving sends them their official welcome email. In the live app, each new request also arrives in the admin’s inbox with an Approve link.</span></div>`
+    body = `<div class="notice" style="margin:-6px 0 14px">${I.shield}<span><b>Admins only.</b> Every new member is approved here by hand. Approve someone only if you’re confident they’re Israeli and studied where they say. Approving sends them their official welcome email. ${LIVE?'Each new request also arrives in your inbox.':'In the live app, each new request also arrives in the admin’s inbox with an Approve link.'}</span></div>`
       + (S.joinReqs.length?`<div class="rlist">${S.joinReqs.map(r=>{ const k=r.knows!=null?byId(r.knows):null; return `<div class="jr">
         <div class="jr-top">${av(r,52)}<span class="who"><b>${esc(r.name)}</b> ${badges(r,'md')}<div class="muted" style="font-size:13.5px">${esc(r.role)} · ${esc(r.company)} · asked ${esc(r.asked)}</div></span></div>
-        <div class="ev"><span class="evc ${r.li.edu?'ok':'no'}">${r.li.edu?I.check:I.x}${r.li.edu?'LinkedIn: '+esc(r.li.edu):'School not listed on LinkedIn'}</span>
+        ${r.live?`<div class="ev"><span class="evc ok">${I.cap}${esc(SCHOOLS[r.schools[0].school].tag)} ${yy(r.schools[0].year)} (self-reported)</span><span class="evc ok">${I.mail||''}${esc(r.email)} (confirmed)</span>${r.phone?`<span class="evc ok">${esc(r.phone)}</span>`:''}<span class="evc ${r.url?'ok':'no'}">${r.url?I.link+'LinkedIn URL added':I.x+'No LinkedIn URL'}</span></div>`
+          +(r.career.length?`<div class="qa"><span>Career</span>${r.career.map(c=>esc(`${c.role} · ${c.company}${c.start?` (${c.start}–${c.end||'Present'})`:''}`)).join('<br>')}</div>`:'')
+        :`<div class="ev"><span class="evc ${r.li.edu?'ok':'no'}">${r.li.edu?I.check:I.x}${r.li.edu?'LinkedIn: '+esc(r.li.edu):'School not listed on LinkedIn'}</span>
           <span class="evc ${r.li.id?'ok':'no'}">${r.li.id?I.check:I.x}${r.li.id?'ID verified on LinkedIn':'ID not verified'}</span>
           <span class="evc ok">${I.check}Israeli background: ${esc(r.li.israeli)}</span>
-          ${k?`<span class="evc ok">${I.users}Says ${esc(k.first)} can confirm${adj.get(ME).has(k.id)?' (your connection)':''}</span>`:''}</div>
+          ${k?`<span class="evc ok">${I.users}Says ${esc(k.first)} can confirm${adj.get(ME).has(k.id)?' (your connection)':''}</span>`:''}</div>`}
         <div class="qa"><span>Where in Israel are you from, and what did you do before your MBA?</span>${esc(r.answer)}</div>
-        <div class="jr-acts"><button class="btn sm primary pill" data-act="jr-approve" data-id="${r.id}">${I.check}Approve</button><button class="btn sm danger" data-act="jr-decline" data-id="${r.id}">Decline</button><span class="sp" style="flex:1"></span><span class="link" style="font-size:13px;font-weight:500">${esc(r.url)}</span></div>
+        <div class="jr-acts"><button class="btn sm primary pill" data-act="jr-approve" data-id="${r.id}">${I.check}Approve</button><button class="btn sm danger" data-act="jr-decline" data-id="${r.id}">Decline</button><span class="sp" style="flex:1"></span>${r.live&&r.url?`<a class="link" style="font-size:13px;font-weight:500" href="${esc(/^https?:/.test(r.url)?r.url:'https://'+r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>`:`<span class="link" style="font-size:13px;font-weight:500">${esc(r.url)}</span>`}</div>
       </div>`; }).join('')}</div>`:`<div class="empty-rail">No one is waiting. You’re all caught up.</div>`);
   }
   if(S.netTab==='sent') body = S.pending.size?`<div class="rlist">${[...S.pending].map(id=>{const p=byId(id);return `<div class="req">${av(p,52)}<button class="who" data-act="profile" data-id="${id}"><b>${esc(p.name)}</b> ${badges(p)}<div class="muted" style="font-size:13.5px">${esc(p.role)} · ${esc(p.company)}</div></button>
@@ -1727,11 +1729,51 @@ function readPhoto(file){
 /* The real "Sign in with LinkedIn" (OpenID Connect) only returns name, email and photo, and needs a backend.
    Sign-up simulates the sign-in and reads everything else from the member's own LinkedIn profile PDF.
    Log in uses the real thing: LinkedIn confirms the member's email and the backend matches it to an approved request. */
-/* Sign-up backend: the Google Apps Script web app URL (see backend/README.md). Empty = demo mode, nothing is sent. */
-const BACKEND_URL='https://script.google.com/macros/s/AKfycbwwRILZLmGF77kaMp61jlNGAdDStwuD0Mai5XagkUGsbE3tHNpw2ZbKNZ2D6OANfp0/exec';
-/* Client ID of the LinkedIn developer app (public; the secret lives only in the backend). Empty = LinkedIn login is off. */
-const LINKEDIN_CLIENT_ID='';
-const LI_STATE_KEY='imn-li-state';
+/* ---------- backend: Supabase ----------
+   Every call to the server goes through API below. Nothing else in this file talks to the backend,
+   so changing backends means rewriting only this block. Setup: supabase/README.md.
+   Both values are public by design: the database's privacy rules decide what each logged-in member can read.
+   Leave them empty to run in demo mode (nothing is sent anywhere). */
+const SUPABASE_URL='';          // e.g. 'https://abcdefgh.supabase.co'
+const SUPABASE_ANON_KEY='';     // Project Settings → API → "anon public" key. Never the service_role key.
+const LINKEDIN_LOGIN=false;     // true once LinkedIn is turned on under Authentication → Providers
+const LIVE=!!(SUPABASE_URL&&SUPABASE_ANON_KEY);
+const SUPABASE_JS='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js';
+let sbReady=null;
+function sb(){
+  if(!sbReady) sbReady=new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src=SUPABASE_JS;
+    sc.onload=()=>res(window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{flowType:'pkce',persistSession:true,detectSessionInUrl:true}}));
+    sc.onerror=()=>{ sbReady=null; rej(Object.assign(new Error('offline'),{code:'offline'})); }; document.head.appendChild(sc); });
+  return sbReady;
+}
+/* Turns Supabase errors into a few codes the screens know how to explain. */
+function apiErr(e){
+  const m=String(e&&e.message||''), s=e&&e.status;
+  const code = e&&e.code==='offline'?'offline'
+    : /signups not allowed|user not found/i.test(m)?'not-member'
+    : /expired|invalid|otp/i.test(m)&&s!==429?'wrong-code'
+    : s===429||/rate limit|security purposes/i.test(m)?'rate-limit'
+    : /already-approved|already-declined|not-admin|not-pending|missing-school|not-logged-in/.exec(m)?.[0] || 'failed';
+  return Object.assign(new Error(code),{code,detail:m});
+}
+async function rpc(fn,args){ const c=await sb(); const {data,error}=await c.rpc(fn,args); if(error) throw apiErr(error); return data; }
+/* Emails (admin alert, welcome) are sent by the "notify" Edge Function. Best effort: a failed email never blocks the screen. */
+async function notify(body){ try{ const c=await sb(); await c.functions.invoke('notify',{body}); }catch(_){ } }
+const API={
+  /* Email a one-time code. signup:true also creates the login if it doesn't exist yet. */
+  async sendCode(email,{signup=false}={}){ const c=await sb(); const {error}=await c.auth.signInWithOtp({email,options:{shouldCreateUser:signup}}); if(error) throw apiErr(error); },
+  async verifyCode(email,code){ const c=await sb(); const {error}=await c.auth.verifyOtp({email,token:code,type:'email'}); if(error) throw apiErr(error); },
+  /* Leaves the page; LinkedIn sends the member back here and sb() finishes the login on load. */
+  async linkedIn(){ const c=await sb(); const {error}=await c.auth.signInWithOAuth({provider:'linkedin_oidc',options:{redirectTo:location.origin+location.pathname}}); if(error) throw apiErr(error); },
+  async sessionEmail(){ const c=await sb(); const {data}=await c.auth.getSession(); return data.session?.user?.email||null; },
+  async signOut(){ const c=await sb(); await c.auth.signOut(); },
+  /* The logged-in member's own profile, or null if they haven't asked to join. */
+  myProfile:()=>rpc('my_profile'),
+  async submitJoin(payload){ const row=await rpc('submit_join_request',{p:payload}); notify({action:'join-request'}); return row; },
+  /* Admins only (the database refuses everyone else). */
+  pendingRequests:()=>rpc('admin_pending_requests'),
+  async decide(id,approve){ const row=await rpc('admin_decide',{member:id,approve}); if(approve) notify({action:'welcome',member:id}); return row; },
+};
 const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 let pdfjsReady=null;
 function loadPdfJs(){
@@ -1866,13 +1908,13 @@ function viewJoin(){
         ${L.err?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${L.err}</span></div>`:''}
         <div class="row"><button class="btn lg li pill" data-act="login-li">${I.link}Log in with LinkedIn</button><button class="link" data-act="join-go" data-step="welcome">Back</button></div>
         <p class="fine" style="font-size:14px;color:var(--muted)">LinkedIn uses a different email? <button class="link" data-act="login-email-mode">Get a code by email instead</button></p>`
-      :!L.sent?`<p class="lead">Enter the email you signed up with. We’ll email you a 6-digit code.</p>
+      :!L.sent?`<p class="lead">Enter the email you signed up with. We’ll email you a login code.</p>
         ${L.err?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${L.err}</span></div>`:''}
         <div class="jsec">${fld('l-email','Email',`<input type="email" id="l-email" value="${esc(L.email||'')}" placeholder="you@example.com" autocomplete="email">`)}</div>
         <div class="row"><button class="btn lg primary pill" data-act="login-send" ${L.busy?'disabled':''}>${L.busy?'Sending…':'Email me a code'}</button><button class="link" data-act="login-li-mode">Back</button></div>`
-      :`<p class="lead">We sent a code to <b>${esc(L.email)}</b>. It expires in 10 minutes.</p>
+      :`<p class="lead">We sent a code to <b>${esc(L.email)}</b>. Check your inbox and spam folder.</p>
         ${L.err?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${L.err}</span></div>`:''}
-        <div class="jsec">${fld('l-code','Code',`<input type="text" id="l-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">`)}</div>
+        <div class="jsec">${fld('l-code','Code',`<input type="text" id="l-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456">`)}</div>
         <div class="row"><button class="btn lg primary pill" data-act="login-verify" ${L.busy?'disabled':''}>${L.busy?'Checking…':'Log in'}</button><button class="link" data-act="login-restart">Use a different email</button></div>`}
     </div>`;
   }
@@ -1928,11 +1970,15 @@ function viewJoin(){
     const ev=`<div class="ev">${d.src.name==='pdf'?`<span class="evc ok">${I.check}Profile imported from LinkedIn PDF</span>`:`<span class="evc no">${I.x}Filled in by hand</span>`}${d.src.edu==='pdf'?`<span class="evc ok">${I.check}LinkedIn lists ${esc(sc.tag)} ${yy(e.year)}</span>`:J.manual?'':`<span class="evc no">${I.x}${esc(sc.tag)} not found on LinkedIn PDF</span>`}${J.liurl?`<span class="evc ok">${I.link}LinkedIn URL added</span>`:''}</div>`;
     let main='';
     if(J.reqSent){
-      main=`<div class="notice" style="background:var(--warm-soft);color:var(--warm)">${I.clock}<span><b>Request sent to the admins.</b> Most requests are reviewed within a day. We’ll email ${esc(d.email)} once you’re approved.${BACKEND_URL?'':' <i>(Demo mode: no email was actually sent.)</i>'}</span></div>
+      main=`<div class="notice" style="background:var(--warm-soft);color:var(--warm)">${I.clock}<span><b>Request sent to the admins.</b> Most requests are reviewed within a day. We’ll email ${esc(d.email)} once you’re approved.${LIVE?'':' <i>(Demo mode: no email was actually sent.)</i>'}</span></div>
         <ol class="track3"><li class="ok"><span class="st">${I.check}</span><span><b>Request submitted</b><small>Just now</small></span></li>
           <li class="now"><span class="st"></span><span><b>An admin reviews it</b><small>They confirm you’re Israeli and studied at ${esc(sc.tag)}</small></span></li>
           <li><span class="st"></span><span><b>You get your official welcome email</b><small>You’re an official member: your profile goes live and members can connect with you</small></span></li></ol>
         <div class="row"><button class="btn lg primary pill" data-act="join-finish" data-status="pending">Finish</button></div>`;
+    } else if(J.codeSent){
+      main=`${J.sendErr?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${esc(J.sendErr)}</span></div>`:''}<p class="lead" style="margin:0 0 14px">We sent a code to <b>${esc(d.email)}</b>. Enter it to confirm the email is yours, and we’ll send your request to the admins.</p>
+        <div class="jsec">${fld('j-code','Code from the email',`<input type="text" id="j-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456">`)}</div>
+        <div class="row"><button class="btn lg primary pill" data-act="join-code-verify" ${J.sending?'disabled':''}>${J.sending?'Checking…':'Confirm and send request'}</button><button class="link" data-act="join-code-resend">Send a new code</button><button class="link" data-act="join-code-back">Back</button></div>`;
     } else {
       main=`${J.sendErr?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${esc(J.sendErr)}</span></div>`:''}<p class="lead" style="margin:0 0 14px">An admin reviews your request by hand. This is what they’ll see:</p>
         <div class="invite" style="flex-direction:column;align-items:stretch;gap:10px"><span><b>${esc(d.first+' '+d.last)}</b><small>${esc(d.role)}${J.liurl?' · '+esc(J.liurl):''}</small></span>${ev}</div>
@@ -1945,7 +1991,7 @@ function viewJoin(){
   if(J.step==='done'){
     body=`<div class="jcard" style="text-align:center"><div style="display:flex;justify-content:center"><span class="welcome-mark">${I.check}</span></div>
       <h1>${me().verify.school==='pending'?'Thanks, '+esc(me().first)+'. You’re on the list.':'Welcome, '+esc(me().first)}</h1><p class="lead" style="margin-inline:auto">${me().verify.school==='pending'?`An admin is reviewing your request. We’ll send your official welcome email to ${esc(me().email)} as soon as you’re approved. Until then you can browse, but your profile stays hidden.`:'You’re approved and your registration is complete. Start by searching for people at the companies you’re targeting.'}</p>
-      ${me().verify.school==='pending'&&!BACKEND_URL?`<div class="demo-toggle" style="justify-content:center">Demo mode: <button class="btn sm ghost pill" data-act="join-demo-approve">${I.check}Simulate admin approval</button></div>`:''}
+      ${me().verify.school==='pending'&&!LIVE?`<div class="demo-toggle" style="justify-content:center">Demo mode: <button class="btn sm ghost pill" data-act="join-demo-approve">${I.check}Simulate admin approval</button></div>`:''}
       <div style="display:flex;justify-content:center;margin:6px 0 18px">${pcard(me(),{txt:me().schools[0].school+' · Class of '+me().schools[0].year,ico:'cap'})}</div>
       <div class="row" style="justify-content:center"><button class="btn lg primary pill" data-act="nav" data-view="home">${I.search}Find people</button><button class="btn lg ghost pill" data-act="nav" data-view="me">View my profile</button></div></div>`;
   }
@@ -1963,93 +2009,132 @@ function joinReadReview(){
   d.schools=[{school:sch,program:prev.program||'MBA',year:y,start:prev.start||y-2}];
   return true;
 }
-async function joinSubmit(){
+/* What sign-up sends to the database. */
+function joinPayload(){
   const J=S.join, d=J.draft, e=d.schools[0];
-  if(!BACKEND_URL){ J.reqSent=true; render(); window.scrollTo(0,0); return; }
-  J.sending=true; J.sendErr=''; render();
-  const payload={first:d.first,last:d.last,email:d.email,headline:d.role,school:SCHOOLS[e.school].full,classYear:e.year,location:d.location,industry:d.industry,
+  return {first:d.first,last:d.last,headline:d.role,school:e.school,classYear:e.year,startYear:e.start,program:e.program,location:d.location,industry:d.industry,
     phone:d.phone,linkedin:J.liurl||'',source:J.manual?'manual':'linkedin',answer:J.answer,about:d.about,career:d.career.map(({src,...c})=>c)};
+}
+/* Live sign-up has two steps: email a code to prove the address is theirs (this also creates their login), then save the request. */
+async function joinSubmit(){
+  const J=S.join, d=J.draft;
+  if(!LIVE){ J.reqSent=true; render(); window.scrollTo(0,0); return; }
+  J.sending=true; J.sendErr=''; render();
   try{
-    // text/plain keeps this a "simple" request, which Apps Script web apps accept without a CORS preflight
-    const r=await (await fetch(BACKEND_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})).json();
-    if(!r.ok) throw new Error(r.error||'failed');
-    J.reqId=r.id; J.reqSent=true;
-  }catch(err){ J.sendErr='We couldn’t send your request. Check your connection and try again.'; }
+    if(((await API.sessionEmail())||'').toLowerCase()===d.email.toLowerCase()) return await joinSave();
+    await API.sendCode(d.email,{signup:true}); J.codeSent=true;
+  }catch(err){ J.sendErr=joinErrText(err); }
   J.sending=false; render(); window.scrollTo(0,0);
 }
-/* Log in on any device: email a code, then exchange it for the member's saved profile. */
-async function loginPost(body){
-  return (await fetch(BACKEND_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})).json();
+async function joinVerifyCode(){
+  const J=S.join, code=val('j-code').replace(/\D/g,''); J.sendErr='';
+  if(code.length<6){ fieldErr('j-code','Enter the code from the email'); return; }
+  J.sending=true; render();
+  try{ await API.verifyCode(J.draft.email,code); }
+  catch(err){ J.sendErr=err.code==='wrong-code'?'That code isn’t right or has expired. Check the email, or send a new code.':joinErrText(err); J.sending=false; render(); return; }
+  await joinSave();
 }
+async function joinSave(){
+  const J=S.join;
+  try{ const row=await API.submitJoin(joinPayload()); J.reqId=row.id; J.reqSent=true; J.codeSent=false; }
+  catch(err){ J.sendErr=joinErrText(err); }
+  J.sending=false; render(); window.scrollTo(0,0);
+}
+function joinErrText(err){
+  return err.code==='already-approved'?'You’re already a member. Go back and log in instead.'
+    :err.code==='already-declined'?'This email’s request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.'
+    :err.code==='rate-limit'?'Too many codes requested. Wait a minute and try again.'
+    :err.code==='offline'?'We couldn’t reach the server. Check your connection and try again.'
+    :'We couldn’t send your request. Try again in a moment.';
+}
+/* Log in on any device with an emailed code (or LinkedIn), then load the member's saved profile. */
 async function loginSendCode(){
   const L=S.join.login; L.email=val('l-email').trim(); L.err='';
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(L.email)){ fieldErr('l-email','Enter a valid email address'); return; }
-  if(!BACKEND_URL){ L.err='Logging in needs the live backend. This copy is in demo mode.'; render(); return; }
+  if(!LIVE){ L.err='Logging in needs the live backend. This copy is in demo mode.'; render(); return; }
   L.busy=true; render();
-  try{
-    const r=await loginPost({action:'login-code',email:L.email});
-    if(r.ok) L.sent=true;
-    else L.err=r.error==='not-member'?'We don’t have a member with that email. Check for typos, or go back and sign up.':'Something went wrong. Try again.';
-  }catch(_){ L.err='We couldn’t reach the server. Check your connection and try again.'; }
+  try{ await API.sendCode(L.email); L.sent=true; }
+  catch(err){ L.err=err.code==='not-member'?'We don’t have a member with that email. Check for typos, or go back and sign up.'
+    :err.code==='rate-limit'?'Too many codes requested. Wait a minute and try again.'
+    :err.code==='offline'?'We couldn’t reach the server. Check your connection and try again.':'Something went wrong. Try again.'; }
   L.busy=false; render();
 }
-function loginLinkedIn(){
+async function loginLinkedIn(){
   const L=S.join.login; L.err='';
-  if(!BACKEND_URL||!LINKEDIN_CLIENT_ID){ L.err='LinkedIn login isn’t set up yet. Get a code by email instead.'; render(); return; }
-  const state=crypto.randomUUID();
-  try{ sessionStorage.setItem(LI_STATE_KEY,state); }catch(_){ }
-  location.href='https://www.linkedin.com/oauth/v2/authorization?'+new URLSearchParams({response_type:'code',client_id:LINKEDIN_CLIENT_ID,
-    redirect_uri:location.origin+location.pathname,scope:'openid profile email',state});
-}
-/* Back from LinkedIn: the page URL carries ?code&state (or ?error). Returns true if this load is a LinkedIn return. */
-function handleLinkedInReturn(){
-  const q=new URLSearchParams(location.search); if(!q.has('state')||!(q.has('code')||q.has('error'))) return false;
-  history.replaceState(null,'',location.pathname);
-  let want=null; try{ want=sessionStorage.getItem(LI_STATE_KEY); sessionStorage.removeItem(LI_STATE_KEY); }catch(_){ }
-  S.firstRun=!loadMe(); joinStart('join'); const L=S.join.login={}; S.join.step='login';
-  if(q.get('state')!==want){ L.err='That LinkedIn login didn’t come from this page. Try again.'; render(); return true; }
-  if(q.has('error')){ L.err='LinkedIn login was cancelled.'; render(); return true; }
+  if(!LIVE||!LINKEDIN_LOGIN){ L.err='LinkedIn login isn’t set up yet. Get a code by email instead.'; render(); return; }
   L.liBusy=true; render();
-  loginPost({action:'linkedin-login',code:q.get('code'),redirectUri:location.origin+location.pathname}).then(r=>{
-    if(r.ok){ loginApply(r.profile); return; }
-    L.err=r.error==='not-member'?`No approved member uses ${esc(r.email)}. Sign up first, or get a code by email if you signed up with a different address.`
-      :r.error==='no-email'?'Your LinkedIn account has no verified email. Get a code by email instead.'
-      :r.error==='not-configured'?'LinkedIn login isn’t set up on the server yet. Get a code by email instead.'
-      :'LinkedIn login didn’t work. Try again, or get a code by email.';
-    L.liBusy=false; render();
-  }).catch(()=>{ L.err='We couldn’t reach the server. Check your connection and try again.'; L.liBusy=false; render(); });
+  try{ await API.linkedIn(); }catch(_){ L.err='LinkedIn login didn’t work. Try again, or get a code by email.'; L.liBusy=false; render(); }
+}
+/* Back from LinkedIn: the URL carries ?code (or ?error). Supabase turns the code into a login as it starts. Returns true if this load is a LinkedIn return. */
+function handleLinkedInReturn(){
+  const q=new URLSearchParams(location.search); if(!LIVE||!(q.has('code')||q.has('error'))) return false;
+  S.firstRun=!loadMe(); joinStart('join'); const L=S.join.login={}; S.join.step='login';
+  if(q.has('error')){ history.replaceState(null,'',location.pathname); L.err='LinkedIn login was cancelled.'; return true; }
+  L.liBusy=true;
+  API.sessionEmail().then(email=>{ history.replaceState(null,'',location.pathname); if(!email) throw new Error('no session'); return loginFinish(); })
+    .catch(()=>{ L.err='LinkedIn login didn’t work. Try again, or get a code by email.'; L.liBusy=false; render(); });
   return true;
 }
 async function loginVerify(){
   const L=S.join.login, code=val('l-code').replace(/\D/g,''); L.err='';
-  if(code.length!==6){ fieldErr('l-code','Enter the 6-digit code from the email'); return; }
+  if(code.length<6){ fieldErr('l-code','Enter the code from the email'); return; }
   L.busy=true; render();
-  try{
-    const r=await loginPost({action:'login',email:L.email,code});
-    if(r.ok){ loginApply(r.profile); return; }
-    if(r.error==='expired'){ L.sent=false; L.err='That code expired. Request a new one.'; }
-    else L.err=r.error==='wrong-code'?'That code isn’t right. Check the email and try again.':'Something went wrong. Try again.';
-  }catch(_){ L.err='We couldn’t reach the server. Check your connection and try again.'; }
-  L.busy=false; render();
+  try{ await API.verifyCode(L.email,code); }
+  catch(err){ L.err=err.code==='wrong-code'?'That code isn’t right or has expired. Check the email, or request a new one.':'Something went wrong. Try again.'; L.busy=false; render(); return; }
+  await loginFinish();
+}
+/* After any successful login: load the profile and decide what the member sees. */
+async function loginFinish(){
+  const L=(S.join&&S.join.login)||{};
+  let p=null;
+  try{ p=await API.myProfile(); }catch(_){ L.err='We couldn’t load your profile. Try again.'; L.busy=L.liBusy=false; render(); return; }
+  if(!p||p.status==='declined'){
+    const email=await API.sessionEmail().catch(()=>null); await API.signOut().catch(()=>{});
+    L.err=!p?`No member uses ${esc(email||'that email')}. Sign up first, or log in with the email you signed up with.`
+      :'Your request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.';
+    L.busy=L.liBusy=false; L.sent=false; render(); return;
+  }
+  loginApply(p);
 }
 function loginApply(p){
-  const m=me(), y=+p.classYear||NOW_YEAR;
-  const school=Object.keys(SCHOOLS).find(k=>SCHOOLS[k].full===p.school)||matchSchool(p.school||'')||Object.keys(SCHOOLS)[0];
+  const m=me(), fallback=Object.keys(SCHOOLS)[0];
+  const schools=(p.schools||[]).map(s=>{ const y=+s.year||NOW_YEAR; return {school:SCHOOLS[s.school]?s.school:(matchSchool(s.school||'')||fallback),program:s.program||'MBA',year:y,start:+s.start||y-2}; });
   Object.assign(m,BLANK_DETAILS(),{first:p.first,last:p.last,role:p.headline,email:p.email,location:p.location||'Boston',industry:p.industry||Object.keys(INDUSTRIES)[0],
-    phone:String(p.phone||''),pref:p.phone?'whatsapp':'email',about:p.about||'',photo:/^https:\/\//.test(p.photo||'')?p.photo:(m.email===p.email?m.photo:null),reqId:p.id,
-    schools:[{school,program:'MBA',year:y,start:y-2}], career:p.career||[],
+    phone:String(p.phone||''),pref:p.pref||(p.phone?'whatsapp':'email'),about:p.about||'',photo:m.email===p.email?m.photo:null,reqId:p.id,
+    canRefer:!!p.canRefer,unit:p.unit||'',ilUni:p.ilUni||'',hometown:p.hometown||'',topics:p.topics||[],
+    schools:schools.length?schools:[{school:fallback,program:'MBA',year:NOW_YEAR,start:NOW_YEAR-2}],
+    career:(p.career||[]).map(c=>({years:c.start?`${c.start}–${c.end||'Present'}`:'',company:c.company,role:c.role,location:c.location||''})),
     verify:{school:p.status==='approved'?'admin':'pending',identity:false,workplace:false}});
+  S.isAdmin=!!p.isAdmin; if(S.isAdmin) loadJoinReqs();
   recompute(m); saveMe(); S.firstRun=false; S.join=null; go('home',{},false);
   toast(p.status==='approved'?`Welcome back, ${esc(p.first)}`:'You’re logged in. Your request is still waiting for an admin.');
 }
-/* Pending members: ask the backend whether an admin has decided yet. */
+/* On load: refresh the member's status from the server (approved yet? admin?). */
 async function checkApproval(){
-  const m=me(); if(!BACKEND_URL||m.verify.school!=='pending'||!m.reqId) return;
-  try{
-    const r=await (await fetch(BACKEND_URL+'?action=status&id='+encodeURIComponent(m.reqId))).json();
-    if(r.ok&&r.status==='approved'){ m.verify.school='admin'; saveMe(); render(); toast('You’re approved! You’re now an official member.'); }
-    if(r.ok&&r.status==='declined'){ toast('Your request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.'); }
-  }catch(_){ }
+  if(!LIVE) return;
+  let p; try{ p=await API.myProfile(); }catch(_){ return; }
+  if(!p) return;   // not logged in on this device
+  const m=me(); S.isAdmin=!!p.isAdmin; if(S.isAdmin) loadJoinReqs();
+  if(m.verify.school==='pending'&&p.status==='approved'){ m.verify.school='admin'; saveMe(); render(); toast('You’re approved! You’re now an official member.'); }
+  else if(m.verify.school==='pending'&&p.status==='declined'){ toast('Your request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.'); }
+  else render();
+}
+/* Admins: real pending requests replace the sample ones. */
+async function loadJoinReqs(){
+  try{ S.joinReqs=(await API.pendingRequests()).map(liveReq); }catch(_){ S.joinReqs=[]; }
+  if(S.view==='network') render();
+}
+function ago(ts){
+  const h=(Date.now()-new Date(ts))/36e5;
+  return h<1?'just now':h<24?`${Math.floor(h)} hour${h<2?'':'s'} ago`:h<48?'yesterday':`${Math.floor(h/24)} days ago`;
+}
+function liveReq(r){
+  const school=SCHOOLS[r.school]?r.school:(matchSchool(r.school||'')||Object.keys(SCHOOLS)[0]);
+  const cur=(r.career||[]).find(c=>c.start&&!c.end)||(r.career||[])[0];
+  let h=0; for(const ch of r.id) h=(h*31+ch.charCodeAt(0))>>>0;   // stable number for the generated avatar
+  return {id:100000+h%900000,uid:r.id,live:true,name:`${r.first_name} ${r.last_name}`,first:r.first_name,last:r.last_name,hair:h%2?'short':'long',
+    role:r.headline,company:cur?cur.company:'',schools:[{school,program:'MBA',year:r.class_year||NOW_YEAR}],
+    email:r.email,phone:r.phone,answer:r.join_answer,url:r.linkedin_url,asked:ago(r.created_at),career:r.career||[],source:r.signup_source};
 }
 /* Profile fields that sign-up doesn't ask for. A new member starts with these empty, not with the sample member's. */
 const BLANK_DETAILS = () => ({canRefer:false,unit:'',ilUni:'',hometown:'',topics:[]});
@@ -2104,11 +2189,11 @@ document.addEventListener('click',e=>{
     case 'join-exit': S.join=null; go(S.stack.length?S.stack[S.stack.length-1].view:'home',S.stack.length?S.stack[S.stack.length-1].params:{}); break;
     case 'join-connect': joinConnect(); break;
     case 'join-pdf-again': S.join.pdf='none'; S.join.found=null; render(); break;
-    case 'join-login': S.join.login=LINKEDIN_CLIENT_ID?{}:{emailMode:true}; S.join.step='login'; render(); window.scrollTo(0,0); break;
+    case 'join-login': S.join.login=LINKEDIN_LOGIN?{}:{emailMode:true}; S.join.step='login'; render(); window.scrollTo(0,0); break;
     case 'login-send': loginSendCode(); break;
     case 'login-li': loginLinkedIn(); break;
     case 'login-email-mode': S.join.login={emailMode:true}; render(); break;
-    case 'login-li-mode': if(LINKEDIN_CLIENT_ID){ S.join.login={}; } else S.join.step='welcome'; render(); break;
+    case 'login-li-mode': if(LINKEDIN_LOGIN){ S.join.login={}; } else S.join.step='welcome'; render(); break;
     case 'login-verify': loginVerify(); break;
     case 'login-restart': S.join.login={emailMode:true,email:S.join.login.email}; render(); break;
     case 'join-manual': S.join.manual=true; S.join.draft.src={}; S.join.step='review'; render(); window.scrollTo(0,0); break;
@@ -2117,11 +2202,19 @@ document.addEventListener('click',e=>{
     case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
     case 'join-finish': joinApply(t.dataset.status); me().reqId=S.join.reqId||null; saveMe(); S.firstRun=false; S.join.step='done'; render(); window.scrollTo(0,0); break;
     case 'join-demo-approve': { const m=me(); m.verify.school='admin'; saveMe(); render(); openRegEmail(m.first,m.email,'An admin approved your request. In the live app this lands in your inbox.'); break; }
+    case 'join-code-verify': joinVerifyCode(); break;
+    case 'join-code-resend': S.join.codeSent=false; joinSubmit(); break;
+    case 'join-code-back': S.join.codeSent=false; S.join.sendErr=''; render(); break;
     case 'join-request-send': { const J=S.join; J.answer=val('j-answer'); J.agree=document.getElementById('j-agree').checked; let ok=true;
       if(J.answer.length<10){ fieldErr('j-answer','Write a sentence or two for the admin'); ok=false; } else fieldErr('j-answer','');
       if(!J.agree){ fieldErr('j-agree','Confirm this to send your request'); ok=false; } else fieldErr('j-agree','');
       if(ok) joinSubmit(); break; }
-    case 'jr-approve': case 'jr-decline': { const r=S.joinReqs.find(x=>x.id===id); S.joinReqs=S.joinReqs.filter(x=>x.id!==id); render();
+    case 'jr-approve': case 'jr-decline': { const r=S.joinReqs.find(x=>x.id===id); if(!r) break;
+      if(r.live){ const ok=t.dataset.act==='jr-approve'; t.disabled=true;
+        API.decide(r.uid,ok).then(()=>{ S.joinReqs=S.joinReqs.filter(x=>x!==r); render(); toast(ok?`${esc(r.first)} approved. Their welcome email is on its way.`:`Request from ${esc(r.first)} declined`); })
+          .catch(err=>{ toast(err.code==='not-pending'?'Another admin already decided on this request':'Couldn’t save that. Try again.'); loadJoinReqs(); });
+        break; }
+      S.joinReqs=S.joinReqs.filter(x=>x.id!==id); render();
       if(t.dataset.act==='jr-approve') openRegEmail(r.first,r.email,`You approved ${esc(r.name)}. In the live app this email goes out automatically.`); else toast(`Request from ${esc(r.first)} declined`); break; }
     case 'connections': S.connQ=''; if(S.view==='connections'&&S.params.id===id){ S.params={id,mode:t.dataset.mode}; render(); } else go('connections',{id,mode:t.dataset.mode}); break;
     case 'conn-filters': S.query=''; S.filters={degree:['1st']}; go('results'); break;
@@ -2137,7 +2230,7 @@ document.addEventListener('click',e=>{
     case 'delete-item': deleteItem(t.dataset.kind,t.dataset.idx); break;
     case 'add-section': openAddSection(); break;
     case 'photo-remove': photoDraft=null; document.getElementById('photo-prev').innerHTML=av({...me(),photo:null},180); break;
-    case 'reset-me': try{localStorage.removeItem(STORE_KEY)}catch(_){ } location.reload(); break;
+    case 'reset-me': (LIVE?API.signOut():Promise.resolve()).catch(()=>{}).finally(()=>{ try{localStorage.removeItem(STORE_KEY)}catch(_){ } location.reload(); }); break;
   }
 });
 document.addEventListener('input',e=>{ if(e.target.id==='conn-q'){ S.connQ=e.target.value; const l=document.getElementById('conn-list'); l.innerHTML=connRows(+l.dataset.id,l.dataset.mode); return; } const c=e.target.dataset.count; if(c){ const max=e.target.maxLength; document.getElementById(c).textContent=`${e.target.value.length}/${max.toLocaleString()}`; } });
@@ -2150,7 +2243,8 @@ document.addEventListener('change',e=>{
   if(e.target.id==='conn-sort'){ S.connSort=e.target.value; const l=document.getElementById('conn-list'); l.innerHTML=connRows(+l.dataset.id,l.dataset.mode); return; }
   if(e.target.dataset.sort!==undefined){ S.sort=e.target.value; render(); }
 });
-document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target.id==='l-email'){ e.preventDefault(); loginSendCode(); } if(e.key==='Enter'&&e.target.id==='l-code'){ e.preventDefault(); loginVerify(); } if(e.key==='Escape'){ closeModal(); S.draftAll=null; if(S.pill){ S.pill=null; render(); } } });
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target.id==='l-email'){ e.preventDefault(); loginSendCode(); } if(e.key==='Enter'&&e.target.id==='l-code'){ e.preventDefault(); loginVerify(); } if(e.key==='Enter'&&e.target.id==='j-code'){ e.preventDefault(); joinVerifyCode(); } if(e.key==='Escape'){ closeModal(); S.draftAll=null; if(S.pill){ S.pill=null; render(); } } });
+if(LIVE) S.joinReqs=[];
 if(!handleLinkedInReturn()){ if(!loadMe()){ S.firstRun=true; joinStart('join'); } else checkApproval(); }
 render();
 </script>
