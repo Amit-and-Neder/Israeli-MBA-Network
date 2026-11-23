@@ -1964,7 +1964,8 @@ async function joinPdf(file){
     const r=await parseLinkedInPdf(file); if(!S.join) return;
     if(!r.first||(!r.career.length&&!r.education.length)) throw new Error('not a LinkedIn profile');
     const d=J.draft;
-    Object.assign(d,{first:r.first,last:r.last,role:r.headline||d.role,email:r.email||d.email,about:r.about||d.about});
+    // LinkedIn allows a 220-character headline and a 2,600-character About; the database takes less.
+    Object.assign(d,{first:clip(r.first,LIMITS.name),last:clip(r.last,LIMITS.name),role:clip(r.headline||d.role,LIMITS.headline),email:r.email||d.email,about:clip(r.about||d.about,LIMITS.about)});
     const loc=matchLocation(r.location)||matchLocation(r.career[0]?.location); if(loc) d.location=loc;
     J.liurl=r.url;
     r.career.forEach(c=>{ if(!d.career.some(x=>x.company===c.company&&x.years===c.years)) d.career.push({...c,src:'pdf'}); });
@@ -2042,10 +2043,10 @@ function viewJoin(){
     const e=d.schools[0]||{school:'',program:'MBA',year:NOW_YEAR+1,start:NOW_YEAR-1};
     body=`<div class="jcard">
       <h1>Review your profile</h1><p class="lead">This is what members will see. Edit anything that’s off.</p>
-      <div class="two">${fld('j-first','First name*',`<input type="text" id="j-first" value="${esc(d.first)}">`)}${fld('j-last','Last name*',`<input type="text" id="j-last" value="${esc(d.last)}">`)}</div>
+      <div class="two">${fld('j-first','First name*',`<input type="text" id="j-first" value="${esc(d.first)}" maxlength="${LIMITS.name}">`)}${fld('j-last','Last name*',`<input type="text" id="j-last" value="${esc(d.last)}" maxlength="${LIMITS.name}">`)}</div>
       <div class="jsec">${fld('j-email','Email*',`<input type="email" id="j-email" value="${esc(d.email||'')}" placeholder="you@example.com">`,'<p class="hint"><span>We send your registration email here once an admin approves you.</span></p>')}</div>
-      <div class="jsec">${fld('j-head','Headline*',`<input type="text" id="j-head" value="${esc(d.role)}" maxlength="220" placeholder="Ex: MBA Candidate · ex-PM at Monday.com">`)}</div>
-      <div class="jsec">${fld('j-about','About',`<textarea id="j-about" maxlength="2600" placeholder="A few lines about your background and what you’re looking for">${esc(d.about||'')}</textarea>`)}</div>
+      <div class="jsec">${fld('j-head','Headline*',`<input type="text" id="j-head" value="${esc(d.role)}" maxlength="${LIMITS.headline}" placeholder="Ex: MBA Candidate · ex-PM at Monday.com">`)}</div>
+      <div class="jsec">${fld('j-about','About',`<textarea id="j-about" maxlength="${LIMITS.about}" placeholder="A few lines about your background and what you’re looking for">${esc(d.about||'')}</textarea>`)}</div>
       <div class="jsec"><h3>${I.cap.replace('<svg','<svg width="17" height="17"')}Your MBA ${d.src.edu==='pdf'?srcTag('pdf'):''}</h3>
         <div class="two">${fld('j-school','School*',`<select id="j-school"><option value="">Select your US MBA program</option>${Object.keys(SCHOOLS).map(k=>`<option value="${esc(k)}" ${k===e.school?'selected':''}>${esc(SCHOOLS[k].full)}</option>`).join('')}</select>`)}
         ${fld('j-year','Class year*',`<select id="j-year">${yearOpts(e.year)}</select>`)}</div></div>
@@ -2102,11 +2103,14 @@ function joinReadReview(){
   d.schools=[{school:sch,program:prev.program||'MBA',year:y,start:prev.start||y-2}];
   return true;
 }
+/* Longest values the database accepts (supabase/migrations: members table). Keep these in sync with it. */
+const LIMITS={name:80, headline:160, about:2000, answer:2000};
+const clip=(v,n)=>String(v||'').trim().slice(0,n);
 /* What sign-up sends to the database. */
 function joinPayload(){
   const J=S.join, d=J.draft, e=d.schools[0];
-  return {first:d.first,last:d.last,headline:d.role,school:e.school,classYear:e.year,startYear:e.start,program:e.program,location:d.location,industry:d.industry,
-    phone:d.phone,linkedin:J.liurl||'',source:'linkedin',answer:J.answer,about:d.about,career:d.career.map(({src,...c})=>c)};
+  return {first:clip(d.first,LIMITS.name),last:clip(d.last,LIMITS.name),headline:clip(d.role,LIMITS.headline),school:e.school,classYear:e.year,startYear:e.start,program:e.program,location:d.location,industry:d.industry,
+    phone:d.phone,linkedin:J.liurl||'',source:'linkedin',answer:clip(J.answer,LIMITS.answer),about:clip(d.about,LIMITS.about),career:d.career.map(({src,...c})=>c)};
 }
 /* Live sign-up has two steps: email a code to prove the address is theirs (this also creates their login), then save the request. */
 async function joinSubmit(){
