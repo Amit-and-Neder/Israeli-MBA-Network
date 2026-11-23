@@ -337,7 +337,6 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .ptag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--tc-soft);color:var(--tc);white-space:nowrap}
 .post-b{margin:12px 0 0;font-size:15px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
 .post-f{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}
-.post-f .when{margin-left:auto;font-size:12.5px;color:var(--faint)}
 .t-job{--tc:var(--accent-text);--tc-soft:var(--accent-soft)}
 .t-hiring{--tc:var(--ok);--tc-soft:var(--ok-soft)}
 .t-event{--tc:var(--warm);--tc-soft:var(--warm-soft)}
@@ -1430,6 +1429,7 @@ const FEED_TYPES=[['job','Looking for a job','Open to work? Say what role, indus
   ['hiring','Hiring','What role is your team hiring for, and where? Offer to refer.'],
   ['event','Event','What’s happening, when and where?']];
 const FEED_LABEL=Object.fromEntries(FEED_TYPES.map(([k,l])=>[k,l]));
+/* Posts are listed newest first but never show when they were posted, so quiet members don't look inactive. */
 const FEED_MAX=280, FEED_KEY='imn-feed-v1', HOUR=3600e3;
 const FEED_PHOTO_TYPES=['hiring','event'], FEED_PHOTO_PX=1080;
 /* Sample posts from the sample members: [author id, type, hours ago, text] */
@@ -1466,13 +1466,6 @@ function readFeedPhoto(file){
   }; img.src=fr.result; }; fr.readAsDataURL(file);
 }
 S.feed=loadFeed(); S.feedFilter='all'; S.feedDraft={type:null,text:'',photo:null};
-function ago(ts){
-  const m=Math.max(0,Math.round((Date.now()-ts)/60000));
-  if(m<1) return 'Just now'; if(m<60) return m+'m ago';
-  const h=Math.round(m/60); if(h<24) return h+'h ago';
-  const d=Math.round(h/24); if(d<7) return d+'d ago';
-  return new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-}
 function viewFeed(){
   const F=S.feed, D=S.feedDraft, f=S.feedFilter;
   const counts=Object.fromEntries(FEED_TYPES.map(([k])=>[k,F.posts.filter(p=>p.type===k).length]));
@@ -1496,7 +1489,7 @@ function viewFeed(){
       <div class="post-h">${av(a,44)}<button class="who" data-act="${mine?'nav':'profile'}" ${mine?'data-view="me"':`data-id="${a.id}"`}><b>${esc(a.name)}</b>${mine?' <span class="muted" style="font-size:13px">(you)</span>':''}<small>${esc(a.role)}${a.curCompany?' · '+esc(a.curCompany):''}</small></button>
         <span class="ptag"><span class="dot" style="width:7px;height:7px;border-radius:50%;background:currentColor"></span>${FEED_LABEL[p.type]}</span></div>
       <p class="post-b">${esc(p.text)}</p>${p.photo?`<img class="post-img" src="${p.photo}" alt="Photo shared by ${esc(a.first)}" loading="lazy">`:''}
-      <div class="post-f">${acts}<span class="when">${ago(p.ts)}</span></div></article>`; };
+      <div class="post-f">${acts}</div></article>`; };
   return `<main><div class="wrap page feed">
     <h1 class="page-h1">Feed</h1><p class="muted" style="margin:0;font-size:15px">Who’s looking, who’s hiring, and what’s happening in the network.</p>
     ${compose}${filters}
