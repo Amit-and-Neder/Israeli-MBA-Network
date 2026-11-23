@@ -1,6 +1,6 @@
 # Israeli MBA Network
 
-A directory and warm-intro platform for Israeli MBA students and alumni: search by school, class year, company or industry, view profiles with career timelines and mutual connections, and request intros over WhatsApp or email.
+A directory and warm-intro platform for Israeli MBA students and alumni: search by school, class year, company or industry, view profiles with career timelines, star the people you want to keep track of, and request intros over WhatsApp or email.
 
 The app is one page, `index.html`, with no build step. The backend is Supabase (see [`supabase/README.md`](supabase/README.md)).
 
