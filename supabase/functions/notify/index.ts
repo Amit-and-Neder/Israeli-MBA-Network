@@ -1,4 +1,4 @@
-// Israeli MBA Network: sends the app's emails through Resend.
+// Israeli MBA Network: sends the app's emails, through Gmail (SMTP) or Resend.
 //
 //   { action: "join-request" }            -> emails the admins about the caller's pending request
 //   { action: "welcome", member: "<id>" } -> emails an approved member their welcome email (admins only)
@@ -9,14 +9,18 @@
 // with the caller's login, and each email is sent at most once (admin_notified_at / welcome_sent_at),
 // so calling it twice, or calling it without the right status, does nothing.
 //
-// Secrets (Supabase dashboard -> Edge Functions -> Secrets):
+// Secrets (Supabase dashboard -> Edge Functions -> Secrets). Set either the SMTP ones (e.g. a Gmail account)
+// or RESEND_API_KEY. If SMTP_HOST is set, SMTP is used.
+//   SMTP_HOST       e.g. smtp.gmail.com     SMTP_PORT  465
+//   SMTP_USER       the Gmail address       SMTP_PASSWORD  a Gmail app password (not the normal password)
 //   RESEND_API_KEY  key from resend.com
-//   FROM_EMAIL      e.g. "Israeli MBA Network <hello@your-domain.com>" (a domain verified in Resend)
+//   FROM_EMAIL      e.g. "Israeli MBA Network <you@gmail.com>" (with Gmail it must be SMTP_USER's address)
 //   ADMIN_EMAILS    comma-separated, who gets "new request" emails
 //   APP_URL         the site's address, e.g. https://neder-nesel.github.io/israeli-mba-network/
 // SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided automatically.
 
 import { createClient } from "npm:@supabase/supabase-js@2.119.0";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const NETWORK = "Israeli MBA Network";
 const env = (k: string) => Deno.env.get(k) ?? "";
@@ -30,6 +34,21 @@ const esc = (s: unknown) =>
   String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 
 async function send(to: string[], subject: string, html: string, replyTo?: string) {
+  if (env("SMTP_HOST")) {
+    // Port 465 (TLS). Supabase Edge Functions can't open ports 25 or 587.
+    const client = new SMTPClient({
+      connection: {
+        hostname: env("SMTP_HOST"), port: Number(env("SMTP_PORT") || 465), tls: true,
+        auth: { username: env("SMTP_USER"), password: env("SMTP_PASSWORD") },
+      },
+    });
+    try {
+      await client.send({ from: env("FROM_EMAIL"), to, subject, content: "auto", html, ...(replyTo ? { replyTo } : {}) });
+    } finally {
+      await client.close();
+    }
+    return;
+  }
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${env("RESEND_API_KEY")}`, "Content-Type": "application/json" },
