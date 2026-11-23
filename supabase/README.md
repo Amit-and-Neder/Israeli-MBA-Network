@@ -7,16 +7,21 @@ This replaces the Google Sheet + Apps Script backend in `backend/`, which `index
 
 | File | What it does |
 |---|---|
-| `migrations/20261116000000_init.sql` | All tables, the privacy rules, and the functions the app calls. Run it once. |
-| `functions/notify/index.ts` | Sends the "new join request" email to admins and the welcome email on approval. |
-| `tests/` | Privacy tests that run on a local Postgres (`tests/run.sh`). 38 checks, e.g. a member can't read another member's phone number. |
+| `migrations/20261116000000_init.sql` | Members, sign-up, admin approval: tables, privacy rules and functions. Run once. |
+| `migrations/20261124000000_member_data.sql` | Everything members do after joining: profile edits, photos, stars, Feed posts, "interested" and intros. Run once, after the first file. |
+| `functions/notify/index.ts` | Sends the app's emails: new join request (to admins), welcome (on approval), intro request (to the person asked) and intro accepted (to the person who asked). |
+| `tests/` | Privacy tests that run on a local Postgres (`tests/run.sh`). 114 checks, e.g. a member can't read another member's phone number or post as someone else. |
 
 ## Who can see what
 
 - **Logged out:** nothing.
 - **Pending** (signed up, not approved yet): only their own profile.
 - **Approved members:** every approved member's profile, schools and career.
-- **Phone and email:** only the member themselves and admins. Later (intros), also someone whose intro they accepted.
+- **Phone and email:** only the member themselves, admins, and someone whose intro they accepted. Accepting is one way: the person who asked gets your details, not the other way round.
+- **Photos:** private files. Approved members see approved members' photos; pending members see only their own.
+- **Stars and "interested":** private to the person who made them. Nobody is told they were starred.
+- **Feed:** approved members read every approved member's posts and can post up to 10 times a day. Only the author or an admin can delete a post.
+- **Intros:** only approved members, one open request per pair, up to 10 new requests a day. Only the person asked can accept or decline.
 - **Admins:** pending requests, including the applicant's email and phone, and the Approve / Decline buttons.
 
 The database enforces all of this itself. The page can't override it, and nobody can approve themselves or edit someone else's profile.
@@ -36,6 +41,8 @@ The database enforces all of this itself. The page can't override it, and nobody
 ### 2. Create the database
 **SQL Editor → New query**, paste all of `migrations/20261116000000_init.sql`, then click **Run**. Supabase warns that the query is "destructive" (it contains revoke/delete statements); on a new project that's expected. It should finish with "Success. No rows returned". *(Done on Nov 16, 2026.)*
 
+Then do the same with `migrations/20261124000000_member_data.sql`. It adds the member-data tables, the two private photo buckets (`avatars`, `post-photos`) and their rules. It's safe to run again if something goes wrong halfway.
+
 ### 3. Set up email sending (required)
 Supabase's built-in email only delivers to your own Supabase team, so real members would never get their codes.
 1. Sign up at [resend.com](https://resend.com) and add a domain you own (**Domains → Add domain**). Then add the DNS records it shows at your domain registrar. Wait until the domain shows "Verified".
@@ -53,7 +60,7 @@ Under **Authentication → Emails → Templates**, edit both **Confirm signup** 
 ```
 
 ### 5. Deploy the email function
-**Edge Functions → Deploy a new function → Via Editor**. Name it `notify`, paste `functions/notify/index.ts`, and click **Deploy**.
+**Edge Functions → Deploy a new function → Via Editor**. Name it `notify`, paste `functions/notify/index.ts`, and click **Deploy**. After any change to that file, open the function, paste the new version and deploy again.
 Then, under **Edge Functions → Secrets**, add:
 
 | Name | Value |

@@ -2,6 +2,8 @@
 //
 //   { action: "join-request" }            -> emails the admins about the caller's pending request
 //   { action: "welcome", member: "<id>" } -> emails an approved member their welcome email (admins only)
+//   { action: "intro", intro: "<id>" }    -> emails the recipient of the caller's new intro request
+//   { action: "intro-accepted", intro: "<id>" } -> emails the requester that the caller accepted, with how to reach them
 //
 // The page calls this right after the matching database call. Every check is done here again
 // with the caller's login, and each email is sent at most once (admin_notified_at / welcome_sent_at),
@@ -38,7 +40,7 @@ async function send(to: string[], subject: string, html: string, replyTo?: strin
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
-  let body: { action?: string; member?: string };
+  let body: { action?: string; member?: string; intro?: string };
   try { body = await req.json(); } catch { return json({ ok: false, error: "bad-request" }, 400); }
 
   // Who is calling? (verified from their login token)
@@ -105,7 +107,7 @@ Deno.serve(async (req) => {
           <p style="margin-bottom:4px"><b>What you can do now:</b></p>
           <ul style="margin-top:0">
             <li>Search for Israeli MBAs by school, company or industry</li>
-            <li>Connect with members and ask for warm intros</li>
+            <li>Star the people you want to follow up with, and ask for warm intros</li>
             <li>Keep your profile current, so others can find you</li>
           </ul>
           <p>To log in on any device, open <a href="${esc(env("APP_URL"))}">${NETWORK}</a>, choose <b>Log in</b> and enter ${esc(c?.email)}. We'll email you a code.</p>
@@ -115,6 +117,53 @@ Deno.serve(async (req) => {
         await send([c!.email], `You're in: welcome to ${NETWORK}`, html);
       } catch (e) {
         await admin.from("members").update({ welcome_sent_at: null }).eq("id", body.member);
+        throw e;
+      }
+      return json({ ok: true, sent: true });
+    }
+    if ((body.action === "intro" || body.action === "intro-accepted") && body.intro) {
+      const accepted = body.action === "intro-accepted";
+      // Only the requester (new intro) or the recipient (accepted) may trigger these, and each goes out once.
+      const stamp = accepted ? "accepted_notified_at" : "notified_at";
+      const { data: r } = await admin.from("intro_requests")
+        .update({ [stamp]: new Date().toISOString() })
+        .eq("id", body.intro).eq(accepted ? "recipient_id" : "requester_id", user.id)
+        .eq("status", accepted ? "accepted" : "pending").is(stamp, null)
+        .select("requester_id,recipient_id,note").maybeSingle();
+      if (!r) return json({ ok: true, sent: false });
+      const person = async (id: string) => {
+        const [{ data: m }, { data: c }, { data: s }] = await Promise.all([
+          admin.from("members").select("first_name,last_name,headline,contact_pref").eq("id", id).single(),
+          admin.from("member_contacts").select("email,phone").eq("member_id", id).single(),
+          admin.from("member_schools").select("school,class_year").eq("member_id", id).order("sort").limit(1).maybeSingle(),
+        ]);
+        return { ...m, ...c, tag: s ? `${s.school} '${String(s.class_year).slice(-2)}` : "" } as Record<string, string>;
+      };
+      const [from, to] = await Promise.all([person(r.requester_id), person(r.recipient_id)]);
+      const app = esc(env("APP_URL"));
+      const button = (label: string) =>
+        `<p style="margin:24px 0"><a href="${app}" style="background:#2E49C2;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:bold">${label}</a></p>`;
+      try {
+        if (!accepted) {
+          await send([to.email], `${from.first_name} ${from.last_name}${from.tag ? ` (${from.tag})` : ""} would like an intro`, `
+            <div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#161A26;max-width:560px">
+              <p>Hi ${esc(to.first_name)},</p>
+              <p><b>${esc(from.first_name)} ${esc(from.last_name)}</b>${from.tag ? `, ${esc(from.tag)}` : ""} (${esc(from.headline)}) found you on ${NETWORK} and wrote:</p>
+              <p style="margin:0;background:#F7F8F4;padding:12px 14px;border-left:3px solid #2E49C2;border-radius:6px;white-space:pre-wrap">${esc(r.note)}</p>
+              ${button("Accept or decline")}
+              <p style="color:#5C6272;font-size:13px">If you accept, ${esc(from.first_name)} can reach you on your ${to.contact_pref === "whatsapp" ? "WhatsApp" : "email"}. If you decline, they see a polite note and none of your details. Log in, then go to My Network → Intro requests.</p>
+            </div>`);
+        } else {
+          const how = to.contact_pref === "whatsapp" && to.phone ? `WhatsApp: <b>${esc(to.phone)}</b>` : `email: <b>${esc(to.email)}</b>`;
+          await send([from.email], `${to.first_name} accepted your intro`, `
+            <div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#161A26;max-width:560px">
+              <p>Hi ${esc(from.first_name)},</p>
+              <p>Good news: <b>${esc(to.first_name)} ${esc(to.last_name)}</b>${to.tag ? ` (${esc(to.tag)})` : ""} accepted your intro. Reach out on their preferred channel, ${how}.</p>
+              ${button("Open their profile")}
+            </div>`);
+        }
+      } catch (e) { // un-mark so the next call can retry
+        await admin.from("intro_requests").update({ [stamp]: null }).eq("id", body.intro);
         throw e;
       }
       return json({ ok: true, sent: true });
