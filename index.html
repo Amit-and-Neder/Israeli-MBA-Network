@@ -851,7 +851,7 @@ const byId = id => P[id];
 /* Stars: each member keeps a private list of people they starred. Saved in this browser for now. */
 const STARS_KEY='imn-stars-v1';
 function loadStars(){ try{ const d=JSON.parse(localStorage.getItem(STARS_KEY)||'null'); if(Array.isArray(d)) return new Set(d); }catch(_){ } return new Set([1,4,7,12,17,24]); }
-function saveStars(){ try{ localStorage.setItem(STARS_KEY,JSON.stringify([...S.stars])); }catch(_){ } }
+function saveStars(){ if(LIVE) return; try{ localStorage.setItem(STARS_KEY,JSON.stringify([...S.stars])); }catch(_){ } }
 
 /* ---------- state ---------- */
 const S = {
@@ -1147,9 +1147,11 @@ function viewHome(){
   const count = P.length-1;
   const cnt = (fn)=>new Set(P.filter(p=>p.id!==ME).flatMap(fn)).size;
   const sc = [['school','School & class',I.cap,`${cnt(p=>p.schools.map(s=>s.school))} programs`],['company','Company',I.building,`${ALL_COMPANIES.length} companies`],['industry','Industry',I.layers,`${cnt(p=>[p.industry])} industries`]];
+  const waiting=LIVE&&me().verify.school==='pending';
   return `<main><div class="wrap">
+    ${waiting?`<div class="notice" style="margin:18px 0 0;background:var(--warm-soft);color:var(--warm)">${I.clock}<span><b>Your request is waiting for an admin.</b> Once you’re approved, you’ll see every member here and they’ll see you. Meanwhile you can finish your profile.</span></div>`:''}
     <section class="hero">
-      <span class="eyebrow">${I.shield}${count} verified Israeli MBAs across US programs</span>
+      <span class="eyebrow">${I.shield}${waiting?'Verified':count} Israeli MBAs across US programs</span>
       <h1>Find the Israeli who’s <em>already where you’re headed.</em></h1>
       ${searchBox('big','q-home')}
       <div class="shortcuts">${sc.map(([k,l,ic,s])=>`<button class="shortcut ${S.browse===k?'on':''}" data-act="browse" data-tab="${k}" aria-expanded="${S.browse===k}"><span class="ico">${ic}</span><span><b>${l}</b><small>Browse ${s}</small></span></button>`).join('')}</div>
@@ -1157,7 +1159,7 @@ function viewHome(){
       <div class="try"><span>Try:</span>${EXAMPLES.map(e=>`<button data-act="search" data-q="${esc(e)}">${esc(e)}</button>`).join('')}</div>
     </section>
     ${rail('interacted')}${rail('school')}${rail('pymk')}${rail('viewed')}${rail('industry')}
-    <p class="demo-note">Prototype with fictional members. Email and WhatsApp hand-offs are simulated. <button class="link" style="font-size:12px" data-act="reset-me">${LIVE?'Log out':'Start over as a new user'}</button></p>
+    <p class="demo-note">${LIVE?'':'Prototype with fictional members. Email and WhatsApp hand-offs are simulated. '}<button class="link" style="font-size:12px" data-act="reset-me">${LIVE?'Log out':'Start over as a new user'}</button></p>
   </div></main>`;
 }
 function browsePanel(tab){
@@ -1365,7 +1367,7 @@ function viewProfile(id){
           ${cg.length?`<div class="common">${cg.map(([ic,t])=>`<div><span class="ico">${ic}</span>${esc(t)}</div>`).join('')}</div>`:`<p class="muted" style="margin:0">Different paths, same community. Worth a hello.</p>`}</section>`}
       </div>
     </div>
-    ${isMe?`<p class="demo-note">Edits are saved in this browser only. <button class="link" style="font-size:12px" data-act="reset-me">${LIVE?'Log out':'Start over as a new user'}</button></p>`:''}
+    ${isMe?`<p class="demo-note">${LIVE?'Changes are saved to your account.':'Edits are saved in this browser only.'} <button class="link" style="font-size:12px" data-act="reset-me">${LIVE?'Log out':'Start over as a new user'}</button></p>`:''}
   </div></main>`;
 }
 function viewNetwork(){
@@ -1390,7 +1392,7 @@ function viewNetwork(){
       </div>`; }).join('')}</div>`:`<div class="empty-rail">No one is waiting. You’re all caught up.</div>`);
   }
   if(S.netTab==='sent') body = S.pending.size?`<div class="rlist">${[...S.pending].map(id=>{const p=byId(id);return `<div class="req">${av(p,52)}<button class="who" data-act="profile" data-id="${id}"><b>${esc(p.name)}</b> ${badges(p)}<div class="muted" style="font-size:13.5px">${esc(p.role)} · ${esc(p.company)}</div></button>
-      <span class="btn sm is-pending">${I.clock}Waiting for ${esc(p.first)}</span><button class="btn ghost sm" data-act="preview-email" data-id="${id}">${I.mail}See email</button><button class="btn ghost sm" data-act="withdraw" data-id="${id}">Withdraw</button></div>`}).join('')}</div>`:`<div class="empty-rail">No requests waiting. Find someone on <button class="link" data-act="nav" data-view="home">Discover</button>.</div>`;
+      <span class="btn sm is-pending">${I.clock}Waiting for ${esc(p.first)}</span>${LIVE?'':`<button class="btn ghost sm" data-act="preview-email" data-id="${id}">${I.mail}See email</button>`}<button class="btn ghost sm" data-act="withdraw" data-id="${id}">Withdraw</button></div>`}).join('')}</div>`:`<div class="empty-rail">No requests waiting. Find someone on <button class="link" data-act="nav" data-view="home">Discover</button>.</div>`;
   return `<main><div class="wrap page">
     <h1 class="page-h1">My Network</h1>
     <div class="stats"><div class="stat"><b>${S.stars.size}</b><span>Starred</span></div><div class="stat"><b>${S.incoming.size}</b><span>Requests to review</span></div><div class="stat"><b>${S.pending.size}</b><span>Waiting on reply</span></div><div class="stat"><b>${S.intros.length}</b><span>Intros sent</span></div></div>
@@ -1428,6 +1430,7 @@ function loadFeed(){
   return {posts:[...saved.mine,...sample].sort((a,b)=>b.ts-a.ts), interested:new Set(saved.interested)};
 }
 function saveFeed(){
+  if(LIVE) return true;   // live posts and interests are saved in Supabase
   try{ localStorage.setItem(FEED_KEY,JSON.stringify({mine:S.feed.posts.filter(p=>p.author===ME),interested:[...S.feed.interested]})); return true; }catch(_){ return false; }
 }
 /* Shrink a post photo so its longer side is at most FEED_PHOTO_PX, keeping its shape. */
@@ -1475,12 +1478,28 @@ function feedPost(){
   const D=S.feedDraft, err=document.getElementById('feed-err'); D.text=val('feed-text').trim();
   const msg=!D.type?'Choose Looking for a job, Hiring or Event.':!D.text?'Write your status first.':'';
   if(msg){ err.textContent=msg; err.hidden=false; return; }
+  if(LIVE){ livePost(D,err); return; }
   const post={id:'m'+Date.now(),author:ME,type:D.type,text:D.text.slice(0,FEED_MAX),ts:Date.now()};
   if(D.photo&&FEED_PHOTO_TYPES.includes(D.type)) post.photo=D.photo;
   S.feed.posts.unshift(post);
   if(!saveFeed()&&post.photo){ S.feed.posts.shift(); err.textContent='This browser is out of room for more photos. Delete an older photo post, or post without the photo.'; err.hidden=false; return; }
   S.feedDraft={type:null,text:'',photo:null}; if(S.feedFilter!=='all'&&S.feedFilter!==D.type) S.feedFilter='all';
   render(); toast('Posted to the feed');
+}
+
+async function livePost(D,err){
+  if(D.busy) return; D.busy=true; err.hidden=true;
+  const withPhoto=D.photo&&FEED_PHOTO_TYPES.includes(D.type); let path=null;
+  try{
+    if(withPhoto) path=await API.uploadPhoto('post-photos',D.photo);
+    const row=await API.createPost({type:D.type,body:D.text.slice(0,FEED_MAX),photo_path:path});
+    S.feed.posts.unshift({id:row.id,author:ME,type:row.type,text:row.body,ts:Date.parse(row.created_at),photoPath:row.photo_path,photo:withPhoto?D.photo:null});
+    S.feedDraft={type:null,text:'',photo:null}; if(S.feedFilter!=='all'&&S.feedFilter!==row.type) S.feedFilter='all';
+    render(); toast('Posted to the feed');
+  }catch(e){
+    if(path) API.removePhoto('post-photos',path);
+    D.busy=false; err.textContent=e.code==='not-allowed'?'Only approved members can post, up to 10 times a day.':liveErr(e); err.hidden=false;
+  }
 }
 
 /* ---------- render ---------- */
@@ -1650,15 +1669,24 @@ function openContact(id,ch){
 function sendRequest(id){
   const note=(document.getElementById('intro-note')?.value||'').trim();
   if(note.length<20){ const e=document.getElementById('intro-err'); e.hidden=false; e.textContent='Write a sentence or two: who you are and why you’re reaching out.'; return; }
+  const p=byId(id);
+  if(LIVE){
+    const btn=document.querySelector('[data-act=send-request]'); if(btn) btn.disabled=true;
+    API.sendIntro(p.uid,note).then(row=>{
+      S.intros.push({uid:row.id,to:id,note,status:'pending',sentAt:row.created_at,respondedAt:null});
+      S.pending.add(id); closeModal(); softRender(id); toast(`Intro sent. ${esc(p.first)} gets an email and can accept or decline.`);
+    }).catch(e=>{ if(btn) btn.disabled=false; const el=document.getElementById('intro-err'); if(!el) return; el.hidden=false;
+      el.textContent=e.code==='already-open'?`You already have an open intro with ${p.first}.`:e.code==='rate-limit'?'You can send up to 10 intros a day. Try again tomorrow.':liveErr(e); });
+    return;
+  }
   S.intros.push({to:id,note,status:'pending',sentAt:new Date().toISOString(),respondedAt:null});
   S.pending.add(id); closeModal(); softRender(id);
-  const p=byId(id);
   toast(`Intro sent to ${esc(p.first)}`,{act:'preview-email',id,label:`See ${esc(p.first)}’s email`});
 }
 
 /* ---------- profile editing (LinkedIn-style) ---------- */
 const STORE_KEY='imn-my-profile-v2';
-const ME_FIELDS=['first','last','role','location','industry','schools','career','email','phone','pref','photo','about','verify','reqId','canRefer','unit','ilUni','hometown','topics'];
+const ME_FIELDS=['first','last','role','location','industry','schools','career','email','phone','pref','photo','about','verify','reqId','canRefer','unit','ilUni','hometown','topics','uid','photoPath','linkedin'];
 const LOC_OPTIONS=['Boston','New York','SF Bay Area','Seattle','Los Angeles','Chicago','Washington, DC','Austin','Miami'];
 const PROGRAMS=['MBA','EMBA','Sloan Fellows MBA','Part-time MBA','MBA/MS'];
 const ySpan = y=>{const m=String(y).split('–'),st=+m[0],en=m[1]?(m[1]==='Present'?null:+m[1]):st; return [st,en]};
@@ -1706,7 +1734,7 @@ function openEdit(kind,idx){
   }
   if(kind==='contact'){
     html=editShell('Edit contact info',`<p class="req-note">* Indicates required. Members use this to reach you after finding you.</p>
-      ${fld('e-email','Email*',`<input type="email" id="e-email" value="${esc(p.email)}">`)}
+      ${fld('e-email','Email*',`<input type="email" id="e-email" value="${esc(p.email)}" ${LIVE?'disabled':''}>`,LIVE?'<p class="hint"><span>This is the email you log in with. To change it, ask an admin.</span></p>':'')}
       ${fld('e-phone','WhatsApp number',`<input type="tel" id="e-phone" value="${esc(p.phone||'')}" placeholder="+1 (617) 555-0100">`,'<p class="hint"><span>Include the country code. Israeli numbers work too.</span></p>')}
       <div class="field" id="fw-e-pref"><span class="fl">Preferred way to be reached*</span><div class="radios"><label><input type="radio" name="e-pref" value="whatsapp" ${p.pref==='whatsapp'?'checked':''}>WhatsApp</label><label><input type="radio" name="e-pref" value="email" ${p.pref==='email'?'checked':''}>Email</label></div><p class="err" hidden></p></div>`,{saveKind:'contact'});
   }
@@ -1790,11 +1818,19 @@ function saveEdit(kind,idx){
   if(kind==='israel'){ Object.assign(p,{unit:val('e-unit'),ilUni:val('e-iluni'),hometown:val('e-home')}); }
   if(kind==='topics'){ p.topics=[...new Set([...[...document.querySelectorAll('[data-topic]:checked')].map(x=>x.value),...val('e-topics').split(',').map(x=>x.trim()).filter(Boolean)])]; }
   recompute(p); saveMe(); closeModal(); render();
+  if(LIVE&&kind==='photo') livePhoto(p); else liveSaveProfile();
   toast(kind==='photo'?'Photo updated':'Profile updated');
+}
+/* Uploads a new profile photo (or removes it), then points your profile at it and deletes the old file. */
+function livePhoto(p){
+  const old=p.photoPath, draft=p.photo&&p.photo.startsWith('data:')?p.photo:null;
+  (draft?API.uploadPhoto('avatars',draft):Promise.resolve(null))
+    .then(path=>API.saveProfile({photoPath:path||''}).then(()=>{ p.photoPath=path; saveMe(); if(old&&old!==path) API.removePhoto('avatars',old); }))
+    .catch(e=>toast('We couldn’t save your photo. '+liveErr(e)));
 }
 function deleteItem(kind,idx){
   const p=me(); if(kind==='exp') p.career.splice(+idx,1); if(kind==='edu'&&p.schools.length>1) p.schools.splice(+idx,1);
-  recompute(p); saveMe(); closeModal(); render(); toast(kind==='exp'?'Experience deleted':'Education deleted');
+  recompute(p); saveMe(); liveSaveProfile(); closeModal(); render(); toast(kind==='exp'?'Experience deleted':'Education deleted');
 }
 function openAddSection(){
   const row=(kind,ico,t,sub)=>`<button class="sec-item" data-act="edit" data-kind="${kind}"><span class="ico">${ico}</span><span><b>${t}</b><small>${sub}</small></span><span class="chev">${I.right}</span></button>`;
@@ -1846,7 +1882,8 @@ function apiErr(e){
     : /signups not allowed|user not found/i.test(m)?'not-member'
     : /expired|invalid|otp/i.test(m)&&s!==429?'wrong-code'
     : s===429||/rate limit|security purposes/i.test(m)?'rate-limit'
-    : /already-approved|already-declined|not-admin|not-pending|missing-school|not-logged-in/.exec(m)?.[0] || 'failed';
+    : /already-approved|already-declined|already-open|not-admin|not-approved|not-pending|not-member|missing-school|not-logged-in|no-profile|bad-photo|rate-limit/.exec(m)?.[0]
+    || (/row-level security/i.test(m)?'not-allowed': /check constraint/i.test(m)?'invalid':'failed');
   return Object.assign(new Error(code),{code,detail:m});
 }
 async function rpc(fn,args){ const c=await sb(); const {data,error}=await c.rpc(fn,args); if(error) throw apiErr(error); return data; }
@@ -1866,6 +1903,26 @@ const API={
   /* Admins only (the database refuses everyone else). */
   pendingRequests:()=>rpc('admin_pending_requests'),
   async decide(id,approve){ const row=await rpc('admin_decide',{member:id,approve}); if(approve) notify({action:'welcome',member:id}); return row; },
+  /* Member data (supabase/migrations/20261124000000_member_data.sql). The database checks every call again. */
+  directory:()=>rpc('directory'),
+  async table(name,cols,order){ const c=await sb(); let q=c.from(name).select(cols); if(order) q=q.order(order,{ascending:false}).limit(300);
+    const {data,error}=await q; if(error) throw apiErr(error); return data; },
+  saveProfile:(p)=>rpc('update_my_profile',{p}),
+  async star(uid,on){ const c=await sb(); const {error}=on?await c.from('stars').insert({member_id:uid}):await c.from('stars').delete().eq('member_id',uid); if(error) throw apiErr(error); },
+  async createPost(row){ const c=await sb(); const {data,error}=await c.from('posts').insert(row).select('id,type,body,photo_path,created_at').single(); if(error) throw apiErr(error); return data; },
+  async deletePost(id){ const c=await sb(); const {error}=await c.from('posts').delete().eq('id',id); if(error) throw apiErr(error); },
+  async setInterest(postId,on){ const c=await sb(); const {error}=on?await c.from('post_interest').insert({post_id:postId}):await c.from('post_interest').delete().eq('post_id',postId); if(error) throw apiErr(error); },
+  /* Intros: the recipient gets an email; when they accept, the requester gets one with how to reach them. */
+  async sendIntro(uid,note){ const row=await rpc('send_intro',{recipient:uid,note}); notify({action:'intro',intro:row.id}); return row; },
+  async respondIntro(introId,accept){ const row=await rpc('respond_intro',{intro:introId,accept}); if(accept) notify({action:'intro-accepted',intro:introId}); return row; },
+  withdrawIntro:(introId)=>rpc('withdraw_intro',{intro:introId}),
+  /* Photos are private files in Supabase Storage, under "<your id>/". */
+  async uploadPhoto(bucket,dataUrl){ const c=await sb(); const {data:{session}}=await c.auth.getSession(); if(!session) throw apiErr({message:'not-logged-in'});
+    const blob=await (await fetch(dataUrl)).blob(), path=`${session.user.id}/${Date.now()}.jpg`;
+    const {error}=await c.storage.from(bucket).upload(path,blob,{contentType:'image/jpeg'}); if(error) throw apiErr(error); return path; },
+  async removePhoto(bucket,path){ try{ const c=await sb(); await c.storage.from(bucket).remove([path]); }catch(_){ } },
+  async photoUrls(bucket,paths){ if(!paths.length) return {}; const c=await sb(); const {data,error}=await c.storage.from(bucket).createSignedUrls(paths,12*3600);
+    return error?{}:Object.fromEntries(data.filter(x=>x.signedUrl).map(x=>[x.path,x.signedUrl])); },
 };
 const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 let pdfjsReady=null;
@@ -2193,29 +2250,112 @@ async function loginFinish(){
   }
   loginApply(p);
 }
-function loginApply(p){
-  const m=me(), fallback=Object.keys(SCHOOLS)[0];
-  const schools=(p.schools||[]).map(s=>{ const y=+s.year||NOW_YEAR; return {school:SCHOOLS[s.school]?s.school:(matchSchool(s.school||'')||fallback),program:s.program||'MBA',year:y,start:+s.start||y-2}; });
-  Object.assign(m,BLANK_DETAILS(),{first:p.first,last:p.last,role:p.headline,email:p.email,location:p.location||'Boston',industry:p.industry||Object.keys(INDUSTRIES)[0],
-    phone:String(p.phone||''),pref:p.pref||(p.phone?'whatsapp':'email'),about:p.about||'',photo:m.email===p.email?m.photo:null,reqId:p.id,
-    canRefer:!!p.canRefer,unit:p.unit||'',ilUni:p.ilUni||'',hometown:p.hometown||'',topics:p.topics||[],
-    schools:schools.length?schools:[{school:fallback,program:'MBA',year:NOW_YEAR,start:NOW_YEAR-2}],
-    career:(p.career||[]).map(c=>({years:c.start?`${c.start}–${c.end||'Present'}`:'',company:c.company,role:c.role,location:c.location||''})),
-    verify:{school:p.status==='approved'?'admin':'pending',identity:false,workplace:false}});
-  S.isAdmin=!!p.isAdmin; if(S.isAdmin) loadJoinReqs();
-  recompute(m); saveMe(); S.firstRun=false; S.join=null; go('home',{},false);
-  toast(p.status==='approved'?`Welcome back, ${esc(p.first)}`:'You’re logged in. Your request is still waiting for an admin.');
+/* Copies your profile from the server (my_profile) into P[0]. */
+function applyProfile(p){
+  const m=me(), sameUser=m.uid===p.id;
+  Object.assign(m,BLANK_DETAILS(),{uid:p.id,first:p.first,last:p.last,role:p.headline,email:p.email,location:p.location||'Boston',industry:p.industry||Object.keys(INDUSTRIES)[0],
+    phone:String(p.phone||''),pref:p.pref||(p.phone?'whatsapp':'email'),about:p.about||'',photoPath:p.photoPath||null,photo:sameUser&&p.photoPath?m.photo:null,reqId:p.id,
+    canRefer:!!p.canRefer,unit:p.unit||'',ilUni:p.ilUni||'',hometown:p.hometown||'',topics:p.topics||[],linkedin:p.linkedin||'',
+    schools:liveSchools(p.schools),
+    career:(p.career||[]).map(c=>({years:liveYears(c),company:c.company,role:c.role||'',location:c.location||''})),
+    verify:{school:p.status==='approved'?'admin':p.status==='declined'?'declined':'pending',identity:false,workplace:false}});
+  S.isAdmin=!!p.isAdmin; recompute(m); saveMe();
 }
-/* On load: refresh the member's status from the server (approved yet? admin?). */
+function loginApply(p){
+  applyProfile(p); if(S.isAdmin) loadJoinReqs();
+  S.firstRun=false; S.join=null; go('home',{},false);
+  toast(p.status==='approved'?`Welcome back, ${esc(p.first)}`:'You’re logged in. Your request is still waiting for an admin.');
+  liveLoad();
+}
+/* On load: refresh your profile and status from the server, then load the network. */
 async function checkApproval(){
   if(!LIVE) return;
-  let p; try{ p=await API.myProfile(); }catch(_){ return; }
-  if(!p) return;   // not logged in on this device
-  const m=me(); S.isAdmin=!!p.isAdmin; if(S.isAdmin) loadJoinReqs();
-  if(m.verify.school==='pending'&&p.status==='approved'){ m.verify.school='admin'; saveMe(); render(); toast('You’re approved! You’re now an official member.'); }
-  else if(m.verify.school==='pending'&&p.status==='declined'){ toast('Your request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.'); }
-  else render();
+  let p; try{ if(!await API.sessionEmail()){ liveLoggedOut(); return; } p=await API.myProfile(); }
+  catch(_){ toast('We couldn’t reach the server. Check your connection and refresh.'); return; }
+  if(!p){ liveLoggedOut(); return; }   // not logged in on this device any more
+  const was=me().verify.school; applyProfile(p); if(S.isAdmin) loadJoinReqs();
+  if(was==='pending'&&p.status==='approved') toast('You’re approved! You’re now an official member.');
+  else if(p.status==='declined') toast('Your request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.');
+  render(); liveLoad();
 }
+function liveLoggedOut(){
+  try{ localStorage.removeItem(STORE_KEY); }catch(_){ }
+  S.firstRun=true; joinStart('join'); S.join.login={emailMode:true}; S.join.step='login'; render();
+}
+
+/* ---------- live data ----------
+   In live mode every member, star, post and intro comes from Supabase; nothing fictional is shown.
+   P[0] is you. Everyone else gets a local id (their position in P) and keeps their database id in p.uid. */
+const UID=new Map();                       // database id -> local id
+const hashOf=s=>{ let h=0; for(const ch of String(s)) h=(h*31+ch.charCodeAt(0))>>>0; return h; };
+const HAIRS=['short','long','curly','bun','side','buzz'];
+const roleCatFor=h=>Object.keys(ROLES).find(k=>ROLES[k].some(a=>new RegExp('\\b'+a+'\\b','i').test(h||'')))||'';
+const liveYears=c=>c.start?`${c.start}–${c.end||'Present'}`:c.end?String(c.end):'Present';
+function liveSchools(list){
+  const fb=Object.keys(SCHOOLS)[0];
+  const out=(list||[]).map(s=>{ const y=+s.year||NOW_YEAR; return {school:SCHOOLS[s.school]?s.school:(matchSchool(s.school||'')||fb),program:s.program||'MBA',year:y,start:+s.start||y-2,concentration:s.concentration||'',clubs:s.clubs||[]}; });
+  return out.length?out:[{school:fb,program:'MBA',year:NOW_YEAR,start:NOW_YEAR-2,concentration:'',clubs:[]}];
+}
+function livePerson(r,id){
+  const p={id,uid:r.id,first:r.first,last:r.last,role:r.headline,location:r.location||'',industry:r.industry||'',about:r.about||'',
+    pref:r.pref||'email',canRefer:!!r.canRefer,unit:r.unit||'',ilUni:r.ilUni||'',hometown:r.hometown||'',topics:r.topics||[],
+    linkedin:r.linkedin||'',photoPath:r.photoPath||null,photo:null,email:'',phone:'',hair:HAIRS[hashOf(r.id)%HAIRS.length],
+    schools:liveSchools(r.schools),career:(r.career||[]).map(c=>({years:liveYears(c),company:c.company,role:c.role||'',location:c.location||''})),
+    roleCat:roleCatFor(r.headline),verify:{school:'admin',identity:false,workplace:false}};
+  recompute(p); return p;
+}
+/* Clears the sample data, so live mode never shows fictional people, not even for a moment. */
+function liveReset(){
+  P.length=1; UID.clear(); ALL_COMPANIES.length=0;
+  Object.keys(INCOMING_NOTES).forEach(k=>delete INCOMING_NOTES[k]);
+  Object.assign(S,{stars:new Set(),unlocked:new Set(),pending:new Set(),incoming:new Set(),intros:[],introIds:{},interacted:[],viewed:[],
+    feed:{posts:[],interested:new Set()}});
+}
+/* Loads everything you may see. Safe to call again to refresh. */
+async function liveLoad(){
+  const m=me(); if(!LIVE||!m.uid) return;
+  let dir,contacts,stars,intros,posts,interest;
+  try{
+    [dir,contacts,stars,intros,posts,interest]=await Promise.all([API.directory(),API.table('member_contacts','member_id,email,phone'),
+      API.table('stars','member_id'),API.table('intro_requests','id,requester_id,recipient_id,note,status,created_at,responded_at'),
+      API.table('posts','id,author_id,type,body,photo_path,created_at','created_at'),API.table('post_interest','post_id')]);
+  }catch(_){ toast('We couldn’t load the network. Check your connection and refresh.'); return; }
+  liveReset(); UID.set(m.uid,ME);
+  for(const r of dir||[]){ if(r.id===m.uid) continue; const id=P.length; UID.set(r.id,id); P.push(livePerson(r,id)); }
+  ALL_COMPANIES.push(...new Set(P.flatMap(p=>[p.curCompany,...p.prev]).filter(Boolean)));
+  for(const c of contacts||[]){ const id=UID.get(c.member_id); if(id>0){ Object.assign(P[id],{email:c.email,phone:c.phone}); S.unlocked.add(id); } }
+  for(const x of stars||[]){ const id=UID.get(x.member_id); if(id!=null) S.stars.add(id); }
+  for(const r of intros||[]){
+    const sent=r.requester_id===m.uid, other=UID.get(sent?r.recipient_id:r.requester_id); if(other==null) continue;
+    if(sent){ S.intros.push({uid:r.id,to:other,note:r.note,status:r.status,sentAt:r.created_at,respondedAt:r.responded_at}); if(r.status==='pending') S.pending.add(other); }
+    else if(r.status==='pending'){ S.incoming.add(other); INCOMING_NOTES[other]=r.note; S.introIds[other]=r.id; }
+    if(r.status==='accepted') S.interacted.push({id:other,label:'Intro accepted'});
+  }
+  S.feed.posts=(posts||[]).map(x=>({id:x.id,author:UID.get(x.author_id),type:x.type,text:x.body,ts:Date.parse(x.created_at),photoPath:x.photo_path})).filter(x=>x.author!=null);
+  S.feed.interested=new Set((interest||[]).map(x=>x.post_id));
+  render(); livePhotos();
+}
+/* Photos are private: fetch links that work for 12 hours, then show them. */
+async function livePhotos(){
+  const people=P.filter(p=>p.photoPath), posts=S.feed.posts.filter(x=>x.photoPath);
+  if(!people.length&&!posts.length) return;
+  const [a,b]=await Promise.all([API.photoUrls('avatars',people.map(p=>p.photoPath)),API.photoUrls('post-photos',posts.map(x=>x.photoPath))]);
+  people.forEach(p=>{ if(a[p.photoPath]) p.photo=a[p.photoPath]; }); posts.forEach(x=>{ if(b[x.photoPath]) x.photo=b[x.photoPath]; });
+  render();
+}
+/* Your profile as the database stores it (same limits as the members table). */
+function profilePayload(m){
+  return {first:clip(m.first,LIMITS.name),last:clip(m.last,LIMITS.name),headline:clip(m.role,LIMITS.headline),location:m.location,industry:m.industry,
+    about:clip(m.about,LIMITS.about),pref:m.pref,canRefer:!!m.canRefer,unit:m.unit||'',ilUni:m.ilUni||'',hometown:m.hometown||'',topics:m.topics||[],phone:m.phone||'',
+    schools:m.schools.map(s=>({school:s.school,program:s.program,year:s.year,start:s.start||null,concentration:s.concentration||'',clubs:s.clubs||[]})),
+    career:m.career.map(c=>{ const [st,en]=ySpan(c.years); return {company:c.company,role:c.role||'',location:c.location||'',start:st||null,end:st?en:null}; })};
+}
+/* Saves your profile after an edit. The screen already shows the change; this only warns if saving failed. */
+function liveSaveProfile(){
+  if(!LIVE||!me().uid) return;
+  API.saveProfile(profilePayload(me())).catch(()=>toast('We couldn’t save that change. Check your connection and try again.'));
+}
+const liveErr=e=>e&&e.code==='offline'?'You’re offline. Check your connection and try again.':'Something went wrong. Try again.';
 /* Admins: real pending requests replace the sample ones. */
 async function loadJoinReqs(){
   try{ S.joinReqs=(await API.pendingRequests()).map(liveReq); }catch(_){ S.joinReqs=[]; }
@@ -2262,22 +2402,27 @@ document.addEventListener('click',e=>{
     case 'scroll': { const tr=document.getElementById('track-'+t.dataset.key); tr.scrollBy({left:+t.dataset.dir*tr.clientWidth*.8,behavior:'smooth'}); break; }
     case 'connect': openConnect(id); break;
     case 'send-request': sendRequest(id); break;
-    case 'pending': toast(`Waiting for ${esc(byId(id).first)} to accept`,{act:'preview-email',id,label:'See the email'}); break;
-    case 'accept': S.incoming.delete(id); unlockContact(id); logInteraction(id,'Intro accepted'); softRender(id); toast(`You accepted ${esc(byId(id).first)}’s intro. You can now reach each other.`,{act:byId(id).pref==='whatsapp'?'wa':'email',id,label:'Say hello'}); break;
-    case 'decline': S.incoming.delete(id); render(); toast('Request ignored'); break;
-    case 'withdraw': { S.pending.delete(id); const r=lastIntro(id); if(r&&r.status==='pending'){ r.status='withdrawn'; r.respondedAt=new Date().toISOString(); } render(); toast('Intro withdrawn'); break; }
+    case 'pending': toast(`Waiting for ${esc(byId(id).first)} to accept`,LIVE?null:{act:'preview-email',id,label:'See the email'}); break;
+    case 'accept': case 'decline': { const ok=t.dataset.act==='accept', p=byId(id), done=()=>{ S.incoming.delete(id); if(ok) logInteraction(id,'Intro accepted'); softRender(id); render();
+        toast(ok?`You accepted ${esc(p.first)}’s intro. ${esc(p.first)} can now reach you on your ${me().pref==='whatsapp'?'WhatsApp':'email'}.`:'Intro declined. They see a polite note, nothing else.'); };
+      if(LIVE) API.respondIntro(S.introIds[id],ok).then(done).catch(e=>toast(liveErr(e))); else done(); break; }
+    case 'withdraw': { const r=lastIntro(id), done=()=>{ S.pending.delete(id); if(r&&r.status==='pending'){ r.status='withdrawn'; r.respondedAt=new Date().toISOString(); } render(); toast('Intro withdrawn'); };
+      if(LIVE&&r) API.withdrawIntro(r.uid).then(done).catch(e=>toast(liveErr(e))); else done(); break; }
     case 'preview-email': introEmail(id); break;
     case 'intro-accept': respondIntro(id,true); break;
     case 'intro-decline': respondIntro(id,false); break;
     case 'declined-info': toast(`${esc(byId(id).first)} can’t take intros right now. Try someone else at ${esc(byId(id).company)}.`); break;
     case 'company': S.browse=null; go('company',{co:t.dataset.co}); break;
-    case 'toggle-refer': { const m=me(); if(!m.curCompany){ toast('Add a current position first. Referrals are for the company you work at now.'); break; } m.canRefer=!m.canRefer; saveMe(); render(); toast(m.canRefer?`Members will see you can refer at ${esc(m.curCompany)}`:'“Can refer” turned off'); break; }
+    case 'toggle-refer': { const m=me(); if(!m.curCompany){ toast('Add a current position first. Referrals are for the company you work at now.'); break; } m.canRefer=!m.canRefer; saveMe(); liveSaveProfile(); render(); toast(m.canRefer?`Members will see you can refer at ${esc(m.curCompany)}`:'“Can refer” turned off'); break; }
     case 'feed-filter': S.feedFilter=t.dataset.filter; render(); break;
     case 'feed-type': { const D=S.feedDraft; D.text=val('feed-text'); D.type=D.type===t.dataset.type?null:t.dataset.type; if(!FEED_PHOTO_TYPES.includes(D.type)) D.photo=null; render(); } document.getElementById('feed-text').focus(); break;
     case 'feed-post': feedPost(); break;
     case 'feed-photo-rm': S.feedDraft.text=val('feed-text'); S.feedDraft.photo=null; render(); break;
-    case 'feed-del': S.feed.posts=S.feed.posts.filter(p=>p.id!==t.dataset.post); saveFeed(); render(); toast('Post deleted'); break;
-    case 'feed-interest': { const k=t.dataset.post, F=S.feed; F.interested.has(k)?F.interested.delete(k):F.interested.add(k); saveFeed(); render(); break; }
+    case 'feed-del': { const k=t.dataset.post, post=S.feed.posts.find(p=>p.id===k);
+      if(LIVE) API.deletePost(k).then(()=>{ if(post&&post.photoPath) API.removePhoto('post-photos',post.photoPath); }).catch(e=>{ if(post){ S.feed.posts.push(post); S.feed.posts.sort((a,b)=>b.ts-a.ts); render(); } toast(liveErr(e)); });
+      S.feed.posts=S.feed.posts.filter(p=>p.id!==k); saveFeed(); render(); toast('Post deleted'); break; }
+    case 'feed-interest': { const k=t.dataset.post, F=S.feed, on=!F.interested.has(k); on?F.interested.add(k):F.interested.delete(k); saveFeed(); render();
+      if(LIVE) API.setInterest(k,on).catch(e=>{ on?F.interested.delete(k):F.interested.add(k); render(); toast(liveErr(e)); }); break; }
     case 'email': openContact(id,'email'); break;
     case 'wa': openContact(id,'wa'); break;
     case 'copy': { const txt=t.dataset.text; const done=()=>{t.innerHTML=I.check+'Copied'}; try{ navigator.clipboard.writeText(txt).then(done,()=>{done()}); }catch(_){ done(); } break; }
@@ -2302,7 +2447,7 @@ document.addEventListener('click',e=>{
     case 'join-go': S.join.step=t.dataset.step; render(); window.scrollTo(0,0); break;
     case 'join-rm': S.join.draft.career.splice(+t.dataset.idx,1); render(); break;
     case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
-    case 'join-finish': joinApply(t.dataset.status); me().reqId=S.join.reqId||null; saveMe(); S.firstRun=false; S.join.step='done'; render(); window.scrollTo(0,0); break;
+    case 'join-finish': joinApply(t.dataset.status); me().reqId=S.join.reqId||null; if(LIVE) me().uid=S.join.reqId||null; saveMe(); S.firstRun=false; S.join.step='done'; render(); window.scrollTo(0,0); break;
     case 'join-demo-approve': { const m=me(); m.verify.school='admin'; saveMe(); render(); openRegEmail(m.first,m.email,'An admin approved your request. In the live app this lands in your inbox.'); break; }
     case 'join-code-verify': joinVerifyCode(); break;
     case 'join-code-resend': S.join.codeSent=false; joinSubmit(); break;
@@ -2319,6 +2464,7 @@ document.addEventListener('click',e=>{
       S.joinReqs=S.joinReqs.filter(x=>x.id!==id); render();
       if(t.dataset.act==='jr-approve') openRegEmail(r.first,r.email,`You approved ${esc(r.name)}. In the live app this email goes out automatically.`); else toast(`Request from ${esc(r.first)} declined`); break; }
     case 'star': { const on=!S.stars.has(id); on?S.stars.add(id):S.stars.delete(id); saveStars(); const p=byId(id);
+      if(LIVE) API.star(p.uid,on).catch(e=>{ on?S.stars.delete(id):S.stars.add(id); render(); toast(liveErr(e)); });
       if(S.view==='network'&&S.netTab==='stars') render(); else refreshStar(id);
       toast(on?`${esc(p.first)} added to your stars`:`${esc(p.first)} removed from your stars`, on?{act:'nav-stars',label:'See starred'}:null); break; }
     case 'nav-stars': S.netTab='stars'; go('network'); break;
@@ -2349,7 +2495,7 @@ document.addEventListener('change',e=>{
   if(e.target.dataset.sort!==undefined){ S.sort=e.target.value; render(); }
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target.id==='l-email'){ e.preventDefault(); loginSendCode(); } if(e.key==='Enter'&&e.target.id==='l-code'){ e.preventDefault(); loginVerify(); } if(e.key==='Enter'&&e.target.id==='j-code'){ e.preventDefault(); joinVerifyCode(); } if(e.key==='Escape'){ closeModal(); S.draftAll=null; if(S.pill){ S.pill=null; render(); } } });
-if(LIVE) S.joinReqs=[];
+if(LIVE){ liveReset(); S.joinReqs=[]; }
 if(!handleLinkedInReturn()){ if(!loadMe()){ S.firstRun=true; joinStart('join'); } else checkApproval(); }
 render();
 </script>
