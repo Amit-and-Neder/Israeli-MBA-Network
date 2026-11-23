@@ -833,7 +833,7 @@ const S = {
   /* every intro request: {to, note, status:'pending'|'accepted'|'declined', sentAt, respondedAt}. "Connects" KPI = intros.length */
   intros:[],
   viewed:[8,22,14],
-  interacted:[{id:1,label:'WhatsApp · 2d ago'},{id:4,label:'Intro accepted · 5d ago'},{id:17,label:'Emailed · 1w ago'},{id:12,label:'Intro accepted · 2w ago'},{id:7,label:'WhatsApp · 3w ago'}],
+  interacted:[{id:1,label:'WhatsApp'},{id:4,label:'Intro accepted'},{id:17,label:'Emailed'},{id:12,label:'Intro accepted'},{id:7,label:'WhatsApp'}],
   /* people whose intro was accepted (either direction): their WhatsApp/email is unlocked for you */
   unlocked:new Set([1,4,7,12,17]),
   stars:loadStars(), starQ:'', starInd:'', starSchool:'',
@@ -1501,11 +1501,12 @@ function respondIntro(id,accept){
   const p=byId(id);
   r.status=accept?'accepted':'declined'; r.respondedAt=new Date().toISOString();
   S.pending.delete(id);
-  if(accept){ unlockContact(id); logInteraction(id,'Intro accepted · just now'); }
+  if(accept){ unlockContact(id); logInteraction(id,'Intro accepted'); }
   closeModal(); softRender(id);
   if(accept) toast(`${esc(p.first)} accepted your intro`, {act:p.pref==='whatsapp'?'wa':'email', id, label:p.pref==='whatsapp'?'Continue on WhatsApp':'Continue by email'});
   else toast(`${esc(p.first)} can’t take intros right now. No worries, it happens.`, p.curCompany?{act:'company',co:p.curCompany,label:`More at ${esc(p.curCompany)}`}:null);
 }
+/* Labels say how you interacted, never when: showing how long ago can make quiet members feel left out. */
 function logInteraction(id,label){ S.interacted=[{id,label},...S.interacted.filter(x=>x.id!==id)].slice(0,12); }
 function openContact(id,ch){
   const p=byId(id);
@@ -1515,7 +1516,7 @@ function openContact(id,ch){
   openModal(`<div class="handoff" style="color:${isWa?'var(--wa)':'var(--accent)'}"><div class="spin"></div><b style="color:var(--ink)">${isWa?'Opening WhatsApp…':'Opening your email app…'}</b><span class="muted" style="font-size:13.5px">Handing off to ${isWa?'WhatsApp':'your default mail client'}</span></div>`);
   setTimeout(()=>{
     if(!document.querySelector('.modal')) return;
-    logInteraction(id, isWa?'WhatsApp · just now':'Emailed · just now');
+    logInteraction(id, isWa?'WhatsApp':'Emailed');
     const digits=p.phone.replace(/\D/g,'');
     const body = isWa
       ? `<h3 style="display:flex;gap:8px;align-items:center"><span style="color:var(--wa)">${I.wa.replace('<svg','<svg width="22" height="22"')}</span>WhatsApp with ${esc(p.first)}</h3>
@@ -2061,7 +2062,7 @@ document.addEventListener('click',e=>{
     case 'connect': openConnect(id); break;
     case 'send-request': sendRequest(id); break;
     case 'pending': toast(`Waiting for ${esc(byId(id).first)} to accept`,{act:'preview-email',id,label:'See the email'}); break;
-    case 'accept': S.incoming.delete(id); unlockContact(id); logInteraction(id,'Intro accepted · just now'); softRender(id); toast(`You accepted ${esc(byId(id).first)}’s intro. You can now reach each other.`,{act:byId(id).pref==='whatsapp'?'wa':'email',id,label:'Say hello'}); break;
+    case 'accept': S.incoming.delete(id); unlockContact(id); logInteraction(id,'Intro accepted'); softRender(id); toast(`You accepted ${esc(byId(id).first)}’s intro. You can now reach each other.`,{act:byId(id).pref==='whatsapp'?'wa':'email',id,label:'Say hello'}); break;
     case 'decline': S.incoming.delete(id); render(); toast('Request ignored'); break;
     case 'withdraw': { S.pending.delete(id); const r=lastIntro(id); if(r&&r.status==='pending'){ r.status='withdrawn'; r.respondedAt=new Date().toISOString(); } render(); toast('Intro withdrawn'); break; }
     case 'preview-email': introEmail(id); break;
