@@ -1851,10 +1851,10 @@ function viewJoin(){
   if(J.step==='welcome'){
     body=`<div class="jcard">
       <h1>Join the network of Israeli MBAs in the US</h1>
-      <p class="lead">Connect LinkedIn and we fill in your profile for you, or sign up with email and fill it in yourself. An admin reviews every request, and we email you as soon as you’re approved.</p>
-      <div class="row"><button class="btn lg li pill" data-act="join-connect">${I.link}Continue with LinkedIn</button><button class="btn lg ghost pill" data-act="join-manual">${I.mail}Sign up with email</button></div>
+      <p class="lead">Upload your LinkedIn profile PDF and we fill in your profile for you. An admin reviews every request, and we email you as soon as you’re approved.</p>
+      <div class="row"><button class="btn lg li pill" data-act="join-go" data-step="imported">${I.doc}Sign up with your LinkedIn PDF</button></div>
       <p class="fine" style="font-size:14px;color:var(--muted)">Already a member? <button class="link" data-act="join-login">Log in</button></p>
-      <p class="fine">We import your name, photo, email, current role and most recent school. We never post for you, and we don’t read your messages or LinkedIn connections. You can edit everything before you submit.</p>
+      <p class="fine">The PDF is read in your browser. We use your name, email, headline, location, MBA and career history, and you can edit everything before you submit.</p>
     </div>`;
   }
   if(J.step==='login'){
@@ -1884,8 +1884,8 @@ function viewJoin(){
     const f=J.found, sync=J.mode==='sync';
     const row=(k,v,ok)=>`<li><span class="k">${k}</span><span class="v">${v||'<span class="muted" style="font-weight:400">Not found, add it next</span>'}</span>${ok&&v?`<span class="ok">${I.check}</span>`:''}</li>`;
     body=`<div class="jcard">
-      <h1>${sync?'Update from your LinkedIn PDF':'You’re signed in with LinkedIn'}</h1>
-      <p class="lead">${sync?'Upload a fresh copy of your LinkedIn PDF and we’ll add anything new.':'Now upload your LinkedIn profile PDF and we’ll fill in your whole profile: name, email, headline, location, MBA and career history.'}</p>
+      <h1>${sync?'Update from your LinkedIn PDF':'Upload your LinkedIn profile PDF'}</h1>
+      <p class="lead">${sync?'Upload a fresh copy of your LinkedIn PDF and we’ll add anything new.':'We’ll fill in your whole profile from it: name, email, headline, location, MBA and career history.'}</p>
       ${J.pdf==='done'?`<ul class="gotlist">
         ${row('Name',esc(d.first+' '+d.last),1)}${row('Email',esc(d.email),1)}${row('Headline',esc(d.role),1)}
         ${row('Location',f.location?esc(f.location)+(f.locMapped&&f.locMapped!==f.location?` <span class="muted" style="font-weight:400">→ ${esc(f.locMapped)}</span>`:''):'',1)}
@@ -1899,7 +1899,7 @@ function viewJoin(){
           ${J.pdfErr?`<small style="color:#C2362F;font-weight:600;display:block;margin-top:6px">${esc(J.pdfErr)}</small>`:''}</span>
         ${J.pdf==='none'?`<span class="btn primary pill upload">${I.doc}Upload PDF<input type="file" id="li-pdf" accept="application/pdf,.pdf" aria-label="Upload LinkedIn profile PDF"></span>`:''}
       </div>`}
-      <div class="row">${J.pdf==='done'?`<button class="btn lg primary pill" data-act="join-go" data-step="review">Review profile</button><button class="link" data-act="join-pdf-again">Use a different PDF</button>`:`<button class="link" data-act="join-go" data-step="review" ${J.pdf==='reading'?'disabled':''}>Skip, I’ll fill it in myself</button>`}</div>
+      <div class="row">${J.pdf==='done'?`<button class="btn lg primary pill" data-act="join-go" data-step="review">Review profile</button><button class="link" data-act="join-pdf-again">Use a different PDF</button>`:sync?`<button class="link" data-act="join-go" data-step="review" ${J.pdf==='reading'?'disabled':''}>Skip</button>`:`<button class="link" data-act="join-go" data-step="welcome" ${J.pdf==='reading'?'disabled':''}>Back</button>`}</div>
     </div>`;
   }
   if(J.step==='review'){
@@ -1920,7 +1920,7 @@ function viewJoin(){
       <div class="jsec two">${fld('j-loc','Location*',`<select id="j-loc">${LOC_OPTIONS.map(l=>`<option ${l===d.location?'selected':''}>${l}</option>`).join('')}</select>`)}${fld('j-ind','Industry*',`<select id="j-ind">${Object.keys(INDUSTRIES).map(l=>`<option ${l===d.industry?'selected':''}>${l}</option>`).join('')}</select>`)}</div>
       <div class="jsec">${fld('j-phone','WhatsApp number',`<input type="tel" id="j-phone" value="${esc(d.phone||'')}" placeholder="+1 (617) 555-0100">`,'<p class="hint"><span>Members you connect with can reach you here. LinkedIn doesn’t share phone numbers, so add it yourself.</span></p>')}</div>
       ${J.mode==='sync'?'':`<div class="jsec">${fld('j-liurl','LinkedIn profile URL',`<input type="text" id="j-liurl" value="${esc(J.liurl||'')}" placeholder="linkedin.com/in/your-name">`,'<p class="hint"><span>Helps the admin confirm who you are, so you’re approved faster.</span></p>')}</div>`}
-      <div class="row"><button class="btn lg primary pill" data-act="join-review-next">${J.mode==='sync'?'Save changes':'Continue'}</button>${J.mode==='sync'?'':`<button class="link" data-act="join-go" data-step="${J.manual?'welcome':'imported'}">Back</button>`}</div>
+      <div class="row"><button class="btn lg primary pill" data-act="join-review-next">${J.mode==='sync'?'Save changes':'Continue'}</button>${J.mode==='sync'?'':`<button class="link" data-act="join-go" data-step="imported">Back</button>`}</div>
     </div>`;
   }
   if(J.step==='verify'){
@@ -1968,7 +1968,7 @@ async function joinSubmit(){
   if(!BACKEND_URL){ J.reqSent=true; render(); window.scrollTo(0,0); return; }
   J.sending=true; J.sendErr=''; render();
   const payload={first:d.first,last:d.last,email:d.email,headline:d.role,school:SCHOOLS[e.school].full,classYear:e.year,location:d.location,industry:d.industry,
-    phone:d.phone,linkedin:J.liurl||'',source:J.manual?'manual':'linkedin',answer:J.answer,about:d.about,career:d.career.map(({src,...c})=>c)};
+    phone:d.phone,linkedin:J.liurl||'',source:'linkedin',answer:J.answer,about:d.about,career:d.career.map(({src,...c})=>c)};
   try{
     // text/plain keeps this a "simple" request, which Apps Script web apps accept without a CORS preflight
     const r=await (await fetch(BACKEND_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})).json();
@@ -2111,7 +2111,6 @@ document.addEventListener('click',e=>{
     case 'login-li-mode': if(LINKEDIN_CLIENT_ID){ S.join.login={}; } else S.join.step='welcome'; render(); break;
     case 'login-verify': loginVerify(); break;
     case 'login-restart': S.join.login={emailMode:true,email:S.join.login.email}; render(); break;
-    case 'join-manual': S.join.manual=true; S.join.draft.src={}; S.join.step='review'; render(); window.scrollTo(0,0); break;
     case 'join-go': S.join.step=t.dataset.step; render(); window.scrollTo(0,0); break;
     case 'join-rm': S.join.draft.career.splice(+t.dataset.idx,1); render(); break;
     case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
