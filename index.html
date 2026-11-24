@@ -2098,7 +2098,10 @@ function mailLink(app,email){
   if(PHONE_OS==='android') return {native:true, web, label:`Open in ${name} app`,
     // Android intent: a "send email" to this address, handed to that app only; Chrome opens the web version if it's missing.
     href: `intent:${email}#Intent;scheme=mailto;action=android.intent.action.SENDTO;package=${app==='gmail'?'com.google.android.gm':'com.microsoft.office.outlook'};S.browser_fallback_url=${encodeURIComponent(web)};end`};
-  return {native:false, web, href:web, label:`Open in ${name}`};
+  // Computer: the normal inbox with a small compose window, not a full-page draft.
+  // Outlook fills in the address; Gmail can't from a link, so the address is copied for pasting into "To".
+  if(app==='gmail') return {native:false, web, copy:true, href:'https://mail.google.com/mail/u/0/#inbox?compose=new', label:'Open in Gmail'};
+  return {native:false, web, href:`https://outlook.office.com/mail/?path=/mail/action/compose&to=${to}`, label:'Open in Outlook'};
 }
 /* iPhone can't tell us if an app is missing, so if the page is still showing after a moment, open the web version. */
 function openMailApp(href,web){
@@ -2123,7 +2126,8 @@ function openContact(id,ch){
     openModal(`<h3 style="display:flex;gap:8px;align-items:center"><span style="color:var(--accent)">${I.mail.replace('<svg','<svg width="22" height="22"')}</span>Email ${esc(p.first)}</h3>
       <dl class="kv"><dt>Email</dt><dd>${esc(p.email)}</dd><button class="btn sm ghost" data-act="copy" data-text="${esc(p.email)}">${I.copy}Copy</button></dl>
       <div class="mail-open">
-        ${['gmail','outlook'].map(app=>{ const l=mailLink(app,p.email); return `<a class="btn lg ghost" href="${esc(l.href)}" ${l.native?`data-act="mail-app" data-web="${esc(l.web)}"`:'target="_blank" rel="noopener"'}>${MAIL_ICONS[app]}${l.label}</a>`; }).join('')}
+        ${['gmail','outlook'].map(app=>{ const l=mailLink(app,p.email); return `<a class="btn lg ghost" href="${esc(l.href)}" ${l.native?`data-act="mail-app" data-web="${esc(l.web)}"`:l.copy?`data-act="mail-copy-open" data-email="${esc(p.email)}" target="_blank" rel="noopener"`:'target="_blank" rel="noopener"'}>${MAIL_ICONS[app]}${l.label}</a>`; }).join('')}
+      ${PHONE_OS?'':'<p class="muted" style="margin:10px 0 0;font-size:12.5px">Gmail opens your inbox with a new message, and the address is copied so you can paste it into “To”.</p>'}
       </div>
       <div class="row"><button class="btn ghost" data-act="close">Done</button></div>`);
     return;
@@ -3105,6 +3109,7 @@ document.addEventListener('click',e=>{
     case 'scrim': if(e.target===t) closeModal(); break;
     case 'close': closeModal(); break;
     case 'li-guide': openGuide(); break;
+    case 'mail-copy-open': { const em=t.dataset.email; try{ navigator.clipboard.writeText(em).then(()=>toast(`Copied ${em}. Paste it into “To” in Gmail.`),()=>{}); }catch(_){ } break; }
     case 'mail-app': e.preventDefault(); if(PHONE_OS==='ios') openMailApp(t.getAttribute('href'),t.dataset.web); else location.href=t.getAttribute('href'); break;
     case 'nav': S.browse=null; go(t.dataset.view); break;
     case 'back': back(); break;
