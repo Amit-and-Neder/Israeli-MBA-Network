@@ -949,6 +949,15 @@ h1,h2,h3,.page-h1,.hero h1,.land-h1,.phead h1,.jcard h1,.modal h3,.rail-h h2,.pa
 .lc{border-radius:12px}
 .land-cta{border-radius:var(--r-sm)}
 @media (max-width:720px) and (hover:none) and (pointer:coarse){.modal,.modal.edit,.modal.guide{border-radius:14px 14px 0 0;border-bottom:0}.bottom-nav button{border-radius:var(--r-sm)}}
+.report-link{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:4px 0;color:var(--faint);font-size:12.5px;font-weight:500}
+.report-link svg{width:14px;height:14px}
+.report-link:hover{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.report-reasons{display:flex;flex-direction:column;gap:6px;margin:4px 0 12px}
+.report-reasons .fopt{padding:9px 12px;border:1px solid var(--line);border-radius:var(--r-sm)}
+.report-reasons .fopt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+#rep-details{margin-top:2px}
+#rep-err{color:#C2362F;font-size:13px;font-weight:600;margin:-4px 0 10px}
+.jr.rep.resolved{opacity:.65}
 .invite-strip{display:flex;align-items:center;gap:14px;margin:6px 0 26px;padding:14px 16px;border:1px solid color-mix(in srgb,var(--accent) 22%,var(--line));border-radius:var(--r-lg);background:linear-gradient(110deg,color-mix(in srgb,var(--accent-soft) 70%,var(--surface)),var(--surface));box-shadow:var(--shadow)}
 .invite-strip .ico{width:44px;height:44px;flex:none;display:grid;place-items:center}
 .invite-strip .t{flex:1;min-width:0}
@@ -991,6 +1000,7 @@ const I = {
   star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg>',
   starOn:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg>',
   users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="16.5" cy="8.25" r="2.6" fill="currentColor" fill-opacity=".14" stroke-opacity=".55"/><path d="M15.2 13.6c2.7.2 4.6 2 5.2 4.9" stroke-opacity=".55"/><circle cx="9" cy="8.5" r="3.25" fill="currentColor" fill-opacity=".14"/><path d="M3.25 19.25c.6-3.4 2.9-5.4 5.75-5.4s5.15 2 5.75 5.4"/></svg>',
+  flag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4.5"/><path d="M5 4.5h11.5l-2 4 2 4H5" fill="currentColor" fill-opacity=".1"/></svg>',
   feed:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.25" width="17" height="15.5" rx="2.75" fill="currentColor" fill-opacity=".08"/><path d="M7.5 9h9M7.5 12.5h9M7.5 16h5"/></svg>',
   compass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.75" fill="currentColor" fill-opacity=".08"/><path d="M15.4 8.6l-1.9 4.9-4.9 1.9 1.9-4.9z" fill="currentColor" fill-opacity=".9" stroke-width="1.4"/></svg>',
   user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.6" fill="currentColor" fill-opacity=".14"/><path d="M4.75 20c.9-3.9 3.7-6.1 7.25-6.1s6.35 2.2 7.25 6.1"/></svg>',
@@ -1766,6 +1776,7 @@ function viewProfile(id){
       </div>
       ${actions}
       ${how}
+      ${isMe?'':`<button class="report-link" data-act="report" data-id="${id}">${I.flag}Report this profile</button>`}
     </div></section>
     <div class="pgrid">
       <div class="lcol">
@@ -1892,13 +1903,25 @@ async function acctDelete(){
 }
 
 function viewNetwork(){
-  const tabs = [['stars','Starred',S.stars.size],...(!LIVE||S.isAdmin?[['joinreqs','Admin: join requests',S.joinReqs.length]]:[])];
+  const openReports=(S.reports||[]).filter(r=>r.status==='open');
+  const tabs = [['stars','Starred',S.stars.size],...(!LIVE||S.isAdmin?[['joinreqs','Admin: join requests',S.joinReqs.length],['reports','Admin: reports',openReports.length]]:[])];
   if(!tabs.some(t=>t[0]===S.netTab)) S.netTab='stars';
   let body='';
   if(S.netTab==='stars') body = starsBox();
   if(S.netTab==='requests') body = S.incoming.size?`<div class="rlist">${[...S.incoming].map(id=>{const p=byId(id);return `<div class="req">${av(p,52)}<button class="who" data-act="profile" data-id="${id}"><b>${esc(p.name)}</b> ${badges(p)}<div class="muted" style="font-size:13.5px">${esc(p.role)} · ${esc(p.company)}</div></button>
       <button class="btn ghost sm" data-act="decline" data-id="${id}">Ignore</button><button class="btn primary sm" data-act="accept" data-id="${id}">${I.check}Accept intro</button>
       ${INCOMING_NOTES[id]?`<p class="note">“${esc(INCOMING_NOTES[id])}”</p>`:''}</div>`}).join('')}</div>`:`<div class="empty-rail">No pending requests. You’re all caught up.</div>`;
+  if(S.netTab==='reports'){
+    const rl=Object.fromEntries(REPORT_REASONS);
+    body = `<div class="notice" style="margin:-6px 0 14px">${I.shield}<span><b>Admins only.</b> Reports are private. The reported member never sees them or who sent them. We don’t block people: reach out, warn, or decline/remove the profile if it’s fake.</span></div>`
+      + ((S.reports||[]).length?`<div class="rlist">${S.reports.map(r=>{ const pid=UID.get(r.reported_id); return `<div class="jr rep ${r.status}">
+        <div class="jr-top"><span class="who">${pid!=null?`<button class="link" data-act="profile" data-id="${pid}"><b>${esc(r.reported_name)}</b></button>`:`<b>${esc(r.reported_name)}</b>`}
+          <div class="muted" style="font-size:13px">Reported by ${esc(r.reporter_name)} · ${new Date(r.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}${r.open_count>1?` · <b>${r.open_count} open reports</b>`:''}</div></span>
+          <span class="ptag" style="--tc:${r.status==='open'?'var(--warm)':'var(--ok)'};--tc-soft:${r.status==='open'?'var(--warm-soft)':'var(--ok-soft)'}">${r.status==='open'?'Open':'Resolved'}</span></div>
+        <div class="qa"><span>${esc(rl[r.reason]||r.reason)}</span>${r.details?esc(r.details):'<span class="muted">No details</span>'}</div>
+        ${r.status==='open'?`<div class="jr-acts"><button class="btn sm primary" data-act="report-resolve" data-rid="${r.id}">${I.check}Mark resolved</button></div>`:''}
+      </div>`; }).join('')}</div>`:`<div class="empty-rail">No reports. All good.</div>`);
+  }
   if(S.netTab==='joinreqs'){
     body = `<div class="notice" style="margin:-6px 0 14px">${I.shield}<span><b>Admins only.</b> Every new member is approved here by hand. Approve someone only if you’re confident they’re Israeli and studied where they say. Approving sends them their official welcome email. ${LIVE?'Each new request also arrives in your inbox.':'In the live app, each new request also arrives in the admin’s inbox with an Approve link.'}</span></div>`
       + (S.joinReqs.length?`<div class="rlist">${S.joinReqs.map(r=>{ const k=r.knows!=null?byId(r.knows):null; return `<div class="jr">
@@ -2139,6 +2162,27 @@ function openGuide(){
     <ol class="guide-steps"><li><b>Open your profile.</b> On LinkedIn, click <b>Me</b> in the top bar, then <b>View profile</b>.</li><li><b>Click “Resources”.</b> It’s the last button under your name and headline.</li><li><b>Choose “Save to PDF”.</b> The file goes to your Downloads folder. Then come back and upload it.</li></ol>
     <p class="muted" style="margin:6px 0 0;font-size:13px">Works on a computer. On a phone, open LinkedIn in the browser and switch to the desktop site.</p>
     <div class="row"><button class="btn primary pill" data-act="close">Got it</button></div></div></div>`;
+}
+/* ---------- report a profile ---------- */
+const REPORT_REASONS=[['fake','Fake or impersonating someone'],['spam','Spam or selling something'],['inappropriate','Inappropriate content'],['harassment','Harassment or abusive behavior'],['other','Something else']];
+function openReport(id){
+  const p=byId(id);
+  openModal(`<h3>Report ${esc(p.first)}’s profile</h3>
+    <p class="sub">Only the admins see this. ${esc(p.first)} won’t know who reported them. We don’t block people in the community, an admin will review it and follow up.</p>
+    <div class="report-reasons" role="radiogroup" aria-label="Reason">${REPORT_REASONS.map(([k,l],i)=>`<label class="fopt"><input type="radio" name="rep-reason" value="${k}" ${i===0?'':''}><span>${l}</span></label>`).join('')}</div>
+    <p class="err" id="rep-err" hidden></p>
+    <textarea id="rep-details" maxlength="1000" rows="3" placeholder="Anything that helps the admin understand (optional)"></textarea>
+    <div class="row"><button class="btn ghost" data-act="close">Cancel</button><button class="btn primary" data-act="report-send" data-id="${id}">${I.flag}Send report</button></div>`);
+}
+async function sendReport(id,btn){
+  const reason=document.querySelector('input[name=rep-reason]:checked')?.value, details=(document.getElementById('rep-details').value||'').trim();
+  const err=document.getElementById('rep-err');
+  if(!reason){ err.hidden=false; err.textContent='Choose a reason.'; return; }
+  const p=byId(id);
+  if(!LIVE){ closeModal(); toast('Thanks. An admin will review it.'); return; }
+  btn.disabled=true;
+  try{ await API.reportMember(p.uid,reason,details); closeModal(); toast('Thanks. An admin will review it.'); }
+  catch(e){ btn.disabled=false; err.hidden=false; err.textContent=e&&e.code==='too-many'?'You’ve sent a lot of reports today. Try again tomorrow.':liveErr(e); }
 }
 /* ---------- invite classmates ---------- */
 let inviteLang='he';
@@ -2603,6 +2647,10 @@ const API={
   async submitJoin(payload){ const row=await rpc('submit_join_request',{p:payload}); notify({action:'join-request'}); return row; },
   /* Admins only (the database refuses everyone else). */
   pendingRequests:()=>rpc('admin_pending_requests'),
+  /* Reports: members report a profile; admins review. No blocking. */
+  reportMember:(member,reason,details)=>rpc('report_member',{member,reason,details}),
+  adminReports:()=>rpc('admin_reports'),
+  resolveReport:(report)=>rpc('admin_resolve_report',{report}),
   async decide(id,approve){ const row=await rpc('admin_decide',{member:id,approve}); if(approve) notify({action:'welcome',member:id}); return row; },
   /* Member data (supabase/migrations/20261124000000_member_data.sql). The database checks every call again. */
   directory:()=>rpc('directory'),
@@ -3105,7 +3153,7 @@ function applyProfile(p){
   S.isAdmin=!!p.isAdmin; recompute(m); saveMe();
 }
 function loginApply(p){
-  applyProfile(p); if(S.isAdmin) loadJoinReqs();
+  applyProfile(p); if(S.isAdmin){ loadJoinReqs(); loadReports(); }
   S.firstRun=false; S.join=null; go('home',{},false);
   toast(p.status==='approved'?`Welcome back, ${esc(p.first)}`:'You’re logged in. Your request is still waiting for an admin.');
   liveLoad();
@@ -3116,7 +3164,7 @@ async function checkApproval(){
   let p; try{ if(!await API.sessionEmail()){ liveLoggedOut(); return; } p=await API.myProfile(); }
   catch(_){ toast('We couldn’t reach the server. Check your connection and refresh.'); return; }
   if(!p){ liveLoggedOut(); return; }   // not logged in on this device any more
-  const was=me().verify.school; applyProfile(p); if(S.isAdmin) loadJoinReqs();
+  const was=me().verify.school; applyProfile(p); if(S.isAdmin){ loadJoinReqs(); loadReports(); }
   if(p.status==='pending') notify({action:'join-request'});   // re-sends the admin email if it didn't go out (each email goes out once)
   if(was==='pending'&&p.status==='approved') toast('You’re approved! You’re now an official member.');
   else if(p.status==='declined') toast('Your request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.');
@@ -3218,6 +3266,11 @@ function liveSaveContact(){
 }
 const liveErr=e=>e&&e.code==='offline'?'You’re offline. Check your connection and try again.':'Something went wrong. Try again.';
 /* Admins: real pending requests replace the sample ones. */
+/* Admins: reports about members. */
+async function loadReports(){
+  try{ S.reports=await API.adminReports(); }catch(_){ S.reports=[]; }
+  if(S.view==='network') render();
+}
 async function loadJoinReqs(){
   try{ S.joinReqs=(await API.pendingRequests()).map(liveReq); }catch(_){ S.joinReqs=[]; }
   if(S.view==='network') render();
@@ -3254,6 +3307,9 @@ document.addEventListener('click',e=>{
     case 'scrim': if(e.target===t) closeModal(); break;
     case 'close': closeModal(); break;
     case 'li-guide': openGuide(); break;
+    case 'report': openReport(id); break;
+    case 'report-send': sendReport(id,t); break;
+    case 'report-resolve': { const rid=t.dataset.rid; t.disabled=true; API.resolveReport(rid).then(()=>{ toast('Marked as resolved'); loadReports(); }).catch(e=>{ t.disabled=false; toast(liveErr(e)); }); break; }
     case 'invite': openInvite(); break;
     case 'inv-lang': inviteLang=t.dataset.lang; openInvite(); break;
     case 'inv-copy': { const txt=invBody(); try{ navigator.clipboard.writeText(txt).then(()=>{ t.innerHTML=I.check+'Copied'; toast('Invite copied. Paste it anywhere.'); },()=>{}); }catch(_){ } break; }
