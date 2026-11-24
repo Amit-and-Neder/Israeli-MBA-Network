@@ -424,6 +424,11 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .edit-f .sp{flex:1}
 .req-note{font-size:12.5px;color:var(--muted);margin:0}
 .field{display:flex;flex-direction:column;gap:5px}
+.field > label.check{display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer}
+.field > label.check:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:var(--accent-text)}
+.field > label.check b{font-weight:600;color:var(--muted)}
+.field > label.check input{width:17px;height:17px;accent-color:var(--accent);margin:0}
+.radios label svg{width:16px;height:16px}
 .field > label,.field > .fl{font-size:13.5px;font-weight:600;color:var(--muted)}
 .field input[type=text],.field input[type=email],.field input[type=password],.field input[type=tel],.field select,.field textarea{height:42px;border:1px solid var(--faint);border-radius:8px;padding:0 12px;background:var(--surface);font-size:15px;width:100%}
 .field textarea{height:auto;min-height:130px;padding:10px 12px;resize:vertical;line-height:1.5}
@@ -1174,14 +1179,17 @@ function connectBtn(id,size=''){
   if(id===ME) return `<button class="btn ${size} ghost" data-act="nav" data-view="me">Your profile</button>`;
   const st = connState(id), p=byId(id);
   const a = `data-conn="${id}" data-size="${size}"`;
-  if(st==='unlocked') return p.pref==='whatsapp'
-    ? `<button class="btn ${size} wa" ${a} data-act="wa" data-id="${id}">${I.wa}WhatsApp</button>`
-    : `<button class="btn ${size} mail" ${a} data-act="email" data-id="${id}">${I.mail}Email</button>`;
+  if(st==='unlocked'){ const ways=contactWays(p), w=ways.includes(p.pref)?p.pref:ways[0];
+    return w==='whatsapp' ? `<button class="btn ${size} wa" ${a} data-act="wa" data-id="${id}">${I.wa}WhatsApp</button>`
+      : w==='email' ? `<button class="btn ${size} mail" ${a} data-act="email" data-id="${id}">${I.mail}Email</button>`
+      : `<button class="btn ${size} is-connected" ${a} disabled>${I.check}Intro accepted</button>`; }
   if(st==='pending') return `<button class="btn ${size} is-pending" ${a} data-act="pending" data-id="${id}">${I.clock}Intro sent</button>`;
   if(st==='incoming') return `<button class="btn ${size} primary" ${a} data-act="accept" data-id="${id}">${I.check}Accept intro</button>`;
   if(st==='declined') return `<button class="btn ${size} ghost" ${a} data-act="declined-info" data-id="${id}">Not available</button>`;
-  return `<button class="btn ${size} primary" ${a} data-act="connect" data-id="${id}">${I.mail}Contact</button>`;
+  return `<button class="btn ${size} primary" ${a} data-act="connect" data-id="${id}">${I.users}Request intro</button>`;
 }
+/* The ways a member shared, after they accepted your intro. */
+const contactWays=p=>[...(p.phone?['whatsapp']:[]),...(p.email&&p.shareEmail!==false?['email']:[])];
 function searchBox(size,id){
   const v = S.view==='results' && size!=='compact' ? S.query : (size==='compact'?'':'');
   return `<div class="search ${size}" data-search>
@@ -1483,9 +1491,9 @@ function viewProfile(id){
       <button class="btn ghost pill" data-act="join-start" data-mode="sync">${I.link}Update from LinkedIn</button>
       <button class="btn ghost pill" data-act="nav" data-view="settings">${I.shield}Account settings</button></div>`
     : st==='unlocked' ? `<div class="pactions">${starBtn(id,'lg')}
-      <button class="btn lg mail" data-act="email" data-id="${id}">${I.mail}Email${p.pref==='email'?'<span class="pref-dot">PREFERRED</span>':''}</button>
-      <button class="btn lg wa" data-act="wa" data-id="${id}">${I.wa}WhatsApp${p.pref==='whatsapp'?'<span class="pref-dot">PREFERRED</span>':''}</button></div>`
-    : `<div class="pactions">${starBtn(id,'lg')}${connectBtn(id,'lg')}<span class="muted" style="font-size:13px;align-self:center">${st==='pending'?`${esc(p.first)} gets one email and can accept or decline.`:st==='declined'?`${esc(p.first)} can’t take intros right now.`:`Contact details unlock after ${esc(p.first)} accepts your intro.`}</span></div>`;
+      ${contactWays(p).includes('email')?`<button class="btn lg mail" data-act="email" data-id="${id}">${I.mail}Email${p.pref==='email'?'<span class="pref-dot">PREFERRED</span>':''}</button>`:''}
+      ${contactWays(p).includes('whatsapp')?`<button class="btn lg wa" data-act="wa" data-id="${id}">${I.wa}WhatsApp${p.pref==='whatsapp'?'<span class="pref-dot">PREFERRED</span>':''}</button>`:''}</div>`
+    : `<div class="pactions">${starBtn(id,'lg')}${connectBtn(id,'lg')}<span class="muted" style="font-size:13px;align-self:center">${st==='pending'?`${esc(p.first)} gets one email and can accept or decline.`:st==='declined'?`${esc(p.first)} can’t take intros right now.`:`Once ${esc(p.first)} accepts, you’ll see how they prefer to be reached.`}</span></div>`;
   return `<main><div class="wrap page">
     ${isMe?'':`<button class="back" data-act="back">${I.left}Back</button>`}
     <section class="phead" style="--sc:${SCHOOLS[p.schools[0].school].color}"><div class="phead-band"><span class="band-label"><b>${esc(SCHOOLS[p.schools[0].school].full)}</b><span>${esc(p.schools[0].program)} · CLASS OF ${p.schools[0].year}</span></span><span class="band-mark">${esc(SCHOOLS[p.schools[0].school].tag)} ${yy(p.schools[0].year)}</span></div><div class="phead-body">
@@ -1863,7 +1871,7 @@ function introText(p){
 }
 function openConnect(id){
   const p=byId(id);
-  openModal(`<h3>Contact ${esc(p.first)}</h3><p class="sub">${esc(p.first)} gets one email with your note and your profile card, and can accept or decline in one tap. ${esc(p.first)}’s ${p.pref==='whatsapp'?'WhatsApp':'email'} unlocks for you only if they accept.</p>
+  openModal(`<h3>Request an intro to ${esc(p.first)}</h3><p class="sub">${esc(p.first)} gets one email with your note and your profile card, and can accept or decline in one tap. If they accept, you’ll see the contact details they chose to share.</p>
     <div class="mini">${av(p,46)}<span><b>${esc(p.name)}</b><small>${esc(p.role)} · ${esc(p.company)}</small></span></div>
     <p class="lbl"><label for="intro-note">Your note</label><span>Who you are · why you’re reaching out</span></p>
     <textarea id="intro-note" maxlength="500">${esc(introText(p))}</textarea>
@@ -1990,6 +1998,23 @@ function strengthPanel(p){
     ${items.map(([k,t,d])=>`<button class="todo ${d?'done':''}" data-act="edit" data-kind="${k}"><span class="ck">${d?I.check:''}</span>${t}</button>`).join('')}</section>`;
 }
 const yearOpts=(sel,from=NOW_YEAR+3,to=1990)=>{let o='';for(let y=from;y>=to;y--) o+=`<option value="${y}" ${+sel===y?'selected':''}>${y}</option>`;return o;};
+/* Contact sharing, used by sign-up (j-) and Contact info (e-). Members share email, WhatsApp or both, and pick one as preferred. */
+function contactFields(px,d){
+  const share=d.shareEmail!==false, pref=d.pref||(d.phone?'whatsapp':'email');
+  return `<p class="req-note" style="margin-top:0">Members see these only after you accept their intro. Share at least one.</p>
+    <div class="field" id="fw-${px}-share"><label class="check"><input type="checkbox" id="${px}-share" ${share?'checked':''}><span>Share my email${d.email?` <b>${esc(d.email)}</b>`:''}</span></label><p class="err" hidden></p></div>
+    ${fld(px+'-phone','WhatsApp number',`<input type="tel" id="${px}-phone" value="${esc(d.phone||'')}" placeholder="+1 (617) 555-0100">`,'<p class="hint"><span>Include the country code. Israeli numbers work too. Leave empty to not share WhatsApp.</span></p>')}
+    <div class="field" id="fw-${px}-pref"><span class="fl">Preferred way to be reached*</span><div class="radios"><label><input type="radio" name="${px}-pref" value="whatsapp" ${pref==='whatsapp'?'checked':''}>${I.wa}WhatsApp</label><label><input type="radio" name="${px}-pref" value="email" ${pref==='email'?'checked':''}>${I.mail}Email</label></div><p class="err" hidden></p></div>`;
+}
+function readContactFields(px){
+  let ok=true;
+  const ph=cleanPhone(val(px+'-phone')), share=document.getElementById(px+'-share').checked, pref=document.querySelector(`input[name=${px}-pref]:checked`)?.value;
+  if(!phoneOk(ph)){ fieldErr(px+'-phone','Enter a full number with country code, using digits only (e.g. +972 54 123 4567)'); ok=false; } else fieldErr(px+'-phone','');
+  if(!share&&!ph){ fieldErr(px+'-share','Share your email, add a WhatsApp number, or both'); ok=false; } else fieldErr(px+'-share','');
+  const prefErr=!pref?'Choose how you prefer to be reached':pref==='whatsapp'&&!ph?'Add a WhatsApp number, or prefer email':pref==='email'&&!share?'Share your email, or prefer WhatsApp':'';
+  fieldErr(px+'-pref',prefErr); if(prefErr) ok=false;
+  return ok?{phone:ph,shareEmail:share,pref}:null;
+}
 const fld=(id,label,input,hint='')=>`<div class="field" id="fw-${id}"><label for="${id}">${label}</label>${input}<p class="err" hidden></p>${hint}</div>`;
 function editShell(title,body,{del=null,saveKind,idx=''}={}){
   return `<div class="edit-h"><h3>${title}</h3><button class="ibtn" data-act="close" aria-label="Dismiss">${I.x}</button></div>
@@ -2008,10 +2033,9 @@ function openEdit(kind,idx){
       <div class="two">${fld('e-loc','Location*',`<select id="e-loc">${locOptions(p.location)}</select>`)}${fld('e-ind','Industry*',`<select id="e-ind">${Object.keys(INDUSTRIES).map(l=>`<option ${l===p.industry?'selected':''}>${l}</option>`).join('')}</select>`)}</div>`,{saveKind:'intro'});
   }
   if(kind==='contact'){
-    html=editShell('Edit contact info',`<p class="req-note">* Indicates required. Members use this to reach you after finding you.</p>
+    html=editShell('Edit contact info',`<p class="req-note">* Indicates required.</p>
       ${fld('e-email','Email*',`<input type="email" id="e-email" value="${esc(p.email)}" ${LIVE?'disabled':''}>`,LIVE?'<p class="hint"><span>This is the email you log in with. To change it, ask an admin.</span></p>':'')}
-      ${fld('e-phone','WhatsApp number',`<input type="tel" id="e-phone" value="${esc(p.phone||'')}" placeholder="+1 (617) 555-0100">`,'<p class="hint"><span>Include the country code. Israeli numbers work too.</span></p>')}
-      <div class="field" id="fw-e-pref"><span class="fl">Preferred way to be reached*</span><div class="radios"><label><input type="radio" name="e-pref" value="whatsapp" ${p.pref==='whatsapp'?'checked':''}>WhatsApp</label><label><input type="radio" name="e-pref" value="email" ${p.pref==='email'?'checked':''}>Email</label></div><p class="err" hidden></p></div>`,{saveKind:'contact'});
+      ${contactFields('e',{...p,email:''})}`,{saveKind:'contact'});
   }
   if(kind==='about'){
     html=editShell('Edit about',`<p class="req-note">Share what you did before your MBA, what you’re exploring now, and how other members can help.</p>
@@ -2071,10 +2095,8 @@ function saveEdit(kind,idx){
     Object.assign(p,{first:val('e-first'),last:val('e-last'),role:val('e-head'),location:val('e-loc'),industry:val('e-ind')}); }
   if(kind==='contact'){
     const em=val('e-email'); const emOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em); fieldErr('e-email',!em?'Enter your email':!emOk?'Enter a valid email address':''); if(!emOk) ok=false;
-    const ph=cleanPhone(val('e-phone')); const phOk=phoneOk(ph); fieldErr('e-phone',phOk?'':'Enter a full number with country code, using digits only (e.g. +972 54 123 4567)'); if(!phOk) ok=false;
-    const pref=document.querySelector('input[name=e-pref]:checked')?.value;
-    if(pref==='whatsapp'&&!ph){ fieldErr('e-pref','Add a WhatsApp number, or choose email'); ok=false; } else fieldErr('e-pref','');
-    if(!ok) return; Object.assign(p,{email:em,phone:ph,pref}); }
+    const c=readContactFields('e'); if(!c) ok=false;
+    if(!ok) return; Object.assign(p,{email:em,phone:c.phone,shareEmail:c.shareEmail,pref:c.pref}); }
   if(kind==='about'){ p.about=document.getElementById('e-about').value.trim(); }
   if(kind==='exp'){
     need('e-title','Enter a title'); need('e-co','Enter a company');
@@ -2093,7 +2115,7 @@ function saveEdit(kind,idx){
   if(kind==='israel'){ Object.assign(p,{unit:val('e-unit'),ilUni:val('e-iluni'),hometown:val('e-home')}); }
   if(kind==='topics'){ p.topics=[...new Set([...[...document.querySelectorAll('[data-topic]:checked')].map(x=>x.value),...val('e-topics').split(',').map(x=>x.trim()).filter(Boolean)])]; }
   recompute(p); saveMe(); closeModal(); render();
-  if(LIVE&&kind==='photo') livePhoto(p); else liveSaveProfile();
+  if(LIVE&&kind==='photo') livePhoto(p); else { liveSaveProfile(); if(kind==='contact') liveSaveContact(); }
   toast(kind==='photo'?'Photo updated':'Profile updated');
 }
 /* Uploads a new profile photo (or removes it), then points your profile at it and deletes the old file. */
@@ -2213,6 +2235,10 @@ const API={
   async table(name,cols,order){ const c=await sb(); let q=c.from(name).select(cols); if(order) q=q.order(order,{ascending:false}).limit(300);
     const {data,error}=await q; if(error) throw apiErr(error); return data; },
   saveProfile:(p)=>rpc('update_my_profile',{p}),
+  /* How you're reached after an accepted intro: { phone, shareEmail, pref }. */
+  saveContact:(p)=>rpc('update_my_contact',{p}),
+  /* Contact details you may see: yours, and those of members who accepted your intro (unshared emails come back empty). */
+  visibleContacts:()=>rpc('visible_contacts'),
   async star(uid,on){ const c=await sb(); const {error}=on?await c.from('stars').insert({member_id:uid}):await c.from('stars').delete().eq('member_id',uid); if(error) throw apiErr(error); },
   async createPost(row){ const c=await sb(); const {data,error}=await c.from('posts').insert(row).select('id,type,body,photo_path,created_at').single(); if(error) throw apiErr(error); return data; },
   async deletePost(id){ const c=await sb(); const {error}=await c.from('posts').delete().eq('id',id); if(error) throw apiErr(error); },
@@ -2316,7 +2342,7 @@ function joinStart(mode){
   const m=me();
   S.join={mode, step: mode==='sync'?'connecting':'login', login:{}, pdf:'none', pdfErr:'', found:null,
     draft: mode==='sync'
-      ? {first:m.first,last:m.last,role:m.role,email:m.email,location:m.location,industry:m.industry,phone:m.phone,pref:m.pref,about:m.about,schools:m.schools.map(x=>({...x})),career:m.career.map(c=>({...c,src:'you'})),src:{}}
+      ? {first:m.first,last:m.last,role:m.role,email:m.email,location:m.location,industry:m.industry,phone:m.phone,shareEmail:m.shareEmail!==false,pref:m.pref,about:m.about,schools:m.schools.map(x=>({...x})),career:m.career.map(c=>({...c,src:'you'})),src:{}}
       : {first:'',last:'',role:'',email:'',location:'Boston',industry:Object.keys(INDUSTRIES)[0],phone:'',pref:'whatsapp',about:'',schools:[],career:[],src:{}}};
   go('join');
   if(mode==='sync') joinConnect();
@@ -2485,7 +2511,7 @@ function viewJoin(){
         ${d.career.length?d.career.map((c,i)=>`<div class="exrow">${logo(c.company,false,'','',i)}<span class="t"><b>${esc(c.role)} · ${esc(c.company)}</b><small>${esc(c.years)}${c.location?' · '+esc(c.location):''}</small></span>${srcTag(c.src)}<button class="ibtn" data-act="join-rm" data-idx="${i}" aria-label="Remove ${esc(c.company)}">${I.x}</button></div>`).join(''):'<p class="muted" style="margin:0;font-size:14px">No positions yet. You can add them from your profile anytime.</p>'}
       </div>
       <div class="jsec two">${fld('j-loc','Location*',`<select id="j-loc">${locOptions(d.location)}</select>`)}${fld('j-ind','Industry*',`<select id="j-ind">${Object.keys(INDUSTRIES).map(l=>`<option ${l===d.industry?'selected':''}>${l}</option>`).join('')}</select>`)}</div>
-      <div class="jsec">${fld('j-phone','WhatsApp number',`<input type="tel" id="j-phone" value="${esc(d.phone||'')}" placeholder="+1 (617) 555-0100">`,'<p class="hint"><span>Members whose intro you accept can reach you here. LinkedIn doesn’t share phone numbers, so add it yourself.</span></p>')}</div>
+      <div class="jsec"><h3>${I.mail.replace('<svg','<svg width="17" height="17"')}How members reach you</h3>${contactFields('j',d)}</div>
       ${J.mode==='sync'?'':`<div class="jsec">${fld('j-liurl','LinkedIn profile URL',`<input type="text" id="j-liurl" value="${esc(J.liurl||'')}" placeholder="linkedin.com/in/your-name">`,'<p class="hint"><span>Helps the admin confirm who you are, so you’re approved faster.</span></p>')}</div>`}
       <div class="row"><button class="btn lg primary pill" data-act="join-review-next">${J.mode==='sync'?'Save changes':'Continue'}</button>${J.mode==='sync'?'':`<button class="link" data-act="join-go" data-step="imported">Back</button>`}</div>
     </div>`;
@@ -2529,11 +2555,11 @@ function joinReadReview(){
   const J=S.join, d=J.draft; let ok=true;
   const need=(id,msg)=>{ const bad=!val(id); fieldErr(id,bad?msg:''); if(bad) ok=false; };
   need('j-first','Enter your first name'); const em=val('j-email'); if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ fieldErr('j-email','Enter a valid email address'); ok=false; } else fieldErr('j-email',''); need('j-last','Enter your last name'); need('j-head','Enter a headline'); need('j-school','Select your school');
-  const ph=cleanPhone(val('j-phone')); if(!phoneOk(ph)){ fieldErr('j-phone','Enter a full number with country code, using digits only (e.g. +972 54 123 4567)'); ok=false; } else fieldErr('j-phone','');
+  const c=readContactFields('j'); if(!c) ok=false;
   if(!ok) return false;
   const y=+val('j-year'), sch=val('j-school'), prev=d.schools[0]||{};
   if(document.getElementById('j-liurl')) J.liurl=val('j-liurl').replace(/^https?:\/\/(www\.)?/,'');
-  Object.assign(d,{first:val('j-first'),last:val('j-last'),role:val('j-head'),email:val('j-email'),about:val('j-about'),location:val('j-loc'),industry:val('j-ind'),phone:ph,pref:ph?d.pref:'email'});
+  Object.assign(d,{first:val('j-first'),last:val('j-last'),role:val('j-head'),email:val('j-email'),about:val('j-about'),location:val('j-loc'),industry:val('j-ind'),phone:c.phone,shareEmail:c.shareEmail,pref:c.pref});
   d.schools=[{school:sch,program:prev.program||'MBA',year:y,start:prev.start||y-2}];
   return true;
 }
@@ -2585,7 +2611,8 @@ async function joinVerifyCode(){
 }
 async function joinSave(){
   const J=S.join;
-  try{ const row=await API.submitJoin(joinPayload()); J.reqId=row.id; J.reqSent=true; J.codeSent=false; }
+  try{ const row=await API.submitJoin(joinPayload()); J.reqId=row.id; J.reqSent=true; J.codeSent=false;
+    const d=J.draft; await API.saveContact({phone:d.phone||'',shareEmail:d.shareEmail!==false,pref:d.pref}).catch(e=>console.error('Contact save failed:', e&&e.detail||e)); }
   catch(err){ J.sendErr=joinErrText(err); }
   J.sending=false; render(); window.scrollTo(0,0);
 }
@@ -2748,14 +2775,14 @@ async function liveLoad(){
   const m=me(); if(!LIVE||!m.uid) return;
   let dir,contacts,stars,intros,posts,interest;
   try{
-    [dir,contacts,stars,intros,posts,interest]=await Promise.all([API.directory(),API.table('member_contacts','member_id,email,phone'),
+    [dir,contacts,stars,intros,posts,interest]=await Promise.all([API.directory(),API.visibleContacts(),
       API.table('stars','member_id'),API.table('intro_requests','id,requester_id,recipient_id,note,status,created_at,responded_at'),
       API.table('posts','id,author_id,type,body,photo_path,created_at','created_at'),API.table('post_interest','post_id')]);
   }catch(_){ toast('We couldn’t load the network. Check your connection and refresh.'); return; }
   liveReset(); UID.set(m.uid,ME);
   for(const r of dir||[]){ if(r.id===m.uid) continue; const id=P.length; UID.set(r.id,id); P.push(livePerson(r,id)); }
   ALL_COMPANIES.push(...new Set(P.flatMap(p=>[p.curCompany,...p.prev]).filter(Boolean)));
-  for(const c of contacts||[]){ const id=UID.get(c.member_id); if(id>0){ Object.assign(P[id],{email:c.email,phone:c.phone}); S.unlocked.add(id); } }
+  for(const c of contacts||[]){ const id=UID.get(c.member_id); if(id===ME){ m.shareEmail=c.share_email!==false; continue; } if(id>0){ Object.assign(P[id],{email:c.email||'',phone:c.phone||'',shareEmail:c.share_email!==false}); S.unlocked.add(id); } }
   for(const x of stars||[]){ const id=UID.get(x.member_id); if(id!=null) S.stars.add(id); }
   for(const r of intros||[]){
     const sent=r.requester_id===m.uid, other=UID.get(sent?r.recipient_id:r.requester_id); if(other==null) continue;
@@ -2794,6 +2821,14 @@ function liveSaveProfile(){
     toast('We couldn’t save that change. '+why, null, 12000);
   });
 }
+/* Contact sharing has its own server check: at least one of email or WhatsApp, and the preferred one shared. */
+function liveSaveContact(){
+  const m=me(); if(!LIVE||!m.uid) return;
+  API.saveContact({phone:m.phone||'',shareEmail:m.shareEmail!==false,pref:m.pref}).catch(e=>{
+    console.error('Contact save failed:', e&&e.detail||e);
+    toast('We couldn’t save how members reach you. '+(e&&e.code==='offline'?'You’re offline. Check your connection and try again.':'Open Contact info on your profile and save it again.'), null, 12000);
+  });
+}
 const liveErr=e=>e&&e.code==='offline'?'You’re offline. Check your connection and try again.':'Something went wrong. Try again.';
 /* Admins: real pending requests replace the sample ones. */
 async function loadJoinReqs(){
@@ -2816,7 +2851,7 @@ function liveReq(r){
 const BLANK_DETAILS = () => ({canRefer:false,unit:'',ilUni:'',hometown:'',topics:[]});
 function joinApply(schoolStatus){
   const d=S.join.draft, m=me();
-  Object.assign(m,{first:d.first,last:d.last,role:d.role,email:d.email,location:d.location,industry:d.industry,phone:d.phone,pref:d.pref,about:d.about,
+  Object.assign(m,{first:d.first,last:d.last,role:d.role,email:d.email,location:d.location,industry:d.industry,phone:d.phone,shareEmail:d.shareEmail!==false,pref:d.pref,about:d.about,
     schools:d.schools.map(s=>({...s})), career:d.career.map(({src,...c})=>c)});
   if(S.join.mode!=='sync') Object.assign(m,{photo:null,...BLANK_DETAILS()});
   m.verify={school:schoolStatus||m.verify.school, identity:false, workplace:false};
@@ -2886,7 +2921,7 @@ document.addEventListener('click',e=>{
     case 'forgot-confirm': forgotConfirm(); break;
     case 'join-go': S.join.step=t.dataset.step; render(); window.scrollTo(0,0); break;
     case 'join-rm': S.join.draft.career.splice(+t.dataset.idx,1); render(); break;
-    case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else if(LIVE){ joinCheckEmail(); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
+    case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); liveSaveProfile(); liveSaveContact(); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else if(LIVE){ joinCheckEmail(); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
     case 'join-finish': joinApply(t.dataset.status); me().reqId=S.join.reqId||null; if(LIVE) me().uid=S.join.reqId||null; saveMe(); S.firstRun=false; S.join.step='done'; render(); window.scrollTo(0,0); break;
     case 'join-demo-approve': { const m=me(); m.verify.school='admin'; saveMe(); render(); openRegEmail(m.first,m.email,'An admin approved your request. In the live app this lands in your inbox.'); break; }
     case 'join-taken-login': { const email=S.join.draft.email; closeModal(); S.join.login={email}; S.join.step='login'; render(); window.scrollTo(0,0); break; }
