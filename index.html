@@ -1224,7 +1224,7 @@ function rrow(p,extra=''){
     <div class="main">
       <div class="nmline"><button class="nm" data-act="profile" data-id="${p.id}">${esc(p.name)}</button>${badges(p,'md')}${statusTag(p,'margin:0')}${referBadge(p)}</div>
       <div class="rl">${esc(p.role)} · <b>${coName(p)}</b></div>
-      <div class="sub2">${esc(p.location)} · ${p.schools.map(s=>esc(`${SCHOOLS[s.school].full}, Class of ${s.year}`)).join(' · ')}</div>
+      <div class="sub2">${esc(locFull(p.location))} · ${p.schools.map(s=>esc(`${SCHOOLS[s.school].full}, Class of ${s.year}`)).join(' · ')}</div>
       ${extra}
     </div>
     <div class="acts">${starBtn(p.id)}${rowAction(p)}</div></li>`;
@@ -1236,7 +1236,7 @@ function rcard(r){
     <div class="main">
       <div><button class="nm" data-act="profile" data-id="${p.id}">${esc(p.name)}</button> <span style="margin-left:8px">${badges(p,'md')}</span>${statusTag(p)} ${referBadge(p)}</div>
       <div class="rl">${esc(p.role)} · <b>${coName(p)}</b></div>
-      <div class="meta"><span>${I.cap}${p.schools.map(s=>esc(`${SCHOOLS[s.school].full} · ${s.program}, Class of ${s.year}`)).join(', ')}</span><span>${I.pin}${esc(p.location)}</span><span>${I.layers}${esc(p.industry)}</span></div>
+      <div class="meta"><span>${I.cap}${p.schools.map(s=>esc(`${SCHOOLS[s.school].full} · ${s.program}, Class of ${s.year}`)).join(', ')}</span><span>${I.pin}${esc(locFull(p.location))}</span><span>${I.layers}${esc(p.industry)}</span></div>
       <span class="signal">${I.spark}<span>${esc(r.reason)}</span></span>
     </div>
     <div class="acts">${starBtn(p.id)}<button class="btn sm ghost" data-act="profile" data-id="${p.id}">View profile</button>${connectBtn(p.id,'sm')}</div>
@@ -1326,7 +1326,7 @@ function browsePanel(tab){
 const PILLS=['refer','school','year','curCompany','industry','location'];
 const FL = Object.fromEntries(FILTER_DEFS.map(([k,l])=>[k,l]));
 FL.location='Locations';
-const optLabel=(k,v)=> k==='year'?`Class of ${v}`: v;
+const optLabel=(k,v)=> k==='year'?`Class of ${v}`: k==='location'?locFull(v): v;
 function filterOptions(base,k){
   const def=FILTER_DEFS.find(d=>d[0]===k); const m=new Map();
   base.forEach(p=>[...new Set(def[2](p).map(String))].forEach(v=>m.set(v,(m.get(v)||0)+1)));
@@ -1432,7 +1432,7 @@ function commonGround(p){
   p.schools.forEach(s=>{ const mine=m.schools.find(x=>x.school===s.school); if(mine) out.push([I.cap, s.year===mine.year?`Same class: ${SCHOOLS[s.school].tag} ${yy(s.year)}`:`Both ${SCHOOLS[s.school].tag} (${yy(s.year)} and ${yy(mine.year)})`]); });
   [p.curCompany,...p.prev].filter(Boolean).forEach(c=>{ if(m.prev.includes(c)) out.push([I.building,`You both worked at ${c}`]); });
   if(p.industry===m.industry) out.push([I.layers,`Both in ${p.industry}`]);
-  if(p.location===m.location) out.push([I.pin,`Both based in ${p.location}`]);
+  if(p.location===m.location) out.push([I.pin,`Both based in ${locFull(p.location)}`]);
   if(p.unit && m.unit && p.unit===m.unit) out.push([I.shield,`Both served in ${p.unit}`]);
   if(p.ilUni && m.ilUni && p.ilUni===m.ilUni) out.push([I.cap,`Both studied at ${p.ilUni}`]);
   if(p.hometown && m.hometown && p.hometown===m.hometown) out.push([I.pin,`Both from ${p.hometown}`]);
@@ -1494,7 +1494,7 @@ function viewProfile(id){
         <h1>${esc(p.name)}${isMe?' <span class="tag">YOU</span>':''}</h1>
         <div class="school-line">${badges(p,'lg')}<span class="txt"><b>${p.schools.map(s=>esc(SCHOOLS[s.school].full)).join(', ')}</b><span>${p.schools.map(s=>esc(`${s.program} · ${s.year>NOW_YEAR?'Graduating':'Class of'} ${s.year}`)).join(', ')}</span></span></div>
         <div class="rl">${esc(p.role)} · <b>${coName(p)}</b></div>
-        <div class="meta"><span>${I.pin}${esc(p.location)}</span><span>${I.layers}${esc(p.industry)}</span></div>
+        <div class="meta"><span>${I.pin}${esc(locFull(p.location))}</span><span>${I.layers}${esc(p.industry)}</span></div>
         <div class="badges">${isMe&&p.verify&&p.verify.school==='pending'?`<span class="vbadge pend">${I.clock}Awaiting admin approval</span>`:''}${statusTag(p,'margin:0;vertical-align:0;align-self:center')}${referBadge(p).replace('class="refer"','class="refer" style="font-size:12.5px;padding:4px 10px"')}<span class="vbadge pref ${p.pref}">${p.pref==='whatsapp'?I.wa:I.mail}${prefLabel}</span></div>
       </div>
       ${actions}
@@ -1945,6 +1945,14 @@ function sendRequest(id){
 /* ---------- profile editing (LinkedIn-style) ---------- */
 const STORE_KEY='imn-my-profile-v2';
 const ME_FIELDS=['first','last','role','location','industry','schools','career','email','phone','pref','photo','about','verify','reqId','canRefer','unit','ilUni','hometown','topics','uid','photoPath','linkedin'];
+/* Country for each city, shown next to it ("Boston, United States") and used to group the picker. */
+const LOC_COUNTRY={'Boston':'United States','New York':'United States','SF Bay Area':'United States','Seattle':'United States','Los Angeles':'United States','Chicago':'United States','Washington, DC':'United States','Austin':'United States','Miami':'United States',
+  'Tel Aviv':'Israel','Jerusalem':'Israel','Haifa':'Israel','London':'United Kingdom','Paris':'France','Barcelona':'Spain','Madrid':'Spain','Berlin':'Germany'};
+const locFull=l=>l&&LOC_COUNTRY[l]?`${l}, ${LOC_COUNTRY[l]}`:(l||'');
+function locOptions(sel){
+  const groups={}; LOC_OPTIONS.forEach(l=>{ const c=LOC_COUNTRY[l]||'Other'; (groups[c]=groups[c]||[]).push(l); });
+  return Object.entries(groups).map(([c,ls])=>`<optgroup label="${esc(c)}">${ls.map(l=>`<option value="${esc(l)}" ${l===sel?'selected':''}>${esc(c==='Other'?l:locFull(l))}</option>`).join('')}</optgroup>`).join('');
+}
 const LOC_OPTIONS=['Boston','New York','SF Bay Area','Seattle','Los Angeles','Chicago','Washington, DC','Austin','Miami','Tel Aviv','Jerusalem','Haifa','London','Paris','Barcelona','Madrid','Berlin','Other'];
 const PROGRAMS=['MBA','EMBA','Sloan Fellows MBA','Part-time MBA','MBA/MS'];
 /* Phone numbers pasted from Contacts or WhatsApp often carry hidden direction marks, non-breaking spaces
@@ -1997,7 +2005,7 @@ function openEdit(kind,idx){
       ${fld('e-head','Headline*',`<input type="text" id="e-head" value="${esc(p.role)}" maxlength="120" data-count="c-head">`,`<p class="hint"><span>Shown under your name, e.g. “MBA Candidate · ex-PM at Monday.com”</span><span id="c-head">${p.role.length}/120</span></p>`)}
       <div class="field"><span class="fl">Current position</span><div class="notice">${I.building}<span>${p.curCompany?`<b>${esc(p.curCompany)}</b> comes from your Experience.`:'Shown from your Experience.'} <button class="link" data-act="edit" data-kind="exp">Add a new position</button></span></div></div>
       <div class="field"><span class="fl">Education</span><div class="notice">${I.cap}<span>${p.schools.map(s=>esc(`${SCHOOLS[s.school].full} · ${s.program} ’${String(s.year).slice(2)}`)).join(', ')} <button class="link" data-act="edit" data-kind="edu" data-idx="0">Edit education</button></span></div></div>
-      <div class="two">${fld('e-loc','Location*',`<select id="e-loc">${LOC_OPTIONS.map(l=>`<option ${l===p.location?'selected':''}>${l}</option>`).join('')}</select>`)}${fld('e-ind','Industry*',`<select id="e-ind">${Object.keys(INDUSTRIES).map(l=>`<option ${l===p.industry?'selected':''}>${l}</option>`).join('')}</select>`)}</div>`,{saveKind:'intro'});
+      <div class="two">${fld('e-loc','Location*',`<select id="e-loc">${locOptions(p.location)}</select>`)}${fld('e-ind','Industry*',`<select id="e-ind">${Object.keys(INDUSTRIES).map(l=>`<option ${l===p.industry?'selected':''}>${l}</option>`).join('')}</select>`)}</div>`,{saveKind:'intro'});
   }
   if(kind==='contact'){
     html=editShell('Edit contact info',`<p class="req-note">* Indicates required. Members use this to reach you after finding you.</p>
@@ -2476,7 +2484,7 @@ function viewJoin(){
       <div class="jsec"><h3>${I.building.replace('<svg','<svg width="17" height="17"')}Career path</h3>
         ${d.career.length?d.career.map((c,i)=>`<div class="exrow">${logo(c.company,false,'','',i)}<span class="t"><b>${esc(c.role)} · ${esc(c.company)}</b><small>${esc(c.years)}${c.location?' · '+esc(c.location):''}</small></span>${srcTag(c.src)}<button class="ibtn" data-act="join-rm" data-idx="${i}" aria-label="Remove ${esc(c.company)}">${I.x}</button></div>`).join(''):'<p class="muted" style="margin:0;font-size:14px">No positions yet. You can add them from your profile anytime.</p>'}
       </div>
-      <div class="jsec two">${fld('j-loc','Location*',`<select id="j-loc">${LOC_OPTIONS.map(l=>`<option ${l===d.location?'selected':''}>${l}</option>`).join('')}</select>`)}${fld('j-ind','Industry*',`<select id="j-ind">${Object.keys(INDUSTRIES).map(l=>`<option ${l===d.industry?'selected':''}>${l}</option>`).join('')}</select>`)}</div>
+      <div class="jsec two">${fld('j-loc','Location*',`<select id="j-loc">${locOptions(d.location)}</select>`)}${fld('j-ind','Industry*',`<select id="j-ind">${Object.keys(INDUSTRIES).map(l=>`<option ${l===d.industry?'selected':''}>${l}</option>`).join('')}</select>`)}</div>
       <div class="jsec">${fld('j-phone','WhatsApp number',`<input type="tel" id="j-phone" value="${esc(d.phone||'')}" placeholder="+1 (617) 555-0100">`,'<p class="hint"><span>Members whose intro you accept can reach you here. LinkedIn doesn’t share phone numbers, so add it yourself.</span></p>')}</div>
       ${J.mode==='sync'?'':`<div class="jsec">${fld('j-liurl','LinkedIn profile URL',`<input type="text" id="j-liurl" value="${esc(J.liurl||'')}" placeholder="linkedin.com/in/your-name">`,'<p class="hint"><span>Helps the admin confirm who you are, so you’re approved faster.</span></p>')}</div>`}
       <div class="row"><button class="btn lg primary pill" data-act="join-review-next">${J.mode==='sync'?'Save changes':'Continue'}</button>${J.mode==='sync'?'':`<button class="link" data-act="join-go" data-step="imported">Back</button>`}</div>
