@@ -1300,24 +1300,30 @@ function rcard(r){
 }
 
 /* ---------- carousels ---------- */
+/* Random order for people rows: new on every visit, steady while you browse (no reshuffling on each click). */
+const SHUFFLE_SEED = Math.random().toString(36).slice(2);
+function shuffled(items,key){
+  const h=s=>{ let x=2166136261; for(let i=0;i<s.length;i++){ x^=s.charCodeAt(i); x=Math.imul(x,16777619); } return x>>>0; };
+  return items.map(it=>({it,r:h(SHUFFLE_SEED+'|'+key+'|'+(it.p.uid||it.p.id))})).sort((a,b)=>a.r-b.r).map(x=>x.it);
+}
 function railData(key){
   if(key==='interacted') return {title:'Recently interacted with',sub:'People you recently reached out to or accepted an intro from',items:S.interacted.map(x=>({p:byId(x.id),sig:{txt:x.label,ico:'clock'}}))};
   if(key==='school'||key.startsWith('school:')){
     // One community row per school the member studied at. No comparing class years.
     const mine=me().schools[+key.split(':')[1]||0]||me().schools[0]; const sc=SCHOOLS[mine.school];
-    const items=P.filter(p=>p.id!==ME && p.schools.some(s=>s.school===mine.school)).sort((a,b)=>a.name.localeCompare(b.name))
-      .map(p=>({p,sig:p.curCompany?{txt:`At ${p.curCompany}`,ico:'building'}:{txt:p.industry,ico:'layers'}}));
+    const items=shuffled(P.filter(p=>p.id!==ME && p.schools.some(s=>s.school===mine.school))
+      .map(p=>({p,sig:p.curCompany?{txt:`At ${p.curCompany}`,ico:'building'}:{txt:p.industry,ico:'layers'}})),'school:'+mine.school);
     return {title:`Your ${sc.tag} community`,sub:`Israelis from ${sc.full}`,items};
   }
   if(key==='pymk'){
     const items = P.filter(p=>p.id!==ME && !S.stars.has(p.id)).map(p=>{
       const s = (sharedSchool(p)?3:0) + (sharedPrev(p)?2:0) + (p.industry===me().industry?1:0);
       return {p,s};
-    }).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>({p:x.p}));
-    return {title:'People you might know',sub:'Based on your school, past companies and industry',items};
+    }).filter(x=>x.s>0).map(x=>({p:x.p}));
+    return {title:'People you might know',sub:'Based on your school, past companies and industry',items:shuffled(items,'pymk')};
   }
   if(key==='viewed') return {title:'Recently viewed',sub:'Profiles you opened lately',items:S.viewed.map(id=>({p:byId(id)}))};
-  if(key==='industry') return {title:`People in ${me().industry}`,sub:'Israeli MBAs working in your industry',items:P.filter(p=>p.id!==ME && p.industry===me().industry).map(p=>({p,sig:{txt:`${p.industry} · ${p.roleCat}`,ico:'layers'}}))};
+  if(key==='industry') return {title:`People in ${me().industry}`,sub:'Israeli MBAs working in your industry',items:shuffled(P.filter(p=>p.id!==ME && p.industry===me().industry).map(p=>({p,sig:{txt:`${p.industry} · ${p.roleCat}`,ico:'layers'}})),'industry')};
 }
 function rail(key){
   const d = railData(key);
