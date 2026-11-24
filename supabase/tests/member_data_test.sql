@@ -219,3 +219,22 @@ commit;
 select t.ok(not exists (select 1 from public.posts where author_id = :'B') and not exists (select 1 from public.stars where :'B' in (owner_id, member_id)),
   'their posts and stars (given and received) go with it');
 select t.ok(exists (select 1 from auth.users where id = :'C') and exists (select 1 from public.members where id = :'C'), 'nobody else is affected');
+
+-- ---------- one-time review keys for email approval (20261126000000_email_approval.sql)
+insert into auth.users values ('99999999-0000-0000-0000-000000000000','q@example.com');
+begin; select set_config('request.jwt.claims','{"sub":"99999999-0000-0000-0000-000000000000","email":"q@example.com"}',true); set local role authenticated;
+select public.submit_join_request('{"first":"Q","last":"R","headline":"PM","school":"MIT Sloan","classYear":"2027"}'::jsonb);
+select t.fails('select count(*) from public.review_tokens', 'permission denied', 'members cannot read review keys');
+select public.submit_join_request('{"first":"Q","last":"R2","headline":"PM","school":"MIT Sloan","classYear":"2027"}'::jsonb);
+commit;
+begin; set local role anon;
+select t.fails('select count(*) from public.review_tokens', 'permission denied', 'anon cannot read review keys');
+commit;
+select t.ok((select count(*) from public.review_tokens where member_id = '99999999-0000-0000-0000-000000000000') = 1
+  and (select length(token) from public.review_tokens where member_id = '99999999-0000-0000-0000-000000000000') = 64,
+  'a new pending request gets one 64-character review key (re-submitting keeps it)');
+select t.ok(not exists (select 1 from public.review_tokens r join public.members m on m.id = r.member_id where m.status <> 'pending'),
+  'approved and declined members have no review key');
+update public.members set status = 'approved' where id = '99999999-0000-0000-0000-000000000000';
+select t.ok(not exists (select 1 from public.review_tokens where member_id = '99999999-0000-0000-0000-000000000000'),
+  'deciding a request deletes its key, so the emailed buttons stop working');

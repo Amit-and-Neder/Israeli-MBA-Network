@@ -1,6 +1,9 @@
 // Israeli MBA Network: sends the app's emails, through Gmail (SMTP) or Resend.
 //
-//   { action: "join-request" }            -> emails the admins about the caller's pending request
+//   { action: "join-request" }            -> emails the admins about the caller's pending request (with Approve and
+//                                            Decline buttons), and tells the applicant their request is waiting
+//   { action: "review-info", member, key } -> no login: who an emailed Approve/Decline button is about
+//   { action: "review", member, key, approve } -> no login: records the decision from the emailed button, once
 //   { action: "welcome", member: "<id>" } -> emails an approved member their welcome email (admins only)
 //   { action: "intro", intro: "<id>" }    -> emails the recipient of the caller's new intro request
 //   { action: "intro-accepted", intro: "<id>" } -> emails the requester that the caller accepted, with how to reach them
@@ -57,10 +60,70 @@ async function send(to: string[], subject: string, html: string, replyTo?: strin
   if (!r.ok) throw new Error(`resend ${r.status}: ${await r.text()}`);
 }
 
+// The official welcome email, sent once per member (welcome_sent_at).
+async function sendWelcome(admin: any, memberId: string) {
+  const { data: m } = await admin.from("members")
+    .update({ welcome_sent_at: new Date().toISOString() })
+    .eq("id", memberId).eq("status", "approved").is("welcome_sent_at", null)
+    .select("first_name").maybeSingle();
+  if (!m) return false;
+  const { data: c } = await admin.from("member_contacts").select("email").eq("member_id", memberId).single();
+  const html = `
+    <div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#161A26;max-width:560px">
+      <h2 style="margin:0 0 12px">Welcome to ${NETWORK}, ${esc(m.first_name)}!</h2>
+      <p>Your request to join has been approved. You're now an official member of ${NETWORK}, the network of Israeli MBA students and alumni in the US.</p>
+      <p style="margin-bottom:4px"><b>What you can do now:</b></p>
+      <ul style="margin-top:0">
+        <li>Search for Israeli MBAs by school, company or industry</li>
+        <li>Star the people you want to follow up with, and ask for warm intros</li>
+        <li>Keep your profile current, so others can find you</li>
+      </ul>
+      <p>Log in any time at <a href="${esc(env("APP_URL"))}">${NETWORK}</a> with ${esc(c?.email)} and your password.</p>
+      <p>Welcome aboard,<br>The ${NETWORK} team</p>
+    </div>`;
+  try {
+    await send([c!.email], `You're in: welcome to ${NETWORK}`, html);
+  } catch (e) {
+    await admin.from("members").update({ welcome_sent_at: null }).eq("id", memberId);
+    throw e;
+  }
+  return true;
+}
+
+// Approve / Decline from the admin email. The key is the request's private one-time review key.
+async function review(admin: any, body: { action?: string; member?: string; key?: string; approve?: boolean }) {
+  if (!body.member || !body.key) return json({ ok: false, error: "invalid" }, 400);
+  const { data: t } = await admin.from("review_tokens").select("token").eq("member_id", body.member).maybeSingle();
+  const { data: m } = await admin.from("members").select("first_name,last_name,headline,status").eq("id", body.member).maybeSingle();
+  if (!m) return json({ ok: false, error: "invalid" }, 404);
+  if (!t || t.token !== body.key) {
+    return json(m.status !== "pending" ? { ok: false, error: "already-decided", status: m.status, first: m.first_name } : { ok: false, error: "invalid" }, 403);
+  }
+  if (body.action === "review-info") {
+    const { data: s } = await admin.from("member_schools").select("school,class_year").eq("member_id", body.member).order("sort").limit(1).maybeSingle();
+    return json({ ok: true, first: m.first_name, last: m.last_name, headline: m.headline, school: s?.school ?? "", classYear: s?.class_year ?? null });
+  }
+  const status = body.approve ? "approved" : "declined";
+  const { data: done } = await admin.from("members")
+    .update({ status, decided_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq("id", body.member).eq("status", "pending").select("id").maybeSingle();
+  if (!done) return json({ ok: false, error: "already-decided", status: m.status, first: m.first_name }, 409);
+  await admin.from("review_tokens").delete().eq("member_id", body.member);
+  let welcomed = false;
+  if (body.approve) { try { welcomed = await sendWelcome(admin, body.member); } catch (e) { console.error(e); } }
+  return json({ ok: true, status, first: m.first_name, welcomed });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
-  let body: { action?: string; member?: string; intro?: string };
+  let body: { action?: string; member?: string; intro?: string; key?: string; approve?: boolean };
   try { body = await req.json(); } catch { return json({ ok: false, error: "bad-request" }, 400); }
+
+  // Emailed Approve/Decline buttons work without logging in: the private review key is the permission.
+  if (body.action === "review" || body.action === "review-info") {
+    try { return await review(createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY")), body); }
+    catch (e) { console.error(e); return json({ ok: false, error: "failed" }, 500); }
+  }
 
   // Who is calling? (verified from their login token)
   const asCaller = createClient(env("SUPABASE_URL"), env("SUPABASE_ANON_KEY"), {
@@ -81,6 +144,8 @@ Deno.serve(async (req) => {
       const { data: c } = await admin.from("member_contacts").select("email,phone").eq("member_id", user.id).single();
       const { data: s } = await admin.from("member_schools").select("school,class_year").eq("member_id", user.id).order("sort").limit(1).maybeSingle();
       const { data: k } = await admin.from("career").select("role,start_year,end_year,companies(name)").eq("member_id", user.id).order("sort");
+      const { data: rk } = await admin.from("review_tokens").select("token").eq("member_id", user.id).maybeSingle();
+      const link = (d: string) => `${env("APP_URL")}?review=${user.id}&key=${rk?.token ?? ""}&do=${d}`;
       const li = m.linkedin_url ? (/^https?:/.test(m.linkedin_url) ? m.linkedin_url : "https://" + m.linkedin_url) : "";
       const rows = [["Name", `${m.first_name} ${m.last_name}`], ["Email", c?.email], ["Headline", m.headline],
         ["MBA", s ? `${s.school}, class of ${s.class_year}` : ""], ["Location", m.location], ["Industry", m.industry], ["WhatsApp", c?.phone]]
@@ -97,8 +162,12 @@ Deno.serve(async (req) => {
           </table>
           ${m.join_answer ? `<p style="margin:16px 0 4px;color:#5C6272">Where in Israel are you from, and what did you do before your MBA?</p><p style="margin:0;background:#F7F8F4;padding:10px 12px;border-radius:8px">${esc(m.join_answer)}</p>` : ""}
           ${career ? `<p style="margin:16px 0 4px;color:#5C6272">Career</p><ul style="margin:0;padding-left:18px">${career}</ul>` : ""}
-          <p style="margin:24px 0"><a href="${esc(env("APP_URL"))}" style="background:#2E49C2;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:bold">Open the app to review</a></p>
-          <p style="color:#8C91A0;font-size:12px">Log in, then go to Network → Admin: join requests to approve or decline.</p>
+          <p style="margin:24px 0">
+            <a href="${esc(link("approve"))}" style="background:#1D7448;color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:bold">Approve</a>
+            &nbsp;
+            <a href="${esc(link("decline"))}" style="background:#F7F8F4;color:#161A26;border:1px solid #E1E3DC;padding:11px 22px;border-radius:10px;text-decoration:none;font-weight:bold">Decline</a>
+          </p>
+          <p style="color:#8C91A0;font-size:12px">Each button opens a page where you confirm. Approving makes them an official member and sends their welcome email. Admins can also decide in the app under My Network → Admin: join requests.</p>
         </div>`;
       const to = env("ADMIN_EMAILS").split(",").map((x) => x.trim()).filter(Boolean);
       try {
@@ -107,38 +176,24 @@ Deno.serve(async (req) => {
         await admin.from("members").update({ admin_notified_at: null }).eq("id", user.id);
         throw e;
       }
+      // Tell the applicant their request arrived and is waiting for an admin (best effort).
+      try {
+        await send([c!.email], `We got your request to join ${NETWORK}`, `
+          <div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#161A26;max-width:560px">
+            <h2 style="margin:0 0 12px">Thanks, ${esc(m.first_name)}. Your request is waiting for approval.</h2>
+            <p>An admin reviews every request by hand to keep the network Israeli MBAs only. Most requests are reviewed within a day.</p>
+            <p>We'll email you as soon as you're approved. Until then, logging in to <a href="${esc(env("APP_URL"))}">${NETWORK}</a> shows that your request is waiting.</p>
+            <p>The ${NETWORK} team</p>
+          </div>`);
+      } catch (e) { console.error(e); }
       return json({ ok: true, sent: true });
     }
 
     if (body.action === "welcome" && body.member) {
       const { data: isAdmin } = await admin.from("admins").select("user_id").eq("user_id", user.id).maybeSingle();
       if (!isAdmin) return json({ ok: false, error: "not-admin" }, 403);
-      const { data: m } = await admin.from("members")
-        .update({ welcome_sent_at: new Date().toISOString() })
-        .eq("id", body.member).eq("status", "approved").is("welcome_sent_at", null)
-        .select("first_name").maybeSingle();
-      if (!m) return json({ ok: true, sent: false });
-      const { data: c } = await admin.from("member_contacts").select("email").eq("member_id", body.member).single();
-      const html = `
-        <div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#161A26;max-width:560px">
-          <h2 style="margin:0 0 12px">Welcome to ${NETWORK}, ${esc(m.first_name)}!</h2>
-          <p>Your request to join has been approved. You're now an official member of ${NETWORK}, the network of Israeli MBA students and alumni in the US.</p>
-          <p style="margin-bottom:4px"><b>What you can do now:</b></p>
-          <ul style="margin-top:0">
-            <li>Search for Israeli MBAs by school, company or industry</li>
-            <li>Star the people you want to follow up with, and ask for warm intros</li>
-            <li>Keep your profile current, so others can find you</li>
-          </ul>
-          <p>To log in on any device, open <a href="${esc(env("APP_URL"))}">${NETWORK}</a>, choose <b>Log in</b> and enter ${esc(c?.email)}. We'll email you a code.</p>
-          <p>Welcome aboard,<br>The ${NETWORK} team</p>
-        </div>`;
-      try {
-        await send([c!.email], `You're in: welcome to ${NETWORK}`, html);
-      } catch (e) {
-        await admin.from("members").update({ welcome_sent_at: null }).eq("id", body.member);
-        throw e;
-      }
-      return json({ ok: true, sent: true });
+      const sent = await sendWelcome(admin, body.member);
+      return json({ ok: true, sent });
     }
     if ((body.action === "intro" || body.action === "intro-accepted") && body.intro) {
       const accepted = body.action === "intro-accepted";

@@ -8,10 +8,11 @@ This replaces the Google Sheet + Apps Script backend in `backend/`, which `index
 | File | What it does |
 |---|---|
 | `migrations/20261116000000_init.sql` | Members, sign-up, admin approval: tables, privacy rules and functions. Run once. |
+| `migrations/20261126000000_email_approval.sql` | One-time keys behind the Approve/Decline buttons in the admin email. Run once, after the accounts file. |
 | `migrations/20261125000000_accounts.sql` | Lets a member delete their own account. Run once, after the member-data file. |
 | `migrations/20261124000000_member_data.sql` | Everything members do after joining: profile edits, photos, stars, Feed posts, "interested" and intros. Run once, after the first file. |
 | `functions/notify/index.ts` | Sends the app's emails: new join request (to admins), welcome (on approval), intro request (to the person asked) and intro accepted (to the person who asked). |
-| `tests/` | Privacy tests that run on a local Postgres (`tests/run.sh`). 120 checks, e.g. a member can't read another member's phone number or post as someone else. |
+| `tests/` | Privacy tests that run on a local Postgres (`tests/run.sh`). 125 checks, e.g. a member can't read another member's phone number or post as someone else. |
 
 ## Who can see what
 
@@ -31,7 +32,8 @@ The database enforces all of this itself. The page can't override it, and nobody
 
 - **The first page is Log in:** email and password, with **Forgot password?** under the fields and the sign-up banner below.
 - **Sign up:** the member fills in the form from their LinkedIn PDF and chooses a password. Supabase emails them a 6-digit code ("Confirm sign up" template). The code proves the email is theirs; then the request is saved as "pending" and the admins get an email.
-- **Approval:** an admin logs in and goes to **Network → Admin: join requests**. Approving sends the welcome email.
+- **Approval:** each new request emails the admins (`ADMIN_EMAILS`, now israeli.network.app@gmail.com) with **Approve** and **Decline** buttons, and emails the applicant that their request is waiting. A button opens a confirmation page on the site; confirming records the decision and, on approval, sends the welcome email. The buttons use a private one-time key per request (`migrations/20261126000000_email_approval.sql`) and stop working once the request is decided. Admins can also decide in the app under **Network → Admin: join requests**.
+- **Waiting for approval:** until then, a member who logs in sees only a "Your request is waiting for approval" page (with Check again and Log out). Declined members see a short note.
 - **Staying logged in:** the login is saved in the browser and renewed automatically. Sessions have no time limit (Authentication → Sessions), so members stay logged in until they log out or change their password.
 - **Forgot password:** Supabase emails a 6-digit code ("Reset password" template); the member enters it with a new password and is logged in. Their other devices are logged out.
 - **Account settings** (in the app): change password (checks the current one; other devices are logged out, this one stays in), log out, log out of all devices, delete account (`migrations/20261125000000_accounts.sql`).
