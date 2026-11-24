@@ -51,6 +51,14 @@ Supabase's built-in email only delivers to your own Supabase team, so real membe
    - Sender email: e.g. `hello@your-domain.com`. Sender name: `Israeli MBA Network`
    - Host `smtp.resend.com`, port `465`, username `resend`, password: the Resend API key
 
+#### Until there's a domain: send from a Gmail account
+Gmail works for both kinds of email, at up to about 500 a day. Messages come from the Gmail address and are more likely to land in spam than with Resend.
+1. On that Google account, turn on **2-Step Verification**, then create an **app password** at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords). Google shows 16 letters. Keep them private: they let anyone send mail as you.
+2. **Login codes:** in **Authentication → Emails → SMTP Settings**, turn on custom SMTP with host `smtp.gmail.com`, port `465`, username = the Gmail address, password = the app password, sender email = the same Gmail address, sender name `Israeli MBA Network`.
+3. **The app's other emails:** in **Edge Functions → Secrets**, set `SMTP_HOST` = `smtp.gmail.com`, `SMTP_PORT` = `465`, `SMTP_USER` = the Gmail address, `SMTP_PASSWORD` = the app password, and `FROM_EMAIL` = `Israeli MBA Network <the Gmail address>`. Skip `RESEND_API_KEY`.
+
+Switching to Resend later: replace the SMTP settings in step 2 with Resend's, delete the `SMTP_*` secrets and add `RESEND_API_KEY`.
+
 ### 4. Make the login emails show a code
 Under **Authentication → Emails → Templates**, edit both **Confirm signup** and **Magic link** so the body shows the code instead of a link. For example:
 ```html
