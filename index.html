@@ -358,6 +358,8 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .post-h{display:flex;gap:12px;align-items:center}
 .post-h .who{flex:1;min-width:0;text-align:left}
 .post-h .who small{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmeta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none}
+.pdate{font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 .ptag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--tc-soft);color:var(--tc);white-space:nowrap}
 .post-b{margin:12px 0 0;font-size:15px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
 .post-f{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}
@@ -1751,6 +1753,8 @@ function readFeedPhoto(file){
   }; img.src=fr.result; }; fr.readAsDataURL(file);
 }
 S.feed=loadFeed(); S.feedFilter='all'; S.feedDraft={type:null,text:'',photo:null};
+/* Post date: day, month and year, no time ("24 Nov 2026"). */
+const postDate = ts => new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
 function viewFeed(){
   const F=S.feed, D=S.feedDraft, f=S.feedFilter;
   // School filter: every school that has members, A–Z.
@@ -1777,7 +1781,7 @@ function viewFeed(){
       : (p.type==='event' ? `<button class="btn sm ${going?'is-connected':'ghost'} pill" data-act="feed-interest" data-post="${p.id}" aria-pressed="${going}">${going?I.check+'Interested':I.plus+'I’m interested'}</button>` : '')+connectBtn(a.id,'sm pill');
     return `<article class="post t-${p.type}">
       <div class="post-h">${av(a,44)}<button class="who" data-act="${mine?'nav':'profile'}" ${mine?'data-view="me"':`data-id="${a.id}"`}><b>${esc(a.name)}</b>${mine?' <span class="muted" style="font-size:13px">(you)</span>':''}<small>${esc(a.role)}${a.curCompany?' · '+esc(a.curCompany):''}</small></button>
-        <span class="ptag"><span class="dot" style="width:7px;height:7px;border-radius:50%;background:currentColor"></span>${FEED_LABEL[p.type]}</span></div>
+        <span class="pmeta"><span class="ptag"><span class="dot" style="width:7px;height:7px;border-radius:50%;background:currentColor"></span>${FEED_LABEL[p.type]}</span>${p.ts?`<time class="pdate" datetime="${new Date(p.ts).toISOString().slice(0,10)}">${postDate(p.ts)}</time>`:''}</span></div>
       <p class="post-b">${esc(p.text)}</p>${p.photo?`<img class="post-img" src="${p.photo}" alt="Photo shared by ${esc(a.first)}" loading="lazy">`:''}
       <div class="post-f">${acts}</div></article>`; };
   return `<main><div class="wrap page feed">
