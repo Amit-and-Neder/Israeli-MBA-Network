@@ -1096,7 +1096,7 @@ const me = () => byId(ME);
 const sharedSchool = p => p.schools.find(s=>me().schools.some(m=>m.school===s.school));
 const sharedPrev = p => [...p.prev, p.curCompany].filter(Boolean).find(c=>me().prev.includes(c));
 function relevance(p){
-  const s = sharedSchool(p); if(s) return {txt:`Also ${SCHOOLS[s.school].tag} · ${yy(s.year)}`,ico:'cap'};
+  const s = sharedSchool(p); if(s) return {txt:`Also ${SCHOOLS[s.school].tag}`,ico:'cap'};
   const c = sharedPrev(p); if(c) return {txt:`Also ex-${c}`,ico:'building'};
   return {txt:`${p.industry} · ${p.roleCat}`,ico:'layers'};
 }
@@ -1309,23 +1309,30 @@ function rcard(r){
 }
 
 /* ---------- carousels ---------- */
+/* Random order for people rows: new on every visit, steady while you browse (no reshuffling on each click). */
+const SHUFFLE_SEED = Math.random().toString(36).slice(2);
+function shuffled(items,key){
+  const h=s=>{ let x=2166136261; for(let i=0;i<s.length;i++){ x^=s.charCodeAt(i); x=Math.imul(x,16777619); } return x>>>0; };
+  return items.map(it=>({it,r:h(SHUFFLE_SEED+'|'+key+'|'+(it.p.uid||it.p.id))})).sort((a,b)=>a.r-b.r).map(x=>x.it);
+}
 function railData(key){
   if(key==='interacted') return {title:'Recently interacted with',sub:'People you recently reached out to or accepted an intro from',items:S.interacted.map(x=>({p:byId(x.id),sig:{txt:x.label,ico:'clock'}}))};
-  if(key==='school'){
-    const mine=me().schools[0]; const sc=SCHOOLS[mine.school];
-    const items=P.filter(p=>p.id!==ME && p.schools.some(s=>s.school===mine.school)).sort((a,b)=>{const ya=a.schools.find(s=>s.school===mine.school).year, yb=b.schools.find(s=>s.school===mine.school).year; return Math.abs(ya-mine.year)-Math.abs(yb-mine.year) || yb-ya;})
-      .map(p=>{const y=p.schools.find(s=>s.school===mine.school).year; return {p,sig:{txt:y===mine.year?'Your class':`${sc.tag} ${yy(y)} · ${Math.abs(y-mine.year)} yr${Math.abs(y-mine.year)>1?'s':''} ${y<mine.year?'ahead':'behind'}`,ico:'cap'}}});
-    return {title:`Your ${sc.tag} community`,sub:`${sc.full} classmates and alumni, closest class years first`,items};
+  if(key==='school'||key.startsWith('school:')){
+    // One community row per school the member studied at. No comparing class years.
+    const mine=me().schools[+key.split(':')[1]||0]||me().schools[0]; const sc=SCHOOLS[mine.school];
+    const items=shuffled(P.filter(p=>p.id!==ME && p.schools.some(s=>s.school===mine.school))
+      .map(p=>({p,sig:p.curCompany?{txt:`At ${p.curCompany}`,ico:'building'}:{txt:p.industry,ico:'layers'}})),'school:'+mine.school);
+    return {title:`Your ${sc.tag} community`,sub:`Israelis from ${sc.full}`,items};
   }
   if(key==='pymk'){
     const items = P.filter(p=>p.id!==ME && !S.stars.has(p.id)).map(p=>{
       const s = (sharedSchool(p)?3:0) + (sharedPrev(p)?2:0) + (p.industry===me().industry?1:0);
       return {p,s};
-    }).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>({p:x.p}));
-    return {title:'People you might know',sub:'Based on your school, past companies and industry',items};
+    }).filter(x=>x.s>0).map(x=>({p:x.p}));
+    return {title:'People you might know',sub:'Based on your school, past companies and industry',items:shuffled(items,'pymk')};
   }
   if(key==='viewed') return {title:'Recently viewed',sub:'Profiles you opened lately',items:S.viewed.map(id=>({p:byId(id)}))};
-  if(key==='industry') return {title:`People in ${me().industry}`,sub:'Israeli MBAs working in your industry',items:P.filter(p=>p.id!==ME && p.industry===me().industry).map(p=>({p,sig:{txt:`${p.industry} · ${p.roleCat}`,ico:'layers'}}))};
+  if(key==='industry') return {title:`People in ${me().industry}`,sub:'Israeli MBAs working in your industry',items:shuffled(P.filter(p=>p.id!==ME && p.industry===me().industry).map(p=>({p,sig:{txt:`${p.industry} · ${p.roleCat}`,ico:'layers'}})),'industry')};
 }
 function rail(key){
   const d = railData(key);
@@ -1369,7 +1376,7 @@ function viewHome(){
       ${S.browse?browsePanel(S.browse):''}
       <div class="try"><span>Try:</span>${EXAMPLES.map(e=>`<button data-act="search" data-q="${esc(e)}">${esc(e)}</button>`).join('')}</div>
     </section>
-    ${rail('interacted')}${rail('school')}${rail('pymk')}${rail('viewed')}${rail('industry')}
+    ${rail('interacted')}${[...new Set(me().schools.map(x=>x.school))].map(k=>rail(k===me().schools[0].school?'school':'school:'+me().schools.findIndex(x=>x.school===k))).join('')}${rail('pymk')}${rail('viewed')}${rail('industry')}
     <p class="demo-note">${LIVE?'':'Prototype with fictional members. Email and WhatsApp hand-offs are simulated. '}<button class="link" style="font-size:12px" data-act="reset-me">${LIVE?'Log out':'Start over as a new user'}</button></p>
   </div></main>`;
 }
@@ -1494,7 +1501,7 @@ function viewList(){
 function commonGround(p){
   if(p.id===ME) return [];
   const out=[]; const m=me();
-  p.schools.forEach(s=>{ const mine=m.schools.find(x=>x.school===s.school); if(mine) out.push([I.cap, s.year===mine.year?`Same class: ${SCHOOLS[s.school].tag} ${yy(s.year)}`:`Both ${SCHOOLS[s.school].tag} (${yy(s.year)} and ${yy(mine.year)})`]); });
+  p.schools.forEach(s=>{ const mine=m.schools.find(x=>x.school===s.school); if(mine) out.push([I.cap, `You both studied at ${SCHOOLS[s.school].full}`]); });
   [p.curCompany,...p.prev].filter(Boolean).forEach(c=>{ if(m.prev.includes(c)) out.push([I.building,`You both worked at ${c}`]); });
   if(p.industry===m.industry) out.push([I.layers,`Both in ${p.industry}`]);
   if(p.location===m.location) out.push([I.pin,`Both based in ${locFull(p.location)}`]);
