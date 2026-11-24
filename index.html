@@ -1302,8 +1302,9 @@ function rcard(r){
 /* ---------- carousels ---------- */
 function railData(key){
   if(key==='interacted') return {title:'Recently interacted with',sub:'People you recently reached out to or accepted an intro from',items:S.interacted.map(x=>({p:byId(x.id),sig:{txt:x.label,ico:'clock'}}))};
-  if(key==='school'){
-    const mine=me().schools[0]; const sc=SCHOOLS[mine.school];
+  if(key==='school'||key.startsWith('school:')){
+    // One community row per school the member studied at. No comparing class years.
+    const mine=me().schools[+key.split(':')[1]||0]||me().schools[0]; const sc=SCHOOLS[mine.school];
     const items=P.filter(p=>p.id!==ME && p.schools.some(s=>s.school===mine.school)).sort((a,b)=>a.name.localeCompare(b.name))
       .map(p=>({p,sig:p.curCompany?{txt:`At ${p.curCompany}`,ico:'building'}:{txt:p.industry,ico:'layers'}}));
     return {title:`Your ${sc.tag} community`,sub:`Israelis from ${sc.full}`,items};
@@ -1360,7 +1361,7 @@ function viewHome(){
       ${S.browse?browsePanel(S.browse):''}
       <div class="try"><span>Try:</span>${EXAMPLES.map(e=>`<button data-act="search" data-q="${esc(e)}">${esc(e)}</button>`).join('')}</div>
     </section>
-    ${rail('interacted')}${rail('school')}${rail('pymk')}${rail('viewed')}${rail('industry')}
+    ${rail('interacted')}${[...new Set(me().schools.map(x=>x.school))].map(k=>rail(k===me().schools[0].school?'school':'school:'+me().schools.findIndex(x=>x.school===k))).join('')}${rail('pymk')}${rail('viewed')}${rail('industry')}
     <p class="demo-note">${LIVE?'':'Prototype with fictional members. Email and WhatsApp hand-offs are simulated. '}<button class="link" style="font-size:12px" data-act="reset-me">${LIVE?'Log out':'Start over as a new user'}</button></p>
   </div></main>`;
 }
