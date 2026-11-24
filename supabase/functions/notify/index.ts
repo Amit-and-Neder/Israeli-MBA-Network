@@ -47,8 +47,11 @@ async function send(to: string[], subject: string, html: string, replyTo?: strin
     });
     try {
       await client.send({ from: env("FROM_EMAIL"), to, subject, content: "auto", html, ...(replyTo ? { replyTo } : {}) });
+    } catch (e) {
+      console.error("smtp send failed:", e);   // the real reason (closing below can fail too and would hide it)
+      throw e;
     } finally {
-      await client.close();
+      try { await client.close(); } catch { /* the connection never opened */ }
     }
     return;
   }

@@ -2492,6 +2492,7 @@ async function checkApproval(){
   catch(_){ toast('We couldn’t reach the server. Check your connection and refresh.'); return; }
   if(!p){ liveLoggedOut(); return; }   // not logged in on this device any more
   const was=me().verify.school; applyProfile(p); if(S.isAdmin) loadJoinReqs();
+  if(p.status==='pending') notify({action:'join-request'});   // re-sends the admin email if it didn't go out (each email goes out once)
   if(was==='pending'&&p.status==='approved') toast('You’re approved! You’re now an official member.');
   else if(p.status==='declined') toast('Your request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.');
   render(); liveLoad();
