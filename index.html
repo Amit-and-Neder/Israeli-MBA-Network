@@ -1087,7 +1087,7 @@ const me = () => byId(ME);
 const sharedSchool = p => p.schools.find(s=>me().schools.some(m=>m.school===s.school));
 const sharedPrev = p => [...p.prev, p.curCompany].filter(Boolean).find(c=>me().prev.includes(c));
 function relevance(p){
-  const s = sharedSchool(p); if(s) return {txt:`Also ${SCHOOLS[s.school].tag} · ${yy(s.year)}`,ico:'cap'};
+  const s = sharedSchool(p); if(s) return {txt:`Also ${SCHOOLS[s.school].tag}`,ico:'cap'};
   const c = sharedPrev(p); if(c) return {txt:`Also ex-${c}`,ico:'building'};
   return {txt:`${p.industry} · ${p.roleCat}`,ico:'layers'};
 }
@@ -1304,9 +1304,9 @@ function railData(key){
   if(key==='interacted') return {title:'Recently interacted with',sub:'People you recently reached out to or accepted an intro from',items:S.interacted.map(x=>({p:byId(x.id),sig:{txt:x.label,ico:'clock'}}))};
   if(key==='school'){
     const mine=me().schools[0]; const sc=SCHOOLS[mine.school];
-    const items=P.filter(p=>p.id!==ME && p.schools.some(s=>s.school===mine.school)).sort((a,b)=>{const ya=a.schools.find(s=>s.school===mine.school).year, yb=b.schools.find(s=>s.school===mine.school).year; return Math.abs(ya-mine.year)-Math.abs(yb-mine.year) || yb-ya;})
-      .map(p=>{const y=p.schools.find(s=>s.school===mine.school).year; return {p,sig:{txt:y===mine.year?'Your class':`${sc.tag} ${yy(y)} · ${Math.abs(y-mine.year)} yr${Math.abs(y-mine.year)>1?'s':''} ${y<mine.year?'ahead':'behind'}`,ico:'cap'}}});
-    return {title:`Your ${sc.tag} community`,sub:`${sc.full} classmates and alumni, closest class years first`,items};
+    const items=P.filter(p=>p.id!==ME && p.schools.some(s=>s.school===mine.school)).sort((a,b)=>a.name.localeCompare(b.name))
+      .map(p=>({p,sig:p.curCompany?{txt:`At ${p.curCompany}`,ico:'building'}:{txt:p.industry,ico:'layers'}}));
+    return {title:`Your ${sc.tag} community`,sub:`Israelis from ${sc.full}`,items};
   }
   if(key==='pymk'){
     const items = P.filter(p=>p.id!==ME && !S.stars.has(p.id)).map(p=>{
@@ -1485,7 +1485,7 @@ function viewList(){
 function commonGround(p){
   if(p.id===ME) return [];
   const out=[]; const m=me();
-  p.schools.forEach(s=>{ const mine=m.schools.find(x=>x.school===s.school); if(mine) out.push([I.cap, s.year===mine.year?`Same class: ${SCHOOLS[s.school].tag} ${yy(s.year)}`:`Both ${SCHOOLS[s.school].tag} (${yy(s.year)} and ${yy(mine.year)})`]); });
+  p.schools.forEach(s=>{ const mine=m.schools.find(x=>x.school===s.school); if(mine) out.push([I.cap, `You both studied at ${SCHOOLS[s.school].full}`]); });
   [p.curCompany,...p.prev].filter(Boolean).forEach(c=>{ if(m.prev.includes(c)) out.push([I.building,`You both worked at ${c}`]); });
   if(p.industry===m.industry) out.push([I.layers,`Both in ${p.industry}`]);
   if(p.location===m.location) out.push([I.pin,`Both based in ${locFull(p.location)}`]);
