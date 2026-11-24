@@ -220,6 +220,21 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .tag.alum{color:var(--accent-text);background:var(--accent-soft);border-color:transparent}
 .refer{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:650;padding:2px 8px;border-radius:99px;background:var(--ok-soft);color:var(--ok);white-space:nowrap}
 .refer svg{width:12px;height:12px}
+.ind-sticker{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:3px 9px 3px 6px;border-radius:99px;color:var(--ic);background:color-mix(in srgb,var(--ic) 11%,var(--surface));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ic) 22%,transparent);white-space:nowrap;line-height:1.3}
+.ind-sticker span{font-size:13px;line-height:1}
+.ind-sticker.lg{font-size:12.5px;padding:4px 11px 4px 8px}
+.ind-sticker.lg span{font-size:14px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ind-sticker{color:color-mix(in srgb,var(--ic) 55%,#fff)}}
+:root[data-theme="dark"] .ind-sticker{color:color-mix(in srgb,var(--ic) 55%,#fff)}
+/* Status "speech bubble" above the photo */
+.cstatus{position:relative;align-self:flex-start;max-width:100%;background:var(--surface);border:1px solid color-mix(in srgb,var(--accent) 25%,var(--line));color:var(--ink);font-size:12.5px;font-weight:550;line-height:1.35;padding:7px 10px;border-radius:14px 14px 14px 4px;margin-bottom:6px;box-shadow:0 2px 8px rgba(22,26,38,.07);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:left}
+.pav{position:relative;align-self:start;justify-self:start;margin-top:-56px;z-index:2}
+.phead-body > .pav > .av,.pav > .av-edit{margin-top:0}
+.pav > .av{position:relative;z-index:1;border:5px solid var(--surface);box-shadow:var(--shadow)}
+.pstatus{position:absolute;left:112px;bottom:calc(100% - 46px);z-index:3;width:max-content;max-width:min(260px,52vw);background:var(--surface);color:var(--ink);font-size:13.5px;font-weight:600;line-height:1.35;text-align:left;padding:9px 13px;border-radius:16px 16px 16px 4px;box-shadow:0 6px 20px rgba(22,26,38,.16);border:1px solid color-mix(in srgb,var(--accent) 20%,var(--line))}
+button.pstatus:hover{border-color:var(--accent)}
+.pstatus.add{display:inline-flex;align-items:center;gap:6px;color:var(--accent-text);border-style:dashed;background:color-mix(in srgb,var(--surface) 92%,transparent)}
+.pstatus.add svg{width:14px;height:14px}
 .card-tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .colink{font:inherit;color:inherit;font-weight:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 .colink:hover{color:var(--accent-text);text-decoration-color:currentColor}
@@ -1185,7 +1200,7 @@ const sharedPrev = p => [...p.prev, p.curCompany].filter(Boolean).find(c=>me().p
 function relevance(p){
   const s = sharedSchool(p); if(s) return {txt:`Also ${SCHOOLS[s.school].tag}`,ico:'cap'};
   const c = sharedPrev(p); if(c) return {txt:`Also ex-${c}`,ico:'building'};
-  return {txt:`${p.industry} · ${p.roleCat}`,ico:'layers'};
+  return {txt:locFull(p.location),ico:'pin'};
 }
 const LOGO_COLORS = ['#2E49C2','#B5641E','#1D7448','#7A3E9D','#B23A48','#2C6E8A','#5B5F2A','#3D3F8F'];
 function logo(name,edu,color,tag,pos=0){
@@ -1345,14 +1360,18 @@ function searchBox(size,id){
 const statusTag = (p,style='') => `<span class="tag ${p.status==='Student'?'stu':'alum'}" ${style?`style="${style}"`:''}>${p.status==='Student'?'STUDENT':'ALUMNI'}</span>`;
 /* Every member can refer at their company, so there's no badge for it. */
 const referBadge = p => '';
+/* Industry sticker: every member shows theirs. */
+const IND_STICKER = {'Technology':['💻','#2E49C2'],'Healthcare':['🩺','#0E8A7A'],'Consulting':['🧭','#7A3E9D'],'Fintech':['💳','#3D3F8F'],'Climate Tech':['🌱','#2F8F46'],'Venture Capital':['🚀','#B5641E'],'Finance':['📈','#1E4E8C']};
+const indSticker = (p,big) => p.industry ? `<span class="ind-sticker${big?' lg':''}" style="--ic:${(IND_STICKER[p.industry]||['🏢','#5C6272'])[1]}"><span aria-hidden="true">${(IND_STICKER[p.industry]||['🏢'])[0]}</span>${esc(p.industry)}</span>` : '';
 const coName = p => p.curCompany ? `<button class="colink" data-act="company" data-co="${esc(p.curCompany)}">${esc(p.curCompany)}</button>` : esc(p.company);
 function pcard(p,signal,warm){
   const sg = signal || relevance(p);
   return `<article class="pcard">
     <button class="pcard-hit" data-act="profile" data-id="${p.id}">
+      ${p.statusNote?`<span class="cstatus">${esc(p.statusNote)}</span>`:''}
       <span class="pc-top">${av(p,64)}<span class="cbs">${badges(p,'md')}</span></span>
-      <div><div class="nm">${esc(p.name)}</div><div class="rl">${esc(p.role)} · ${esc(p.company)}</div></div>
-      <span class="card-tags">${statusTag(p,'margin:0')}${referBadge(p)}</span>
+      <div><div class="nm">${esc(p.name)}</div><div class="rl">${esc(p.title||p.role)} · ${esc(p.company)}</div></div>
+      <span class="card-tags">${statusTag(p,'margin:0')}${indSticker(p)}</span>
     </button>
     <span class="signal ${warm?'warm':''}">${I[sg.ico]||I.users}<span>${esc(sg.txt)}</span></span>
     <div class="pcard-actions">${starBtn(p.id)}<button class="btn sm ghost" data-act="profile" data-id="${p.id}">View profile</button>${connectBtn(p.id,'sm')}</div>
@@ -1374,8 +1393,8 @@ function rrow(p,extra=''){
   return `<li class="rrow">
     <button data-act="profile" data-id="${p.id}" aria-label="Open ${esc(p.name)}">${av(p,64)}</button>
     <div class="main">
-      <div class="nmline"><button class="nm" data-act="profile" data-id="${p.id}">${esc(p.name)}</button>${badges(p,'md')}${statusTag(p,'margin:0')}${referBadge(p)}</div>
-      <div class="rl">${esc(p.role)} · <b>${coName(p)}</b></div>
+      <div class="nmline"><button class="nm" data-act="profile" data-id="${p.id}">${esc(p.name)}</button>${badges(p,'md')}${statusTag(p,'margin:0')}${indSticker(p)}</div>
+      <div class="rl">${esc(p.title||p.role)} · <b>${coName(p)}</b></div>
       <div class="sub2">${esc(locFull(p.location))} · ${p.schools.map(s=>esc(`${SCHOOLS[s.school].full}, Class of ${s.year}`)).join(' · ')}</div>
       ${extra}
     </div>
@@ -1386,9 +1405,9 @@ function rcard(r){
   return `<article class="rcard">
     <button data-act="profile" data-id="${p.id}" aria-label="Open ${esc(p.name)}">${av(p,72)}</button>
     <div class="main">
-      <div><button class="nm" data-act="profile" data-id="${p.id}">${esc(p.name)}</button> <span style="margin-left:8px">${badges(p,'md')}</span>${statusTag(p)} ${referBadge(p)}</div>
-      <div class="rl">${esc(p.role)} · <b>${coName(p)}</b></div>
-      <div class="meta"><span>${I.cap}${p.schools.map(s=>esc(`${SCHOOLS[s.school].full} · ${s.program}, Class of ${s.year}`)).join(', ')}</span><span>${I.pin}${esc(locFull(p.location))}</span><span>${I.layers}${esc(p.industry)}</span></div>
+      <div><button class="nm" data-act="profile" data-id="${p.id}">${esc(p.name)}</button> <span style="margin-left:8px">${badges(p,'md')}</span>${statusTag(p)} ${indSticker(p)}</div>
+      <div class="rl">${esc(p.title||p.role)} · <b>${coName(p)}</b></div>
+      <div class="meta"><span>${I.cap}${p.schools.map(s=>esc(`${SCHOOLS[s.school].full} · ${s.program}, Class of ${s.year}`)).join(', ')}</span><span>${I.pin}${esc(locFull(p.location))}</span></div>
       <span class="signal">${I.spark}<span>${esc(r.reason)}</span></span>
     </div>
     <div class="acts">${starBtn(p.id)}<button class="btn sm ghost" data-act="profile" data-id="${p.id}">View profile</button>${connectBtn(p.id,'sm')}</div>
@@ -1408,7 +1427,7 @@ function railData(key){
     // One community row per school the member studied at. No comparing class years.
     const mine=me().schools[+key.split(':')[1]||0]||me().schools[0]; const sc=SCHOOLS[mine.school];
     const items=shuffled(P.filter(p=>p.id!==ME && p.schools.some(s=>s.school===mine.school))
-      .map(p=>({p,sig:p.curCompany?{txt:`At ${p.curCompany}`,ico:'building'}:{txt:p.industry,ico:'layers'}})),'school:'+mine.school);
+      .map(p=>({p,sig:{txt:locFull(p.location),ico:'pin'}})),'school:'+mine.school);
     return {title:`Your ${sc.tag} community`,sub:`Israelis from ${sc.full}`,items};
   }
   if(key==='pymk'){
@@ -1419,7 +1438,7 @@ function railData(key){
     return {title:'People you might know',sub:'Based on your school, past companies and industry',items:shuffled(items,'pymk')};
   }
   if(key==='viewed') return {title:'Recently viewed',sub:'Profiles you opened lately',items:S.viewed.map(id=>({p:byId(id)}))};
-  if(key==='industry') return {title:`People in ${me().industry}`,sub:'Israeli MBAs working in your industry',items:shuffled(P.filter(p=>p.id!==ME && p.industry===me().industry).map(p=>({p,sig:{txt:`${p.industry} · ${p.roleCat}`,ico:'layers'}})),'industry')};
+  if(key==='industry') return {title:`People in ${me().industry}`,sub:'Israeli MBAs working in your industry',items:shuffled(P.filter(p=>p.id!==ME && p.industry===me().industry).map(p=>({p,sig:{txt:locFull(p.location),ico:'pin'}})),'industry')};
 }
 function rail(key){
   const d = railData(key);
@@ -1648,13 +1667,15 @@ function viewProfile(id){
   return `<main><div class="wrap page">
     ${isMe?'':`<button class="back" data-act="back">${I.left}Back</button>`}
     <section class="phead" style="--sc:${SCHOOLS[p.schools[0].school].color}"><div class="phead-band"><span class="band-label"><b>${esc(SCHOOLS[p.schools[0].school].full)}</b><span>${esc(p.schools[0].program)} · CLASS OF ${p.schools[0].year}</span></span><span class="band-mark">${esc(SCHOOLS[p.schools[0].school].tag)} ${yy(p.schools[0].year)}</span></div><div class="phead-body">
-      ${isMe?`<button class="av-edit" data-act="edit" data-kind="photo" aria-label="Edit photo">${av(p,132)}<span class="cam">${I.camera}</span></button><button class="ibtn intro-edit" data-act="edit" data-kind="intro" aria-label="Edit intro">${I.pencil}</button>`:av(p,132)}
+      <div class="pav">${isMe?`<button class="av-edit" data-act="edit" data-kind="photo" aria-label="Edit photo">${av(p,132)}<span class="cam">${I.camera}</span></button>`:av(p,132)}
+        ${p.statusNote?(isMe?`<button class="pstatus" data-act="edit" data-kind="status" aria-label="Edit your status">${esc(p.statusNote)}</button>`:`<span class="pstatus">${esc(p.statusNote)}</span>`):isMe?`<button class="pstatus add" data-act="edit" data-kind="status">${I.plus}Add a status</button>`:''}</div>
+      ${isMe?`<button class="ibtn intro-edit" data-act="edit" data-kind="intro" aria-label="Edit intro">${I.pencil}</button>`:''}
       <div class="phead-info">
         <h1>${esc(p.name)}${isMe?' <span class="tag">YOU</span>':''}</h1>
         <div class="school-line">${badges(p,'lg')}<span class="txt"><b>${p.schools.map(s=>esc(SCHOOLS[s.school].full)).join(', ')}</b><span>${p.schools.map(s=>esc(`${s.program} · ${s.year>NOW_YEAR?'Graduating':'Class of'} ${s.year}`)).join(', ')}</span></span></div>
-        <div class="rl">${esc(p.role)} · <b>${coName(p)}</b></div>
-        <div class="meta"><span>${I.pin}${esc(locFull(p.location))}</span><span>${I.layers}${esc(p.industry)}</span></div>
-        <div class="badges">${isMe&&p.verify&&p.verify.school==='pending'?`<span class="vbadge pend">${I.clock}Awaiting admin approval</span>`:''}${statusTag(p,'margin:0;vertical-align:0;align-self:center')}${referBadge(p).replace('class="refer"','class="refer" style="font-size:12.5px;padding:4px 10px"')}<span class="vbadge pref ${p.pref}">${p.pref==='whatsapp'?I.wa:I.mail}${prefLabel}</span></div>
+        <div class="rl">${esc(p.title||p.role)} · <b>${coName(p)}</b></div>
+        <div class="meta"><span>${I.pin}${esc(locFull(p.location))}</span></div>
+        <div class="badges">${isMe&&p.verify&&p.verify.school==='pending'?`<span class="vbadge pend">${I.clock}Awaiting admin approval</span>`:''}${statusTag(p,'margin:0;vertical-align:0;align-self:center')}${indSticker(p,true)}<span class="vbadge pref ${p.pref}">${p.pref==='whatsapp'?I.wa:I.mail}${prefLabel}</span></div>
       </div>
       ${actions}
       ${how}
@@ -1895,7 +1916,7 @@ function viewFeed(){
     const acts = mine ? `<button class="btn sm ghost pill" data-act="feed-del" data-post="${p.id}">Delete</button>`
       : (p.type==='event' ? `<button class="btn sm ${going?'is-connected':'ghost'} pill" data-act="feed-interest" data-post="${p.id}" aria-pressed="${going}">${going?I.check+'Interested':I.plus+'I’m interested'}</button>` : '')+connectBtn(a.id,'sm pill');
     return `<article class="post t-${p.type}">
-      <div class="post-h"><button class="post-av" data-act="${mine?'nav':'profile'}" ${mine?'data-view="me"':`data-id="${a.id}"`} aria-label="Open ${esc(a.name)}’s profile">${av(a,44)}</button><button class="who" data-act="${mine?'nav':'profile'}" ${mine?'data-view="me"':`data-id="${a.id}"`}><b>${esc(a.name)}</b>${mine?' <span class="muted" style="font-size:13px">(you)</span>':''}<small>${esc(a.role)}${a.curCompany?' · '+esc(a.curCompany):''}</small></button>
+      <div class="post-h"><button class="post-av" data-act="${mine?'nav':'profile'}" ${mine?'data-view="me"':`data-id="${a.id}"`} aria-label="Open ${esc(a.name)}’s profile">${av(a,44)}</button><button class="who" data-act="${mine?'nav':'profile'}" ${mine?'data-view="me"':`data-id="${a.id}"`}><b>${esc(a.name)}</b>${mine?' <span class="muted" style="font-size:13px">(you)</span>':''}<small>${esc(a.title||a.role)} · ${esc(a.company)}</small></button>
         <span class="pmeta"><span class="ptag"><span class="dot" style="width:7px;height:7px;border-radius:50%;background:currentColor"></span>${FEED_LABEL[p.type]}</span>${p.ts?`<time class="pdate" datetime="${new Date(p.ts).toISOString().slice(0,10)}">${postDate(p.ts)}</time>`:''}</span></div>
       <p class="post-b">${linkify(p.text)}</p>${p.photo?`<img class="post-img" src="${p.photo}" alt="Photo shared by ${esc(a.first)}" loading="lazy">`:''}
       <div class="post-f">${acts}</div></article>`; };
@@ -2050,7 +2071,7 @@ function introText(p){
 function openConnect(id){
   const p=byId(id);
   openModal(`<h3>Request an intro to ${esc(p.first)}</h3><p class="sub">${esc(p.first)} gets one email with your note and your profile card, and can accept or decline in one tap. If they accept, you’ll see the contact details they chose to share.</p>
-    <div class="mini">${av(p,46)}<span><b>${esc(p.name)}</b><small>${esc(p.role)} · ${esc(p.company)}</small></span></div>
+    <div class="mini">${av(p,46)}<span><b>${esc(p.name)}</b><small>${esc(p.title||p.role)} · ${esc(p.company)}</small></span></div>
     <p class="lbl"><label for="intro-note">Your note</label><span>Who you are · why you’re reaching out</span></p>
     <textarea id="intro-note" maxlength="500">${esc(introText(p))}</textarea>
     <p class="err" id="intro-err" hidden style="color:#C2362F;font-size:12.5px;font-weight:600;margin:6px 0 0"></p>
@@ -2173,7 +2194,7 @@ function sendRequest(id){
 
 /* ---------- profile editing (LinkedIn-style) ---------- */
 const STORE_KEY='imn-my-profile-v2';
-const ME_FIELDS=['first','last','role','location','industry','schools','career','email','phone','pref','photo','about','verify','reqId','canRefer','unit','ilUni','hometown','topics','uid','photoPath','linkedin'];
+const ME_FIELDS=['statusNote','first','last','role','location','industry','schools','career','email','phone','pref','photo','about','verify','reqId','canRefer','unit','ilUni','hometown','topics','uid','photoPath','linkedin'];
 /* Country for each city, shown next to it ("Boston, United States") and used to group the picker. */
 const LOC_COUNTRY={'Boston':'United States','New York':'United States','SF Bay Area':'United States','Seattle':'United States','Los Angeles':'United States','Chicago':'United States','Washington, DC':'United States','Austin':'United States','Miami':'United States',
   'Tel Aviv':'Israel','Jerusalem':'Israel','Haifa':'Israel','London':'United Kingdom','Paris':'France','Barcelona':'Spain','Madrid':'Spain','Berlin':'Germany'};
@@ -2205,6 +2226,8 @@ function recompute(p){
   const cur = p.career.find(c=>/Present/.test(c.years));
   p.curCompany = p.status==='Student'?null:(cur?cur.company:null);
   p.company = p.status==='Student' ? p.schools.find(s=>s.year>NOW_YEAR).school : (cur?cur.company:p.schools[0].school);
+  // What we show under the name: their current job title, not the (often marketing) LinkedIn headline.
+  p.title = p.status==='Student' ? 'MBA Candidate' : cur&&cur.role ? cur.role : 'MBA Alum';
   p.prev=[...new Set(p.career.filter(c=>!/Present/.test(c.years)&&!/^IDF/.test(c.company)&&c.company!==p.curCompany).map(c=>c.company))];
   if(!p.curCompany) p.canRefer=false;
   p.words=[p.name,p.role,p.company,...p.career.map(c=>c.role+' '+c.company)].join(' ').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
@@ -2257,6 +2280,10 @@ function openEdit(kind,idx){
     html=editShell('Edit contact info',`<p class="req-note">* Indicates required.</p>
       ${fld('e-email','Email*',`<input type="email" id="e-email" value="${esc(p.email)}" ${LIVE?'disabled':''}>`,LIVE?'<p class="hint"><span>This is the email you log in with. To change it, ask an admin.</span></p>':'')}
       ${contactFields('e',{...p,email:''})}`,{saveKind:'contact'});
+  }
+  if(kind==='status'){
+    html=editShell('Your status',`<p class="req-note">A short public note above your photo, for everyone in the network. For example “Moving to NYC in June, happy to grab coffee” or “Hiring PMs at Wix”.</p>
+      ${fld('e-status','Status',`<textarea id="e-status" maxlength="100" data-count="c-status" rows="3" placeholder="What’s new with you?">${esc(p.statusNote||'')}</textarea>`,`<p class="hint"><span>Leave empty to remove it.</span><span id="c-status">${(p.statusNote||'').length}/100</span></p>`)}`,{saveKind:'status'});
   }
   if(kind==='about'){
     html=editShell('Edit about',`<p class="req-note">Share what you did before your MBA, what you’re exploring now, and how other members can help.</p>
@@ -2318,6 +2345,7 @@ function saveEdit(kind,idx){
     const em=val('e-email'); const emOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em); fieldErr('e-email',!em?'Enter your email':!emOk?'Enter a valid email address':''); if(!emOk) ok=false;
     const c=readContactFields('e'); if(!c) ok=false;
     if(!ok) return; Object.assign(p,{email:em,phone:c.phone,shareEmail:c.shareEmail,pref:c.pref}); }
+  if(kind==='status'){ p.statusNote=document.getElementById('e-status').value.replace(/\s+/g,' ').trim().slice(0,100); if(LIVE&&p.uid) API.setStatus(p.statusNote).catch(e=>toast('We couldn’t save your status. '+liveErr(e))); }
   if(kind==='about'){ p.about=document.getElementById('e-about').value.trim(); }
   if(kind==='exp'){
     need('e-title','Enter a title'); need('e-co','Enter a company');
@@ -2473,6 +2501,9 @@ const API={
   saveContact:(p)=>rpc('update_my_contact',{p}),
   /* Contact details you may see: yours, and those of members who accepted your intro (unshared emails come back empty). */
   visibleContacts:()=>rpc('visible_contacts'),
+  /* Status notes ("speech bubbles"): read all you may see, set your own. */
+  statusNotes:()=>rpc('status_notes'),
+  setStatus:(note)=>rpc('set_my_status',{note}),
   async star(uid,on){ const c=await sb(); const {error}=on?await c.from('stars').insert({member_id:uid}):await c.from('stars').delete().eq('member_id',uid); if(error) throw apiErr(error); },
   async createPost(row){ const c=await sb(); const {data,error}=await c.from('posts').insert(row).select('id,type,body,photo_path,created_at').single(); if(error) throw apiErr(error); return data; },
   async deletePost(id){ const c=await sb(); const {error}=await c.from('posts').delete().eq('id',id); if(error) throw apiErr(error); },
@@ -3015,16 +3046,18 @@ function liveReset(){
 /* Loads everything you may see. Safe to call again to refresh. */
 async function liveLoad(){
   const m=me(); if(!LIVE||!m.uid) return;
-  let dir,contacts,stars,intros,posts,interest;
+  let dir,contacts,stars,intros,posts,interest,notes;
   try{
     [dir,contacts,stars,intros,posts,interest]=await Promise.all([API.directory(),API.visibleContacts(),
       API.table('stars','member_id'),API.table('intro_requests','id,requester_id,recipient_id,note,status,created_at,responded_at'),
       API.table('posts','id,author_id,type,body,photo_path,created_at','created_at'),API.table('post_interest','post_id')]);
+    notes=await API.statusNotes().catch(()=>[]);
   }catch(_){ toast('We couldn’t load the network. Check your connection and refresh.'); return; }
   liveReset(); UID.set(m.uid,ME);
   for(const r of dir||[]){ if(r.id===m.uid) continue; const id=P.length; UID.set(r.id,id); P.push(livePerson(r,id)); }
   ALL_COMPANIES.push(...new Set(P.flatMap(p=>[p.curCompany,...p.prev]).filter(Boolean)));
   for(const c of contacts||[]){ const id=UID.get(c.member_id); if(id===ME){ m.shareEmail=c.share_email!==false; continue; } if(id>0){ Object.assign(P[id],{email:c.email||'',phone:c.phone||'',shareEmail:c.share_email!==false}); S.unlocked.add(id); } }
+  for(const n of notes||[]){ const id=UID.get(n.member_id); if(id!=null&&P[id]) P[id].statusNote=n.note||''; }
   for(const x of stars||[]){ const id=UID.get(x.member_id); if(id!=null) S.stars.add(id); }
   for(const r of intros||[]){
     const sent=r.requester_id===m.uid, other=UID.get(sent?r.recipient_id:r.requester_id); if(other==null) continue;
