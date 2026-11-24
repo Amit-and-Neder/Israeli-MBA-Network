@@ -8,6 +8,7 @@ This replaces the Google Sheet + Apps Script backend in `backend/`, which `index
 | File | What it does |
 |---|---|
 | `migrations/20261116000000_init.sql` | Members, sign-up, admin approval: tables, privacy rules and functions. Run once. |
+| `migrations/20261129000000_contacts_for_members.sql` | Every approved member sees the email and WhatsApp each approved member shares, with no intro. Run once, after the contact-sharing file. |
 | `migrations/20261128000000_contact_sharing.sql` | Members share email, WhatsApp or both, and pick a preferred one. Emails are read through `visible_contacts()`, which hides unshared ones. Run once, after the email-check file, at the same time the matching site change goes live. |
 | `migrations/20261127000000_email_check.sql` | `email_in_use()`: lets the sign-up form say early that an email already has an account (true/false only). Run once, after the email-approval file. |
 | `migrations/20261126000000_email_approval.sql` | One-time keys behind the Approve/Decline buttons in the admin email. Run once, after the accounts file. |
