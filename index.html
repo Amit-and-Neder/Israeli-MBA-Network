@@ -2060,6 +2060,8 @@ const API={
   async sendIntro(uid,note){ const row=await rpc('send_intro',{recipient:uid,note}); notify({action:'intro',intro:row.id}); return row; },
   async respondIntro(introId,accept){ const row=await rpc('respond_intro',{intro:introId,accept}); if(accept) notify({action:'intro-accepted',intro:introId}); return row; },
   withdrawIntro:(introId)=>rpc('withdraw_intro',{intro:introId}),
+  /* Sign-up: is this email already registered? (true/false only) */
+  emailInUse:(email)=>rpc('email_in_use',{email}),
   /* Admin email buttons: no login, the one-time review key is the permission. */
   reviewInfo:(member,key)=>notifyCall({action:'review-info',member,key}),
   reviewDecide:(member,key,approve)=>notifyCall({action:'review',member,key,approve}),
@@ -2331,6 +2333,22 @@ function joinPayload(){
   return {first:clip(d.first,LIMITS.name),last:clip(d.last,LIMITS.name),headline:clip(d.role,LIMITS.headline),school:e.school,classYear:e.year,startYear:e.start,program:e.program,location:d.location,industry:d.industry,
     phone:d.phone,linkedin:J.liurl||'',source:'linkedin',answer:clip(J.answer,LIMITS.answer),about:clip(d.about,LIMITS.about),career:d.career.map(({src,...c})=>c)};
 }
+/* Before asking for a password, make sure the email isn't already registered. */
+async function joinCheckEmail(){
+  const J=S.join, email=J.draft.email, btn=document.querySelector('[data-act=join-review-next]');
+  if(btn){ btn.disabled=true; btn.textContent='Checking…'; }
+  let taken=false;
+  try{ taken=await API.emailInUse(email); }catch(_){ }   // if the check fails, sign-up itself still refuses a taken email
+  if(btn){ btn.disabled=false; btn.textContent='Continue'; }
+  if(taken){ emailTakenPopup(email); return; }
+  J.step='verify'; J.reqSent=false; render(); window.scrollTo(0,0);
+}
+function emailTakenPopup(email){
+  openModal(`<h3 style="display:flex;gap:8px;align-items:center"><span style="color:#C2362F">${I.x}</span>This email already has an account</h3>
+    <p class="sub"><b>${esc(email)}</b> is already registered with Israeli MBA Network. Each email can only sign up once.</p>
+    <p class="sub">If it’s yours, log in instead, or use “Forgot password?” on the login page. Otherwise, go back and use a different email.</p>
+    <div class="row"><button class="btn ghost" data-act="join-taken-change">Use a different email</button><button class="btn primary" data-act="join-taken-login">Log in instead</button></div>`);
+}
 /* Live sign-up: create the login with the chosen password (Supabase emails a code to prove the address is theirs),
    then save the request once the code is confirmed. */
 async function joinSubmit(){
@@ -2341,7 +2359,7 @@ async function joinSubmit(){
     if(((await API.sessionEmail())||'').toLowerCase()===d.email.toLowerCase()) return await joinSave();
     if(await API.signUp(d.email,J.pass)) return await joinSave();   // no confirmation needed
     J.codeSent=true;
-  }catch(err){ J.sendErr=joinErrText(err); }
+  }catch(err){ if(err.code==='already-registered'){ J.sending=false; render(); emailTakenPopup(d.email); return; } J.sendErr=joinErrText(err); }
   J.sending=false; render(); window.scrollTo(0,0);
 }
 async function joinVerifyCode(){
@@ -2647,9 +2665,11 @@ document.addEventListener('click',e=>{
     case 'forgot-confirm': forgotConfirm(); break;
     case 'join-go': S.join.step=t.dataset.step; render(); window.scrollTo(0,0); break;
     case 'join-rm': S.join.draft.career.splice(+t.dataset.idx,1); render(); break;
-    case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
+    case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else if(LIVE){ joinCheckEmail(); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
     case 'join-finish': joinApply(t.dataset.status); me().reqId=S.join.reqId||null; if(LIVE) me().uid=S.join.reqId||null; saveMe(); S.firstRun=false; S.join.step='done'; render(); window.scrollTo(0,0); break;
     case 'join-demo-approve': { const m=me(); m.verify.school='admin'; saveMe(); render(); openRegEmail(m.first,m.email,'An admin approved your request. In the live app this lands in your inbox.'); break; }
+    case 'join-taken-login': { const email=S.join.draft.email; closeModal(); S.join.login={email}; S.join.step='login'; render(); window.scrollTo(0,0); break; }
+    case 'join-taken-change': closeModal(); S.join.step='review'; render(); fieldErr('j-email','This email already has an account. Use a different one.'); document.getElementById('j-email')?.focus(); break;
     case 'join-code-verify': joinVerifyCode(); break;
     case 'join-code-resend': API.resendSignup(S.join.draft.email).then(()=>toast('We sent a new code')).catch(e=>toast(liveErr(e))); break;
     case 'join-code-back': S.join.codeSent=false; S.join.sendErr=''; render(); break;

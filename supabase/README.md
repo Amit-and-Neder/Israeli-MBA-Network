@@ -8,11 +8,12 @@ This replaces the Google Sheet + Apps Script backend in `backend/`, which `index
 | File | What it does |
 |---|---|
 | `migrations/20261116000000_init.sql` | Members, sign-up, admin approval: tables, privacy rules and functions. Run once. |
+| `migrations/20261127000000_email_check.sql` | `email_in_use()`: lets the sign-up form say early that an email already has an account (true/false only). Run once, after the email-approval file. |
 | `migrations/20261126000000_email_approval.sql` | One-time keys behind the Approve/Decline buttons in the admin email. Run once, after the accounts file. |
 | `migrations/20261125000000_accounts.sql` | Lets a member delete their own account. Run once, after the member-data file. |
 | `migrations/20261124000000_member_data.sql` | Everything members do after joining: profile edits, photos, stars, Feed posts, "interested" and intros. Run once, after the first file. |
 | `functions/notify/index.ts` | Sends the app's emails: new join request (to admins), welcome (on approval), intro request (to the person asked) and intro accepted (to the person who asked). |
-| `tests/` | Privacy tests that run on a local Postgres (`tests/run.sh`). 125 checks, e.g. a member can't read another member's phone number or post as someone else. |
+| `tests/` | Privacy tests that run on a local Postgres (`tests/run.sh`). 129 checks, e.g. a member can't read another member's phone number or post as someone else. |
 
 ## Who can see what
 

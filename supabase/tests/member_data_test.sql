@@ -238,3 +238,11 @@ select t.ok(not exists (select 1 from public.review_tokens r join public.members
 update public.members set status = 'approved' where id = '99999999-0000-0000-0000-000000000000';
 select t.ok(not exists (select 1 from public.review_tokens where member_id = '99999999-0000-0000-0000-000000000000'),
   'deciding a request deletes its key, so the emailed buttons stop working');
+
+-- ---------- email already in use (20261127000000_email_check.sql)
+begin; set local role anon;
+select t.ok(public.email_in_use('c@example.com'), 'sign-up form: a registered email is reported as taken');
+select t.ok(public.email_in_use('  C@Example.COM '), 'the check ignores capital letters and spaces');
+select t.ok(not public.email_in_use('nobody@example.com'), 'an unused email is reported as free');
+select t.fails('select count(*) from auth.users', 'permission denied', 'the check does not open the login table');
+commit;
