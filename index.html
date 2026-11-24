@@ -6,7 +6,7 @@
 <style>
 /* Layout: search-first single column. Hero search dominates Discover; rails below. Profile = header card + timeline / common ground two-column. */
 :root{
-  --bg:#F1F2EE; --surface:#FFFFFF; --surface-2:#F7F8F4; --ink:#161A26; --muted:#5C6272; --faint:#8C91A0; --line:#E1E3DC;
+  --bg:#EEF2FB; --surface:#FFFFFF; --surface-2:#F5F7FC; --ink:#161A26; --muted:#5C6272; --faint:#8C91A0; --line:#E2E7F1;
   --accent:#2E49C2; --accent-ink:#FFFFFF; --accent-soft:#E8ECFA; --accent-text:#2940A8;
   --warm:#B5641E; --warm-soft:#FBEEDF;
   --ok:#1D7448; --ok-soft:#E2F1E8; --wa:#159447; --wa-soft:#E0F3E7;
@@ -19,21 +19,21 @@
   --r-lg:20px; --r-md:14px; --r-sm:10px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0F121A; --surface:#171B26; --surface-2:#1C2130; --ink:#E8EAF1; --muted:#A1A7B8; --faint:#757C90; --line:#272D3D;
+  --bg:#0C1020; --surface:#171B26; --surface-2:#1C2130; --ink:#E8EAF1; --muted:#A1A7B8; --faint:#757C90; --line:#272D3D;
   --accent:#7D95FF; --accent-ink:#0F1426; --accent-soft:#222A47; --accent-text:#A9B8FF;
   --warm:#F0A764; --warm-soft:#33261A; --ok:#6FD39F; --ok-soft:#173025; --wa:#4AD483; --wa-soft:#15301F;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25); --shadow-lg:0 2px 6px rgba(0,0,0,.3),0 22px 56px rgba(0,0,0,.45);
   --scrim:rgba(0,0,0,.6); color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --bg:#0F121A; --surface:#171B26; --surface-2:#1C2130; --ink:#E8EAF1; --muted:#A1A7B8; --faint:#757C90; --line:#272D3D;
+  --bg:#0C1020; --surface:#171B26; --surface-2:#1C2130; --ink:#E8EAF1; --muted:#A1A7B8; --faint:#757C90; --line:#272D3D;
   --accent:#7D95FF; --accent-ink:#0F1426; --accent-soft:#222A47; --accent-text:#A9B8FF;
   --warm:#F0A764; --warm-soft:#33261A; --ok:#6FD39F; --ok-soft:#173025; --wa:#4AD483; --wa-soft:#15301F;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25); --shadow-lg:0 2px 6px rgba(0,0,0,.3),0 22px 56px rgba(0,0,0,.45);
   --scrim:rgba(0,0,0,.6); color-scheme:dark;
 }
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);position:relative;isolation:isolate;min-height:100vh;color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
 input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
@@ -41,7 +41,7 @@ svg{display:block}
 .wrap{max-width:1140px;margin:0 auto;padding-inline:20px}
 
 /* top bar */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--land-top) 82%,transparent);backdrop-filter:saturate(1.2) blur(14px);-webkit-backdrop-filter:saturate(1.2) blur(14px);border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
 .top .wrap{display:flex;align-items:center;gap:20px;height:64px}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:650;font-size:17px;letter-spacing:-.01em;white-space:nowrap}
 .brand-mark{width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
@@ -107,7 +107,7 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--ok);background:var(--ok-soft);padding:5px 11px;border-radius:99px}
 .eyebrow svg{width:14px;height:14px}
 .hero h1{font-family:var(--f-display);font-weight:750;font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-.03em;margin:18px 0 26px;text-wrap:balance}
-.hero h1 em{font-style:normal;color:var(--accent)}
+.hero h1 em,.page-h1 em{font-style:normal;color:var(--accent);background:linear-gradient(180deg,transparent 72%,color-mix(in srgb,var(--accent) 16%,transparent) 72%)}
 .shortcuts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
 .shortcut{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-align:left;transition:border-color .15s,box-shadow .15s}
 .shortcut:hover{border-color:var(--faint)}
@@ -342,7 +342,7 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .t-job{--tc:var(--accent-text);--tc-soft:var(--accent-soft)}
 .t-hiring{--tc:var(--ok);--tc-soft:var(--ok-soft)}
 .t-event{--tc:var(--warm);--tc-soft:var(--warm-soft)}
-.page-h1{font-family:var(--f-display);font-weight:750;font-size:30px;letter-spacing:-.025em;margin:0 0 6px}
+.page-h1{font-family:var(--f-display);font-weight:750;font-size:clamp(30px,3.4vw,38px);line-height:1.08;letter-spacing:-.025em;margin:0 0 8px}
 .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:3px}
 .seg button{padding:6px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:var(--muted);display:flex;gap:6px;align-items:center}
 .seg button svg{width:14px;height:14px}
@@ -444,7 +444,7 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .btn.outline:hover{background:var(--accent-soft);filter:none}
 .btn.outline.is-pending{border-color:var(--warm);color:var(--warm);background:transparent}
 .btn.outline.is-connected{border-color:var(--ok);color:var(--ok);background:transparent}
-.pillbar{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:20;background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-block:12px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.pillbar{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-block:12px;margin-bottom:6px;border-bottom:1px solid var(--line)}
 .pillw{position:relative}
 .fpill{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 14px;border-radius:99px;border:1px solid var(--faint);background:var(--surface);font-weight:600;font-size:14px;color:var(--muted);white-space:nowrap}
 .fpill svg{width:15px;height:15px;transition:transform .15s}
@@ -531,7 +531,7 @@ button.how .chev svg{width:16px;height:16px}
 /* ---------- landing (login) page ---------- */
 .landing{overflow-x:clip;position:relative;isolation:isolate}
 /* Soft blue-and-white wash behind the landing page, fixed so it stays smooth while scrolling. */
-.landing::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
   radial-gradient(60% 55% at 85% 20%, var(--land-glow1) 0%, transparent 70%),
   radial-gradient(55% 60% at 10% 90%, var(--land-glow2) 0%, transparent 70%),
   radial-gradient(40% 40% at 45% 45%, var(--land-glow3) 0%, transparent 75%),
@@ -700,7 +700,7 @@ body:has(.landing) .top{position:relative;background:transparent;border-bottom-c
   .top .nav{display:none}
   .top .wrap{gap:12px}
   .brand span.full{display:none}
-  .bottom-nav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+  .bottom-nav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
   .bottom-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;font-size:11.5px;font-weight:600;color:var(--muted);position:relative}
   .bottom-nav button.on{color:var(--accent-text)}
   .bottom-nav svg{width:21px;height:21px}
