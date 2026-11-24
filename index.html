@@ -43,8 +43,14 @@ svg{display:block}
 /* top bar */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--land-top) 82%,transparent);backdrop-filter:saturate(1.2) blur(14px);-webkit-backdrop-filter:saturate(1.2) blur(14px);border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
 .top .wrap{display:flex;align-items:center;gap:20px;height:64px}
-.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:650;font-size:17px;letter-spacing:-.01em;white-space:nowrap}
-.brand-mark{width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.brand{display:flex;align-items:center;gap:11px;white-space:nowrap;text-align:left}
+.brand-mark{width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,#3B5BE0 0%,#1E2F86 100%);display:grid;place-items:center;box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 4px 12px rgba(30,47,134,.28);overflow:hidden;flex:none}
+.brand-mark img{width:100%;height:100%;object-fit:contain}
+.wm{display:flex;flex-direction:column;line-height:1}
+.wm-1{font-family:var(--f-display);font-weight:650;font-size:18px;letter-spacing:-.02em;color:var(--ink)}
+.wm-1 b{font-weight:800;color:var(--accent-text);letter-spacing:-.01em}
+.wm-2{display:flex;align-items:center;gap:7px;margin-top:4px;font-family:var(--f-body);font-weight:700;font-size:9.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted)}
+.wm-2 i{font-style:normal;font-weight:600;letter-spacing:.14em;color:var(--faint);padding-left:7px;border-left:1px solid var(--line)}
 .top-search{flex:1;max-width:460px;min-width:0}
 .nav{display:flex;gap:4px;margin-left:auto}
 .nav button{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;color:var(--muted);font-weight:600;font-size:14px;position:relative}
@@ -108,10 +114,15 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .eyebrow svg{width:14px;height:14px}
 .hero h1{font-family:var(--f-display);font-weight:750;font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-.03em;margin:18px 0 26px;text-wrap:balance}
 .hero h1 em,.page-h1 em{font-style:normal;color:var(--accent);background:linear-gradient(180deg,transparent 72%,color-mix(in srgb,var(--accent) 16%,transparent) 72%)}
+:root{--ic-1:#2E49C2;--ic-1d:#1E2F86;--ic-2:#B7C6FF;--ic-3:#F2B84B;--ic-3d:#CF8E22;--ic-4:#2FAE74;--ic-bg:#EAF0FF}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ic-1:#7D95FF;--ic-1d:#4D63CF;--ic-2:#3A4880;--ic-3:#F0B655;--ic-3d:#B6802A;--ic-4:#48C98B;--ic-bg:#1D2546}}
+:root[data-theme="dark"]{--ic-1:#7D95FF;--ic-1d:#4D63CF;--ic-2:#3A4880;--ic-3:#F0B655;--ic-3d:#B6802A;--ic-4:#48C98B;--ic-bg:#1D2546}
+.ico.ill{background:linear-gradient(150deg,var(--ic-bg) 0%,color-mix(in srgb,var(--ic-bg) 45%,var(--surface)) 100%)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 14%,transparent);color:inherit!important}
+.ico.ill svg{width:84%!important;height:84%!important;overflow:visible}
 .goals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 16px;text-align:left}
 .goal{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:18px;background:linear-gradient(135deg,var(--surface) 0%,color-mix(in srgb,var(--accent-soft) 70%,var(--surface)) 100%);border:1px solid color-mix(in srgb,var(--accent) 18%,var(--line));box-shadow:var(--shadow);text-align:left;transition:transform .15s,box-shadow .15s,border-color .15s}
 .goal:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
-.goal .ico{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);flex:none}
+.goal .ico{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);flex:none}
 .goal .ico svg{width:22px;height:22px}
 .goal small{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.01em}
 .goal b{display:block;font-family:var(--f-display);font-weight:750;font-size:20px;line-height:1.1;letter-spacing:-.015em;color:var(--accent-text)}
@@ -121,7 +132,7 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .shortcut{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-align:left;transition:border-color .15s,box-shadow .15s}
 .shortcut:hover{border-color:var(--faint)}
 .shortcut.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-.shortcut .ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-text);flex:none}
+.shortcut .ico{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-text);flex:none}
 .shortcut .ico svg{width:19px;height:19px}
 .shortcut b{display:block;font-weight:650;font-size:15px}
 .shortcut small{color:var(--muted);font-size:12.5px}
@@ -740,7 +751,9 @@ body:has(.landing) .top{position:relative;background:transparent;border-bottom-c
   .top .nav{justify-content:space-between}
   .top .nav button{padding:7px 6px;gap:6px}
   .top .nav button > svg{display:none}
-  .brand span.full{display:none}
+  .wm-1{font-size:16px}
+  .wm-2 i{display:none}
+  .brand-mark{width:32px;height:32px}
 }
 </style>
 
@@ -784,7 +797,13 @@ const I = {
   down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
   copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
 };
-const markSVG='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg>';
+/* Brand: set BRAND_LOGO to an image path (e.g. 'logo.svg') and it replaces the drawn mark. */
+const BRAND_LOGO='';
+function brandInner(){
+  const mark = BRAND_LOGO?`<img src="${BRAND_LOGO}" alt="">`:markSVG;
+  return `<span class="brand-mark">${mark}</span><span class="wm full"><span class="wm-1">Israeli <b>MBA</b></span><span class="wm-2">Network<i>US · EU</i></span></span>`;
+}
+const markSVG='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.3"><circle cx="9" cy="12" r="5.2" stroke="#fff"/><circle cx="15" cy="12" r="5.2" stroke="#9FB4FF"/><path d="M12 7.9a5.2 5.2 0 0 1 0 8.2" stroke="#fff"/></svg>';
 
 /* ---------- reference data ---------- */
 const NOW_YEAR = 2026;
@@ -883,10 +902,18 @@ const JOIN_REQS = [
   {id:101,name:'Tal Ben-David',first:'Tal',last:'Ben-David',hair:'long',role:'Incoming PM',company:'Ramp',schools:[{school:'MIT Sloan',program:'MBA',year:2026}],li:{edu:'MIT Sloan · MBA, 2024–2026',id:false,israeli:'IDF · Intelligence Corps, Wix (Tel Aviv)'},knows:17,email:'tal.bendavid@example.com',answer:'Grew up in Haifa. PM at Wix for 4 years before Sloan, now moving to NYC for a fintech role.',url:'linkedin.com/in/tal-bendavid',asked:'2 hours ago'},
   {id:102,name:'Shai Mor',first:'Shai',last:'Mor',hair:'short',role:'MBA Candidate',company:'MIT Sloan',schools:[{school:'MIT Sloan',program:'MBA',year:2028}],li:{edu:null,id:true,israeli:'Technion, Intel (Haifa)'},knows:null,email:'shai.mor@example.com',answer:'From Tel Aviv, ex-Intel engineer. Started at Sloan this fall and haven’t updated LinkedIn yet.',url:'linkedin.com/in/shaimor',asked:'Yesterday'},
 ];
+const ILL = {
+  colleague:'<svg viewBox="0 0 48 48"><circle cx="30.5" cy="16.5" r="6.5" fill="var(--ic-2)"/><path d="M19.5 38c0-6.6 4.9-11 11-11s11 4.4 11 11z" fill="var(--ic-2)"/><circle cx="18.5" cy="18.5" r="7" fill="var(--ic-1)"/><path d="M6.5 40c0-7 5.4-12 12-12s12 5 12 12z" fill="var(--ic-1)"/><circle cx="37" cy="35" r="7" fill="var(--ic-4)" stroke="var(--ic-bg)" stroke-width="2.5"/><path d="m33.7 35 2.3 2.3 4.2-4.5" stroke="#fff" stroke-width="2.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  investor:'<svg viewBox="0 0 48 48"><path d="M6 36v3.2a10.5 3.8 0 0 0 21 0V36" fill="var(--ic-3d)"/><ellipse cx="16.5" cy="36" rx="10.5" ry="3.8" fill="var(--ic-3)"/><path d="M6 30.5v3.2a10.5 3.8 0 0 0 21 0v-3.2" fill="var(--ic-3d)"/><ellipse cx="16.5" cy="30.5" rx="10.5" ry="3.8" fill="var(--ic-3)"/><path d="M6 25v3.2a10.5 3.8 0 0 0 21 0V25" fill="var(--ic-3d)"/><ellipse cx="16.5" cy="25" rx="10.5" ry="3.8" fill="var(--ic-3)"/><ellipse cx="16.5" cy="25" rx="5" ry="1.6" fill="var(--ic-3d)" opacity=".55"/><path d="m25 21 6.5-6.5 4.5 4.5 7-8" stroke="var(--ic-1)" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M36.5 10.5H43V17" stroke="var(--ic-1)" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  investment:'<svg viewBox="0 0 48 48"><circle cx="11" cy="12" r="1.6" fill="var(--ic-3)"/><circle cx="40" cy="36" r="1.4" fill="var(--ic-2)"/><circle cx="20" cy="7" r="1.1" fill="var(--ic-2)"/><path d="M19 30.5c-3.6.9-6.2 4.3-7.3 9.3 5-1.1 8.4-3.7 9.3-7.3z" fill="var(--ic-3)"/><path d="M18.2 33.2c-1.8.6-3 2.1-3.6 4.2 2.1-.6 3.6-1.8 4.2-3.6z" fill="#fff" opacity=".75"/><path d="m21 23-7 .6-4.4 5.2 8.2.6z" fill="var(--ic-2)"/><path d="m25 27-.6 7-5.2 4.4-.6-8.2z" fill="var(--ic-2)"/><path d="M33.5 8.2c3.6-.9 6.1-.4 6.1-.4s.5 2.5-.4 6.1c-1.6 6.4-6.6 12.4-12.6 16.3l-7.8-7.8C22.7 16.4 27.1 9.8 33.5 8.2z" fill="var(--ic-1)"/><circle cx="31" cy="17" r="3.6" fill="#fff"/><circle cx="31" cy="17" r="1.9" fill="var(--ic-2)"/></svg>',
+  school:'<svg viewBox="0 0 48 48"><path d="M12 21.5v8.5c0 3.3 5.4 6.4 12 6.4s12-3.1 12-6.4v-8.5l-12 5.4z" fill="var(--ic-1d)"/><path d="M24 8.5 3.5 18 24 27.5 44.5 18z" fill="var(--ic-1)"/><path d="M24 8.5 3.5 18 24 22z" fill="#fff" opacity=".12"/><circle cx="24" cy="18" r="2" fill="var(--ic-2)"/><path d="M24 18 39.5 21.5V31" stroke="var(--ic-3)" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M37 31h5l-1 6h-3z" fill="var(--ic-3)"/></svg>',
+  company:'<svg viewBox="0 0 48 48"><rect x="26" y="16" width="15" height="24" rx="2" fill="var(--ic-2)"/><rect x="30" y="21" width="7" height="2.6" rx="1" fill="#fff" opacity=".85"/><rect x="30" y="26.5" width="7" height="2.6" rx="1" fill="#fff" opacity=".85"/><rect x="30" y="32" width="7" height="2.6" rx="1" fill="#fff" opacity=".85"/><rect x="8" y="7" width="21" height="33" rx="2.5" fill="var(--ic-1)"/><g fill="#fff" opacity=".92"><rect x="12" y="12" width="5" height="3.8" rx=".9"/><rect x="20" y="12" width="5" height="3.8" rx=".9"/><rect x="12" y="19" width="5" height="3.8" rx=".9"/><rect x="20" y="19" width="5" height="3.8" rx=".9"/><rect x="12" y="26" width="5" height="3.8" rx=".9"/><rect x="20" y="26" width="5" height="3.8" rx=".9"/></g><rect x="15.5" y="33" width="6" height="7" rx="1" fill="var(--ic-3)"/><rect x="5" y="39.5" width="38" height="2.2" rx="1.1" fill="var(--ic-1d)"/></svg>',
+  industry:'<svg viewBox="0 0 48 48"><path d="M41.59 13.61 L43.58 14.57 L43.13 16.82 L40.92 16.93 L39.93 18.38 L40.66 20.47 L38.76 21.74 L37.12 20.25 L35.39 20.59 L34.43 22.58 L32.18 22.13 L32.07 19.92 L30.62 18.93 L28.53 19.66 L27.26 17.76 L28.75 16.12 L28.41 14.39 L26.42 13.43 L26.87 11.18 L29.08 11.07 L30.07 9.62 L29.34 7.53 L31.24 6.26 L32.88 7.75 L34.61 7.41 L35.57 5.42 L37.82 5.87 L37.93 8.08 L39.38 9.07 L41.47 8.34 L42.74 10.24 L41.25 11.88Z" fill="var(--ic-3)"/><circle cx="35" cy="14" r="2.8" fill="var(--ic-bg)"/><path d="M29.76 24.74 L32.92 25.51 L32.92 28.49 L29.76 29.26 L29.04 31.50 L31.14 33.97 L29.38 36.39 L26.38 35.16 L24.48 36.54 L24.72 39.78 L21.88 40.70 L20.17 37.94 L17.83 37.94 L16.12 40.70 L13.28 39.78 L13.52 36.54 L11.62 35.16 L8.62 36.39 L6.86 33.97 L8.96 31.50 L8.24 29.26 L5.08 28.49 L5.08 25.51 L8.24 24.74 L8.96 22.50 L6.86 20.03 L8.62 17.61 L11.62 18.84 L13.52 17.46 L13.28 14.22 L16.12 13.30 L17.83 16.06 L20.17 16.06 L21.88 13.30 L24.72 14.22 L24.48 17.46 L26.38 18.84 L29.38 17.61 L31.14 20.03 L29.04 22.50Z" fill="var(--ic-1)"/><circle cx="19" cy="27" r="6.2" fill="var(--ic-2)"/><circle cx="19" cy="27" r="3" fill="var(--ic-bg)"/></svg>'
+};
 const GOALS = [
-  ['Who can refer','briefcase','Colleague','Alumni who can refer you at their company'],
-  ['Investors','coin','Investor','VCs and angels in the network'],
-  ['Founders','rocket','Investment','Founders building their next company'],
+  ['Who can refer','colleague','Colleague','Alumni who can refer you at their company'],
+  ['Investors','investor','Investor','VCs and angels in the network'],
+  ['Founders','investment','Investment','Founders building their next company'],
 ];
 const EXAMPLES = ['Who can refer at Google','Sloan \'23','Product managers at Google','People from MIT working in healthcare','HBS alumni in New York','Founders in climate tech','People who worked at McKinsey'];
 const INCOMING_NOTES = {25:'Hi Noam! Saw you were at Monday.com before Sloan. I’m a Sloan ’24 at Apple and happy to help with your PM recruiting.',16:'Hey, fellow Waze/Monday alum network here. Would love to swap notes on NYC product roles.'};
@@ -1250,14 +1277,14 @@ function rail(key){
 
 /* ---------- views ---------- */
 /* Just the brand, for pages outside the network (sign-up, waiting for approval, admin review links). */
-function plainBar(){ return `<header class="top"><div class="wrap"><span class="brand"><span class="brand-mark">${markSVG}</span><span class="full">Israeli MBA Network</span></span></div></header>`; }
+function plainBar(){ return `<header class="top"><div class="wrap"><span class="brand">${brandInner()}</span></div></header>`; }
 function topbar(){
-  if(S.view==='join') return `<header class="top"><div class="wrap"><span class="brand"><span class="brand-mark">${markSVG}</span><span class="full">Israeli MBA Network</span></span><span style="margin-left:auto"></span>${S.join&&S.join.step!=='done'&&!S.firstRun?`<button class="btn sm ghost pill" data-act="join-exit">Exit preview</button>`:''}</div></header>`;
+  if(S.view==='join') return `<header class="top"><div class="wrap"><span class="brand">${brandInner()}</span><span style="margin-left:auto"></span>${S.join&&S.join.step!=='done'&&!S.firstRun?`<button class="btn sm ghost pill" data-act="join-exit">Exit preview</button>`:''}</div></header>`;
   const n = S.incoming.size + S.joinReqs.length;
   const tab = (v,label,ico)=>`<button class="${S.view===v?'on':''}" data-act="nav" data-view="${v}">${ico}<span>${label}</span>${v==='network'&&n?`<span class="badge">${n}</span>`:''}</button>`;
   const showSearch = S.view!=='home' && S.view!=='results';
   return `<header class="top"><div class="wrap">
-    <button class="brand" data-act="nav" data-view="home"><span class="brand-mark">${markSVG}</span><span class="full">Israeli MBA Network</span></button>
+    <button class="brand" data-act="nav" data-view="home">${brandInner()}</button>
     <div class="top-search">${showSearch?searchBox('compact','q-top'):''}</div>
     <nav class="nav">${tab('home','Discover',I.compass.replace('<svg','<svg width="17" height="17"'))}${tab('feed','Feed',I.feed.replace('<svg','<svg width="17" height="17"'))}${tab('network','My Network',I.users.replace('<svg','<svg width="17" height="17"'))}${tab('me','My Profile',av(me(),22))}</nav>
   </div></header>
@@ -1265,15 +1292,15 @@ function topbar(){
 }
 function viewHome(){
   const cnt = (fn)=>new Set(P.filter(p=>p.id!==ME).flatMap(fn)).size;
-  const sc = [['school','School & class',I.cap,`${cnt(p=>p.schools.map(s=>s.school))} programs`],['company','Company',I.building,`${ALL_COMPANIES.length} companies`],['industry','Industry',I.layers,`${cnt(p=>[p.industry])} industries`]];
+  const sc = [['school','School & class',ILL.school,`${cnt(p=>p.schools.map(s=>s.school))} programs`],['company','Company',ILL.company,`${ALL_COMPANIES.length} companies`],['industry','Industry',ILL.industry,`${cnt(p=>[p.industry])} industries`]];
   const waiting=LIVE&&me().verify.school==='pending';
   return `<main><div class="wrap">
     ${waiting?`<div class="notice" style="margin:18px 0 0;background:var(--warm-soft);color:var(--warm)">${I.clock}<span><b>Your request is waiting for an admin.</b> Once you’re approved, you’ll see every member here and they’ll see you. Meanwhile you can finish your profile.</span></div>`:''}
     <section class="hero">
       <h1>Find the Israeli who’s <em>already where you’re headed.</em></h1>
-      <div class="goals" role="group" aria-label="What are you looking for?">${GOALS.map(([q,ic,t,d])=>`<button class="goal" data-act="search" data-q="${esc(q)}"><span class="ico">${I[ic]}</span><span><small>Find your next</small><b>${t}</b><em>${d}</em></span></button>`).join('')}</div>
+      <div class="goals" role="group" aria-label="What are you looking for?">${GOALS.map(([q,ic,t,d])=>`<button class="goal" data-act="search" data-q="${esc(q)}"><span class="ico ill">${ILL[ic]}</span><span><small>Find your next</small><b>${t}</b><em>${d}</em></span></button>`).join('')}</div>
       ${searchBox('big','q-home')}
-      <div class="shortcuts">${sc.map(([k,l,ic,s])=>`<button class="shortcut ${S.browse===k?'on':''}" data-act="browse" data-tab="${k}" aria-expanded="${S.browse===k}"><span class="ico">${ic}</span><span><b>${l}</b><small>Browse ${s}</small></span></button>`).join('')}</div>
+      <div class="shortcuts">${sc.map(([k,l,ic,s])=>`<button class="shortcut ${S.browse===k?'on':''}" data-act="browse" data-tab="${k}" aria-expanded="${S.browse===k}"><span class="ico ill">${ic}</span><span><b>${l}</b><small>Browse ${s}</small></span></button>`).join('')}</div>
       ${S.browse?browsePanel(S.browse):''}
       <div class="try"><span>Try:</span>${EXAMPLES.map(e=>`<button data-act="search" data-q="${esc(e)}">${esc(e)}</button>`).join('')}</div>
     </section>
