@@ -405,7 +405,7 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .req-note{font-size:12.5px;color:var(--muted);margin:0}
 .field{display:flex;flex-direction:column;gap:5px}
 .field > label,.field > .fl{font-size:13.5px;font-weight:600;color:var(--muted)}
-.field input[type=text],.field input[type=email],.field input[type=tel],.field select,.field textarea{height:42px;border:1px solid var(--faint);border-radius:8px;padding:0 12px;background:var(--surface);font-size:15px;width:100%}
+.field input[type=text],.field input[type=email],.field input[type=password],.field input[type=tel],.field select,.field textarea{height:42px;border:1px solid var(--faint);border-radius:8px;padding:0 12px;background:var(--surface);font-size:15px;width:100%}
 .field textarea{height:auto;min-height:130px;padding:10px 12px;resize:vertical;line-height:1.5}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 .field.bad input,.field.bad select,.field.bad textarea{border-color:#C2362F}
@@ -1334,7 +1334,8 @@ function viewProfile(id){
   const st = connState(id);
   const actions = isMe ? `<div class="pactions">${p.curCompany?`<button class="switch" role="switch" aria-checked="${!!p.canRefer}" data-act="toggle-refer"><span class="knob"></span>I can refer people at ${esc(p.curCompany)}</button>`:''}
       <button class="btn ghost pill" data-act="edit" data-kind="contact">${I.mail}Contact info</button>
-      <button class="btn ghost pill" data-act="join-start" data-mode="sync">${I.link}Update from LinkedIn</button></div>`
+      <button class="btn ghost pill" data-act="join-start" data-mode="sync">${I.link}Update from LinkedIn</button>
+      <button class="btn ghost pill" data-act="nav" data-view="settings">${I.shield}Account settings</button></div>`
     : st==='unlocked' ? `<div class="pactions">${starBtn(id,'lg')}
       <button class="btn lg mail" data-act="email" data-id="${id}">${I.mail}Email${p.pref==='email'?'<span class="pref-dot">PREFERRED</span>':''}</button>
       <button class="btn lg wa" data-act="wa" data-id="${id}">${I.wa}WhatsApp${p.pref==='whatsapp'?'<span class="pref-dot">PREFERRED</span>':''}</button></div>`
@@ -1370,6 +1371,52 @@ function viewProfile(id){
     ${isMe?`<p class="demo-note">${LIVE?'Changes are saved to your account.':'Edits are saved in this browser only.'} <button class="link" style="font-size:12px" data-act="reset-me">${LIVE?'Log out':'Start over as a new user'}</button></p>`:''}
   </div></main>`;
 }
+/* ---------- account settings ---------- */
+function viewSettings(){
+  const m=me(), A=S.acct||(S.acct={});
+  const box=(title,sub,inner,danger)=>`<section class="panel" style="margin-bottom:16px${danger?';border-color:#E8B4B0':''}"><h2>${title}</h2>${sub?`<p class="sub">${sub}</p>`:''}<div style="margin-top:14px">${inner}</div></section>`;
+  const note=(k)=>A[k]?`<div class="notice" style="margin-bottom:12px;${A[k].bad?'background:var(--warm-soft);color:var(--warm)':''}">${A[k].bad?I.x:I.check}<span>${A[k].text}</span></div>`:'';
+  return `<main><div class="wrap page" style="max-width:720px">
+    <button class="back" data-act="nav" data-view="me">${I.left}My profile</button>
+    <h1 class="page-h1">Account settings</h1><p class="muted" style="margin:0 0 20px">Your login, password and account.</p>
+    ${box('Login','The email you log in with. Members only see it after accepting your intro.',
+      `<dl class="dl"><dt>Email</dt><dd>${esc(m.email||'')}</dd><dt>Status</dt><dd>${m.verify&&m.verify.school==='pending'?'Waiting for admin approval':'Member'}${S.isAdmin?' · Admin':''}</dd></dl>
+       <p class="fine" style="font-size:13px">To change your login email, ask an admin.</p>`)}
+    ${box('Change password',`You stay logged in on this device. Your other devices are logged out.`,
+      `${note('pw')}<div class="jsec">${fld('s-cur','Current password',`<input type="password" id="s-cur" autocomplete="current-password">`)}</div>
+       <div class="two">${fld('s-new','New password',`<input type="password" id="s-new" autocomplete="new-password" placeholder="At least ${PW_MIN} characters">`)}${fld('s-new2','Repeat new password',`<input type="password" id="s-new2" autocomplete="new-password">`)}</div>
+       <div class="row"><button class="btn primary pill" data-act="acct-password" ${A.busy?'disabled':''}>${A.busy==='pw'?'Saving…':'Change password'}</button></div>`)}
+    ${box('Profile and contact','What members see about you.',
+      `<div class="row" style="margin:0"><button class="btn ghost pill" data-act="nav" data-view="me">${I.user}Edit my profile</button><button class="btn ghost pill" data-act="edit" data-kind="contact">${I.mail}WhatsApp and contact preference</button></div>`)}
+    ${box('Log out','You stay logged in on this device until you log out or change your password.',
+      `${note('out')}<div class="row" style="margin:0"><button class="btn ghost pill" data-act="reset-me">Log out</button><button class="btn ghost pill" data-act="acct-out-all" ${A.busy?'disabled':''}>Log out of all devices</button></div>`)}
+    ${box('Delete account','Removes your profile, photos, posts, stars and intros for good. This can’t be undone.',
+      `${note('del')}<div class="jsec">${fld('s-del','Type DELETE to confirm',`<input type="text" id="s-del" autocomplete="off" placeholder="DELETE">`)}</div>
+       <div class="row"><button class="btn pill" style="background:#C2362F;color:#fff" data-act="acct-delete" ${A.busy?'disabled':''}>${A.busy==='del'?'Deleting…':'Delete my account'}</button></div>`,true)}
+    ${LIVE?'':'<p class="demo-note">Demo mode: account changes need the live backend.</p>'}
+  </div></main>`;
+}
+async function acctPassword(){
+  const A=S.acct, m=me(), cur=document.getElementById('s-cur').value, pw=document.getElementById('s-new').value, pw2=document.getElementById('s-new2').value;
+  let ok=true;
+  if(!cur){ fieldErr('s-cur','Enter your current password'); ok=false; } else fieldErr('s-cur','');
+  if(pw.length<PW_MIN){ fieldErr('s-new',`Use at least ${PW_MIN} characters`); ok=false; } else fieldErr('s-new','');
+  if(pw!==pw2){ fieldErr('s-new2','The passwords don’t match'); ok=false; } else fieldErr('s-new2','');
+  if(!ok) return;
+  if(!LIVE){ A.pw={bad:true,text:'Demo mode: passwords need the live backend.'}; render(); return; }
+  A.busy='pw'; A.pw=null; render();
+  try{ await API.signIn(m.email,cur); await API.setPassword(pw); A.pw={text:'Password changed. Your other devices are logged out.'}; }
+  catch(err){ A.pw={bad:true,text:err.code==='wrong-password'?'Your current password isn’t right.':err.code==='same-password'?'Choose a password different from your current one.':err.code==='weak-password'?`Choose a stronger password: at least ${PW_MIN} characters.`:liveErr(err)}; }
+  A.busy=null; render();
+}
+async function acctDelete(){
+  const A=S.acct; if(val('s-del')!=='DELETE'){ fieldErr('s-del','Type DELETE in capital letters'); return; } fieldErr('s-del','');
+  if(!LIVE){ A.del={bad:true,text:'Demo mode: accounts are deleted only in the live app.'}; render(); return; }
+  A.busy='del'; A.del=null; render();
+  try{ await API.deleteAccount(); try{ localStorage.removeItem(STORE_KEY); }catch(_){ } location.reload(); }
+  catch(err){ A.busy=null; A.del={bad:true,text:'We couldn’t delete your account. '+liveErr(err)}; render(); }
+}
+
 function viewNetwork(){
   const tabs = [['stars','Starred',S.stars.size],['requests','Intro requests',S.incoming.size],...(!LIVE||S.isAdmin?[['joinreqs','Admin: join requests',S.joinReqs.length]]:[]),['sent','Sent intros',S.pending.size]];
   let body='';
@@ -1513,6 +1560,7 @@ function render(){
   else if(S.view==='network') v=viewNetwork();
   else if(S.view==='feed') v=viewFeed();
   else if(S.view==='me') v=viewProfile(ME);
+  else if(S.view==='settings') v=viewSettings();
   else if(S.view==='join') v=viewJoin();
   document.getElementById('app').innerHTML = topbar()+v;
   document.querySelectorAll('[data-search]').forEach(bindSearch);
@@ -1879,6 +1927,11 @@ function sb(){
 function apiErr(e){
   const m=String(e&&e.message||''), s=e&&e.status;
   const code = e&&e.code==='offline'?'offline'
+    : /invalid login credentials/i.test(m)?'wrong-password'
+    : /email not confirmed/i.test(m)?'not-confirmed'
+    : /already.registered|already been registered|user already exists/i.test(m)?'already-registered'
+    : /should be different|same as the old/i.test(m)?'same-password'
+    : /password should|weak password|at least \d+ characters/i.test(m)?'weak-password'
     : /signups not allowed|user not found/i.test(m)?'not-member'
     : /expired|invalid|otp/i.test(m)&&s!==429?'wrong-code'
     : s===429||/rate limit|security purposes/i.test(m)?'rate-limit'
@@ -1890,9 +1943,27 @@ async function rpc(fn,args){ const c=await sb(); const {data,error}=await c.rpc(
 /* Emails (admin alert, welcome) are sent by the "notify" Edge Function. Best effort: a failed email never blocks the screen. */
 async function notify(body){ try{ const c=await sb(); await c.functions.invoke('notify',{body}); }catch(_){ } }
 const API={
-  /* Email a one-time code. signup:true also creates the login if it doesn't exist yet. */
-  async sendCode(email,{signup=false}={}){ const c=await sb(); const {error}=await c.auth.signInWithOtp({email,options:{shouldCreateUser:signup}}); if(error) throw apiErr(error); },
-  async verifyCode(email,code){ const c=await sb(); const {error}=await c.auth.verifyOtp({email,token:code,type:'email'}); if(error) throw apiErr(error); },
+  /* Email + password logins. Sessions are saved in this browser and renewed automatically, so a member stays
+     logged in until they log out or change their password (which logs out their other devices). */
+  async signIn(email,password){ const c=await sb(); const {error}=await c.auth.signInWithPassword({email,password}); if(error) throw apiErr(error); },
+  /* Creates the login and emails a 6-digit code to confirm the address. Returns true if no confirmation was needed. */
+  async signUp(email,password){ const c=await sb(); const {data,error}=await c.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});
+    if(error) throw apiErr(error);
+    if(data.user&&Array.isArray(data.user.identities)&&!data.user.identities.length) throw apiErr({message:'already-registered'});
+    return !!data.session; },
+  async confirmSignup(email,code){ const c=await sb(); const {error}=await c.auth.verifyOtp({email,token:code,type:'signup'}); if(error) throw apiErr(error); },
+  async resendSignup(email){ const c=await sb(); const {error}=await c.auth.resend({type:'signup',email}); if(error) throw apiErr(error); },
+  /* Forgot password: email a code, then trade it (with the new password) for a login. */
+  async sendReset(email){ const c=await sb(); const {error}=await c.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname}); if(error) throw apiErr(error); },
+  async confirmReset(email,code){ const c=await sb(); const {error}=await c.auth.verifyOtp({email,token:code,type:'recovery'}); if(error) throw apiErr(error); },
+  /* New password for the logged-in member; their other devices are logged out, this one stays in. */
+  async setPassword(password){ const c=await sb(); const {error}=await c.auth.updateUser({password}); if(error) throw apiErr(error);
+    await c.auth.signOut({scope:'others'}).catch(()=>{}); },
+  async signOutEverywhere(){ const c=await sb(); await c.auth.signOut({scope:'global'}); },
+  /* Deletes your photos, then your account and everything tied to it (supabase/migrations/20261125000000_accounts.sql). */
+  async deleteAccount(){ const c=await sb(); const {data:{session}}=await c.auth.getSession(); if(!session) throw apiErr({message:'not-logged-in'});
+    for(const b of ['avatars','post-photos']){ const {data}=await c.storage.from(b).list(session.user.id,{limit:1000}); if(data&&data.length) await c.storage.from(b).remove(data.map(f=>`${session.user.id}/${f.name}`)); }
+    await rpc('delete_my_account'); await c.auth.signOut({scope:'local'}).catch(()=>{}); },
   /* Leaves the page; LinkedIn sends the member back here and sb() finishes the login on load. */
   async linkedIn(){ const c=await sb(); const {error}=await c.auth.signInWithOAuth({provider:'linkedin_oidc',options:{redirectTo:location.origin+location.pathname}}); if(error) throw apiErr(error); },
   async sessionEmail(){ const c=await sb(); const {data}=await c.auth.getSession(); return data.session?.user?.email||null; },
@@ -2004,7 +2075,7 @@ function openRegEmail(first,email,note){
 }
 function joinStart(mode){
   const m=me();
-  S.join={mode, step: mode==='sync'?'connecting':'welcome', pdf:'none', pdfErr:'', found:null,
+  S.join={mode, step: mode==='sync'?'connecting':'login', login:{}, pdf:'none', pdfErr:'', found:null,
     draft: mode==='sync'
       ? {first:m.first,last:m.last,role:m.role,email:m.email,location:m.location,industry:m.industry,phone:m.phone,pref:m.pref,about:m.about,schools:m.schools.map(x=>({...x})),career:m.career.map(c=>({...c,src:'you'})),src:{}}
       : {first:'',last:'',role:'',email:'',location:'Boston',industry:Object.keys(INDUSTRIES)[0],phone:'',pref:'whatsapp',about:'',schools:[],career:[],src:{}}};
@@ -2034,39 +2105,52 @@ async function joinPdf(file){
   }catch(err){ J.pdf='none'; J.pdfErr='We couldn’t read that file. Use the PDF from your LinkedIn profile: More → Save to PDF.'; }
   render();
 }
-function stepIdx(st){ return st==='welcome'||st==='connecting'||st==='imported'?0: st==='review'?1: st==='verify'?2:3; }
+function stepIdx(st){ return st==='connecting'||st==='imported'?0: st==='review'?1: st==='verify'?2:3; }
 function viewJoin(){
   const J=S.join; if(!J) return '';
   const cur=stepIdx(J.step);
   const steps = J.mode==='sync' ? JOIN_STEPS.slice(0,2) : JOIN_STEPS;
-  const head=J.step==='login'?'':`<ol class="steps">${steps.map(([k,l],i)=>`<li class="${i===cur?'on':i<cur?'done':''}">${l}</li>`).join('')}</ol>`;
+  const head=J.step==='login'||J.step==='forgot'?'':`<ol class="steps">${steps.map(([k,l],i)=>`<li class="${i===cur?'on':i<cur?'done':''}">${l}</li>`).join('')}</ol>`;
   const d=J.draft; let body='';
-  if(J.step==='welcome'){
-    body=`<div class="jcard">
-      <h1>Join the network of Israeli MBAs in the US</h1>
+  const errBox=e=>e?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${e}</span></div>`:'';
+  if(J.step==='login'){
+    const L=J.login||(J.login={});
+    body=L.confirm?`<div class="jcard">
+      <h1>Confirm your email</h1><p class="lead">We sent a 6-digit code to <b>${esc(L.email)}</b>. Enter it to finish setting up your login. Check your spam folder too.</p>
+      ${errBox(L.err)}
+      <div class="jsec">${fld('l-code','Code from the email',`<input type="text" id="l-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456">`)}</div>
+      <div class="row"><button class="btn lg primary pill" data-act="login-confirm" ${L.busy?'disabled':''}>${L.busy?'Checking…':'Confirm and log in'}</button><button class="link" data-act="login-back">Back</button></div>
+    </div>`
+    :`<div class="jcard">
+      <h1>Log in</h1>
+      <p class="lead">Welcome back to the network of Israeli MBAs in the US.</p>
+      ${errBox(L.err)}${L.note?`<div class="notice" style="margin-bottom:14px">${I.check}<span>${L.note}</span></div>`:''}
+      <div class="jsec">${fld('l-email','Email',`<input type="email" id="l-email" value="${esc(L.email||'')}" placeholder="you@example.com" autocomplete="username">`)}</div>
+      <div class="jsec">${fld('l-pass','Password',`<input type="password" id="l-pass" autocomplete="current-password" placeholder="Your password">`)}
+        <p class="fine" style="margin:6px 0 0;font-size:14px"><button class="link" data-act="forgot-start">Forgot password?</button></p></div>
+      <div class="row"><button class="btn lg primary pill" data-act="login-submit" ${L.busy?'disabled':''}>${L.busy?'Logging in…':'Log in'}</button>${LINKEDIN_LOGIN?`<button class="btn lg li pill" data-act="login-li">${I.link}Log in with LinkedIn</button>`:''}</div>
+    </div>
+    <div class="jcard" style="margin-top:16px">
+      <h2 style="margin:0 0 6px;font-family:var(--f-display)">New here? Join the network of Israeli MBAs in the US</h2>
       <p class="lead">Upload your LinkedIn profile PDF and we fill in your profile for you. An admin reviews every request, and we email you as soon as you’re approved.</p>
       <div class="row"><button class="btn lg li pill" data-act="join-go" data-step="imported">${I.doc}Sign up with your LinkedIn PDF</button></div>
-      <p class="fine" style="font-size:14px;color:var(--muted)">Already a member? <button class="link" data-act="join-login">Log in</button></p>
       <p class="fine">The PDF is read in your browser. We use your name, email, headline, location, MBA and career history, and you can edit everything before you submit.</p>
     </div>`;
   }
-  if(J.step==='login'){
-    const L=J.login||{};
-    body=`<div class="jcard">
-      <h1>Log in</h1>
-      ${L.liBusy?`<p class="lead">Checking your LinkedIn account…</p>`
-      :!L.emailMode?`<p class="lead">Log in with the LinkedIn account that uses the email you signed up with.</p>
-        ${L.err?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${L.err}</span></div>`:''}
-        <div class="row"><button class="btn lg li pill" data-act="login-li">${I.link}Log in with LinkedIn</button><button class="link" data-act="join-go" data-step="welcome">Back</button></div>
-        <p class="fine" style="font-size:14px;color:var(--muted)">LinkedIn uses a different email? <button class="link" data-act="login-email-mode">Get a code by email instead</button></p>`
-      :!L.sent?`<p class="lead">Enter the email you signed up with. We’ll email you a login code.</p>
-        ${L.err?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${L.err}</span></div>`:''}
-        <div class="jsec">${fld('l-email','Email',`<input type="email" id="l-email" value="${esc(L.email||'')}" placeholder="you@example.com" autocomplete="email">`)}</div>
-        <div class="row"><button class="btn lg primary pill" data-act="login-send" ${L.busy?'disabled':''}>${L.busy?'Sending…':'Email me a code'}</button><button class="link" data-act="login-li-mode">Back</button></div>`
-      :`<p class="lead">We sent a code to <b>${esc(L.email)}</b>. Check your inbox and spam folder.</p>
-        ${L.err?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${L.err}</span></div>`:''}
-        <div class="jsec">${fld('l-code','Code',`<input type="text" id="l-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456">`)}</div>
-        <div class="row"><button class="btn lg primary pill" data-act="login-verify" ${L.busy?'disabled':''}>${L.busy?'Checking…':'Log in'}</button><button class="link" data-act="login-restart">Use a different email</button></div>`}
+  if(J.step==='forgot'){
+    const F=J.forgot||(J.forgot={});
+    body=!F.sent?`<div class="jcard">
+      <h1>Reset your password</h1><p class="lead">Enter the email you log in with. We’ll email you a 6-digit code to set a new password.</p>
+      ${errBox(F.err)}
+      <div class="jsec">${fld('f-email','Email',`<input type="email" id="f-email" value="${esc(F.email||'')}" placeholder="you@example.com" autocomplete="username">`)}</div>
+      <div class="row"><button class="btn lg primary pill" data-act="forgot-send" ${F.busy?'disabled':''}>${F.busy?'Sending…':'Email me a code'}</button><button class="link" data-act="login-back">Back to log in</button></div>
+    </div>`
+    :`<div class="jcard">
+      <h1>Choose a new password</h1><p class="lead">If <b>${esc(F.email)}</b> has an account, we sent it a 6-digit code. Check your spam folder too.</p>
+      ${errBox(F.err)}
+      <div class="jsec">${fld('f-code','Code from the email',`<input type="text" id="f-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456">`)}</div>
+      <div class="two">${fld('f-pass','New password',`<input type="password" id="f-pass" autocomplete="new-password" placeholder="At least ${PW_MIN} characters">`)}${fld('f-pass2','Repeat new password',`<input type="password" id="f-pass2" autocomplete="new-password">`)}</div>
+      <div class="row"><button class="btn lg primary pill" data-act="forgot-confirm" ${F.busy?'disabled':''}>${F.busy?'Saving…':'Set password and log in'}</button><button class="link" data-act="forgot-again">Send a new code</button><button class="link" data-act="login-back">Back to log in</button></div>
     </div>`;
   }
   if(J.step==='connecting'){
@@ -2092,7 +2176,7 @@ function viewJoin(){
           ${J.pdfErr?`<small style="color:#C2362F;font-weight:600;display:block;margin-top:6px">${esc(J.pdfErr)}</small>`:''}</span>
         ${J.pdf==='none'?`<span class="btn primary pill upload">${I.doc}Upload PDF<input type="file" id="li-pdf" accept="application/pdf,.pdf" aria-label="Upload LinkedIn profile PDF"></span>`:''}
       </div>`}
-      <div class="row">${J.pdf==='done'?`<button class="btn lg primary pill" data-act="join-go" data-step="review">Review profile</button><button class="link" data-act="join-pdf-again">Use a different PDF</button>`:sync?`<button class="link" data-act="join-go" data-step="review" ${J.pdf==='reading'?'disabled':''}>Skip</button>`:`<button class="link" data-act="join-go" data-step="welcome" ${J.pdf==='reading'?'disabled':''}>Back</button>`}</div>
+      <div class="row">${J.pdf==='done'?`<button class="btn lg primary pill" data-act="join-go" data-step="review">Review profile</button><button class="link" data-act="join-pdf-again">Use a different PDF</button>`:sync?`<button class="link" data-act="join-go" data-step="review" ${J.pdf==='reading'?'disabled':''}>Skip</button>`:`<button class="link" data-act="join-go" data-step="login" ${J.pdf==='reading'?'disabled':''}>Back</button>`}</div>
     </div>`;
   }
   if(J.step==='review'){
@@ -2127,13 +2211,15 @@ function viewJoin(){
           <li><span class="st"></span><span><b>You get your official welcome email</b><small>You’re an official member: your profile goes live and members can reach out to you</small></span></li></ol>
         <div class="row"><button class="btn lg primary pill" data-act="join-finish" data-status="pending">Finish</button></div>`;
     } else if(J.codeSent){
-      main=`${J.sendErr?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${esc(J.sendErr)}</span></div>`:''}<p class="lead" style="margin:0 0 14px">We sent a code to <b>${esc(d.email)}</b>. Enter it to confirm the email is yours, and we’ll send your request to the admins.</p>
+      main=`${J.sendErr?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${esc(J.sendErr)}</span></div>`:''}<p class="lead" style="margin:0 0 14px">We sent a 6-digit code to <b>${esc(d.email)}</b>. Enter it to confirm the email is yours, and we’ll send your request to the admins. Check your spam folder too.</p>
         <div class="jsec">${fld('j-code','Code from the email',`<input type="text" id="j-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456">`)}</div>
         <div class="row"><button class="btn lg primary pill" data-act="join-code-verify" ${J.sending?'disabled':''}>${J.sending?'Checking…':'Confirm and send request'}</button><button class="link" data-act="join-code-resend">Send a new code</button><button class="link" data-act="join-code-back">Back</button></div>`;
     } else {
       main=`${J.sendErr?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${esc(J.sendErr)}</span></div>`:''}<p class="lead" style="margin:0 0 14px">An admin reviews your request by hand. This is what they’ll see:</p>
         <div class="invite" style="flex-direction:column;align-items:stretch;gap:10px"><span><b>${esc(d.first+' '+d.last)}</b><small>${esc(d.role)}${J.liurl?' · '+esc(J.liurl):''}</small></span>${ev}</div>
         <div class="jsec">${fld('j-answer','Where in Israel are you from, and what did you do before your MBA?*',`<textarea id="j-answer" maxlength="400" placeholder="Ex: Grew up in Haifa, served in 8200, then PM at Monday.com for 4 years.">${esc(J.answer||'')}</textarea>`)}</div>
+        ${LIVE?`<div class="jsec"><h3>${I.shield.replace('<svg','<svg width="17" height="17"')}Choose a password</h3><p class="muted" style="margin:-4px 0 10px;font-size:14px">You’ll log in with ${esc(d.email)} and this password.</p>
+          <div class="two">${fld('j-pass','Password*',`<input type="password" id="j-pass" autocomplete="new-password" placeholder="At least ${PW_MIN} characters">`)}${fld('j-pass2','Repeat password*',`<input type="password" id="j-pass2" autocomplete="new-password">`)}</div></div>`:''}
         <div class="jsec field" id="fw-j-agree"><label class="checkrow"><input type="checkbox" id="j-agree" ${J.agree?'checked':''}>I’m Israeli and I study or studied at ${esc(sc.full)}.</label><p class="err" hidden></p></div>
         <div class="row"><button class="btn lg primary pill" data-act="join-request-send" ${J.sending?'disabled':''}>${J.sending?'Sending…':'Submit for approval'}</button><button class="link" data-act="join-go" data-step="review">Back</button></div>`;
     }
@@ -2169,14 +2255,16 @@ function joinPayload(){
   return {first:clip(d.first,LIMITS.name),last:clip(d.last,LIMITS.name),headline:clip(d.role,LIMITS.headline),school:e.school,classYear:e.year,startYear:e.start,program:e.program,location:d.location,industry:d.industry,
     phone:d.phone,linkedin:J.liurl||'',source:'linkedin',answer:clip(J.answer,LIMITS.answer),about:clip(d.about,LIMITS.about),career:d.career.map(({src,...c})=>c)};
 }
-/* Live sign-up has two steps: email a code to prove the address is theirs (this also creates their login), then save the request. */
+/* Live sign-up: create the login with the chosen password (Supabase emails a code to prove the address is theirs),
+   then save the request once the code is confirmed. */
 async function joinSubmit(){
   const J=S.join, d=J.draft;
   if(!LIVE){ J.reqSent=true; render(); window.scrollTo(0,0); return; }
   J.sending=true; J.sendErr=''; render();
   try{
     if(((await API.sessionEmail())||'').toLowerCase()===d.email.toLowerCase()) return await joinSave();
-    await API.sendCode(d.email,{signup:true}); J.codeSent=true;
+    if(await API.signUp(d.email,J.pass)) return await joinSave();   // no confirmation needed
+    J.codeSent=true;
   }catch(err){ J.sendErr=joinErrText(err); }
   J.sending=false; render(); window.scrollTo(0,0);
 }
@@ -2184,9 +2272,9 @@ async function joinVerifyCode(){
   const J=S.join, code=val('j-code').replace(/\D/g,''); J.sendErr='';
   if(code.length<6){ fieldErr('j-code','Enter the code from the email'); return; }
   J.sending=true; render();
-  try{ await API.verifyCode(J.draft.email,code); }
+  try{ await API.confirmSignup(J.draft.email,code); }
   catch(err){ J.sendErr=err.code==='wrong-code'?'That code isn’t right or has expired. Check the email, or send a new code.':joinErrText(err); J.sending=false; render(); return; }
-  await joinSave();
+  J.pass=null; await joinSave();
 }
 async function joinSave(){
   const J=S.join;
@@ -2195,29 +2283,73 @@ async function joinSave(){
   J.sending=false; render(); window.scrollTo(0,0);
 }
 function joinErrText(err){
-  return err.code==='already-approved'?'You’re already a member. Go back and log in instead.'
+  return err.code==='already-approved'||err.code==='already-registered'?'This email already has an account. Go back to the first page and log in, or use “Forgot password?”.'
+    :err.code==='weak-password'?`Choose a stronger password: at least ${PW_MIN} characters.`
     :err.code==='already-declined'?'This email’s request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.'
     :err.code==='rate-limit'?'Too many codes requested. Wait a minute and try again.'
     :err.code==='offline'?'We couldn’t reach the server. Check your connection and try again.'
     :'We couldn’t send your request. Try again in a moment.';
 }
-/* Log in on any device with an emailed code (or LinkedIn), then load the member's saved profile. */
-async function loginSendCode(){
-  const L=S.join.login; L.email=val('l-email').trim(); L.err='';
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(L.email)){ fieldErr('l-email','Enter a valid email address'); return; }
+/* Log in with email and password, then load the member's saved profile. */
+const PW_MIN=8;
+const emailOk=e=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+async function loginSubmit(){
+  const L=S.join.login; L.email=val('l-email'); L.err=''; L.note='';
+  const pw=document.getElementById('l-pass').value;
+  if(!emailOk(L.email)){ fieldErr('l-email','Enter a valid email address'); return; } else fieldErr('l-email','');
+  if(!pw){ fieldErr('l-pass','Enter your password'); return; } else fieldErr('l-pass','');
   if(!LIVE){ L.err='Logging in needs the live backend. This copy is in demo mode.'; render(); return; }
   L.busy=true; render();
-  try{ await API.sendCode(L.email); L.sent=true; }
-  catch(err){ L.err=err.code==='not-member'?'We don’t have a member with that email. Check for typos, or go back and sign up.'
-    :err.code==='rate-limit'?'Too many codes requested. Wait a minute and try again.'
-    :err.code==='offline'?'We couldn’t reach the server. Check your connection and try again.':'Something went wrong. Try again.'; }
-  L.busy=false; render();
+  try{ await API.signIn(L.email,pw); }
+  catch(err){
+    L.busy=false;
+    if(err.code==='not-confirmed'){ L.confirm=true; API.resendSignup(L.email).catch(()=>{}); render(); return; }
+    L.err=err.code==='wrong-password'?'Wrong email or password. If you joined before passwords existed, use “Forgot password?” to set one.'
+      :err.code==='rate-limit'?'Too many tries. Wait a minute and try again.'
+      :err.code==='offline'?'We couldn’t reach the server. Check your connection and try again.':'Something went wrong. Try again.';
+    render(); return;
+  }
+  await loginFinish();
+}
+/* Signed up but never confirmed the email: confirm it with the code, then log in. */
+async function loginConfirm(){
+  const L=S.join.login, code=val('l-code').replace(/\D/g,''); L.err='';
+  if(code.length<6){ fieldErr('l-code','Enter the code from the email'); return; }
+  L.busy=true; render();
+  try{ await API.confirmSignup(L.email,code); }
+  catch(err){ L.err=err.code==='wrong-code'?'That code isn’t right or has expired. Go back and log in again for a new one.':'Something went wrong. Try again.'; L.busy=false; render(); return; }
+  L.confirm=false; await loginFinish();
+}
+/* Forgot password: email a code, then set a new password with it. */
+async function forgotSend(){
+  const F=S.join.forgot; F.email=val('f-email'); F.err='';
+  if(!emailOk(F.email)){ fieldErr('f-email','Enter a valid email address'); return; }
+  if(!LIVE){ F.err='Resetting a password needs the live backend. This copy is in demo mode.'; render(); return; }
+  F.busy=true; render();
+  try{ await API.sendReset(F.email); F.sent=true; }
+  catch(err){ F.err=err.code==='rate-limit'?'Too many emails requested. Wait a minute and try again.':err.code==='offline'?'We couldn’t reach the server. Check your connection and try again.':'Something went wrong. Try again.'; }
+  F.busy=false; render();
+}
+async function forgotConfirm(){
+  const F=S.join.forgot, code=val('f-code').replace(/\D/g,''), pw=document.getElementById('f-pass').value, pw2=document.getElementById('f-pass2').value; F.err='';
+  let ok=true;
+  if(code.length<6){ fieldErr('f-code','Enter the code from the email'); ok=false; } else fieldErr('f-code','');
+  if(pw.length<PW_MIN){ fieldErr('f-pass',`Use at least ${PW_MIN} characters`); ok=false; } else fieldErr('f-pass','');
+  if(pw!==pw2){ fieldErr('f-pass2','The passwords don’t match'); ok=false; } else fieldErr('f-pass2','');
+  if(!ok) return;
+  F.busy=true; render();
+  try{ await API.confirmReset(F.email,code); await API.setPassword(pw); }
+  catch(err){ F.err=err.code==='wrong-code'?'That code isn’t right or has expired. Send a new code and try again.'
+      :err.code==='weak-password'?`Choose a stronger password: at least ${PW_MIN} characters.`
+      :err.code==='same-password'?'That’s your current password. Log in with it, or choose a different one.':'Something went wrong. Try again.';
+    F.busy=false; render(); return; }
+  S.join.login={email:F.email}; await loginFinish();
 }
 async function loginLinkedIn(){
   const L=S.join.login; L.err='';
-  if(!LIVE||!LINKEDIN_LOGIN){ L.err='LinkedIn login isn’t set up yet. Get a code by email instead.'; render(); return; }
+  if(!LIVE||!LINKEDIN_LOGIN){ L.err='LinkedIn login isn’t set up yet. Log in with your email and password.'; render(); return; }
   L.liBusy=true; render();
-  try{ await API.linkedIn(); }catch(_){ L.err='LinkedIn login didn’t work. Try again, or get a code by email.'; L.liBusy=false; render(); }
+  try{ await API.linkedIn(); }catch(_){ L.err='LinkedIn login didn’t work. Try again, or log in with your email and password.'; L.liBusy=false; render(); }
 }
 /* Back from LinkedIn: the URL carries ?code (or ?error). Supabase turns the code into a login as it starts. Returns true if this load is a LinkedIn return. */
 function handleLinkedInReturn(){
@@ -2226,16 +2358,8 @@ function handleLinkedInReturn(){
   if(q.has('error')){ history.replaceState(null,'',location.pathname); L.err='LinkedIn login was cancelled.'; return true; }
   L.liBusy=true;
   API.sessionEmail().then(email=>{ history.replaceState(null,'',location.pathname); if(!email) throw new Error('no session'); return loginFinish(); })
-    .catch(()=>{ L.err='LinkedIn login didn’t work. Try again, or get a code by email.'; L.liBusy=false; render(); });
+    .catch(()=>{ L.err='LinkedIn login didn’t work. Try again, or log in with your email and password.'; L.liBusy=false; render(); });
   return true;
-}
-async function loginVerify(){
-  const L=S.join.login, code=val('l-code').replace(/\D/g,''); L.err='';
-  if(code.length<6){ fieldErr('l-code','Enter the code from the email'); return; }
-  L.busy=true; render();
-  try{ await API.verifyCode(L.email,code); }
-  catch(err){ L.err=err.code==='wrong-code'?'That code isn’t right or has expired. Check the email, or request a new one.':'Something went wrong. Try again.'; L.busy=false; render(); return; }
-  await loginFinish();
 }
 /* After any successful login: load the profile and decide what the member sees. */
 async function loginFinish(){
@@ -2246,7 +2370,7 @@ async function loginFinish(){
     const email=await API.sessionEmail().catch(()=>null); await API.signOut().catch(()=>{});
     L.err=!p?`No member uses ${esc(email||'that email')}. Sign up first, or log in with the email you signed up with.`
       :'Your request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.';
-    L.busy=L.liBusy=false; L.sent=false; render(); return;
+    L.busy=L.liBusy=false; render(); return;
   }
   loginApply(p);
 }
@@ -2280,7 +2404,7 @@ async function checkApproval(){
 }
 function liveLoggedOut(){
   try{ localStorage.removeItem(STORE_KEY); }catch(_){ }
-  S.firstRun=true; joinStart('join'); S.join.login={emailMode:true}; S.join.step='login'; render();
+  S.firstRun=true; joinStart('join'); render();
 }
 
 /* ---------- live data ----------
@@ -2437,24 +2561,29 @@ document.addEventListener('click',e=>{
     case 'join-exit': S.join=null; go(S.stack.length?S.stack[S.stack.length-1].view:'home',S.stack.length?S.stack[S.stack.length-1].params:{}); break;
     case 'join-connect': joinConnect(); break;
     case 'join-pdf-again': S.join.pdf='none'; S.join.found=null; render(); break;
-    case 'join-login': S.join.login=LINKEDIN_LOGIN?{}:{emailMode:true}; S.join.step='login'; render(); window.scrollTo(0,0); break;
-    case 'login-send': loginSendCode(); break;
+    case 'login-submit': loginSubmit(); break;
+    case 'login-confirm': loginConfirm(); break;
     case 'login-li': loginLinkedIn(); break;
-    case 'login-email-mode': S.join.login={emailMode:true}; render(); break;
-    case 'login-li-mode': if(LINKEDIN_LOGIN){ S.join.login={}; } else S.join.step='welcome'; render(); break;
-    case 'login-verify': loginVerify(); break;
-    case 'login-restart': S.join.login={emailMode:true,email:S.join.login.email}; render(); break;
+    case 'login-back': { const email=(S.join.forgot&&S.join.forgot.email)||(S.join.login&&S.join.login.email)||''; S.join.login={email}; S.join.step='login'; render(); window.scrollTo(0,0); break; }
+    case 'forgot-start': S.join.forgot={email:val('l-email')}; S.join.step='forgot'; render(); window.scrollTo(0,0); break;
+    case 'forgot-send': forgotSend(); break;
+    case 'forgot-again': S.join.forgot={email:S.join.forgot.email}; render(); break;
+    case 'forgot-confirm': forgotConfirm(); break;
     case 'join-go': S.join.step=t.dataset.step; render(); window.scrollTo(0,0); break;
     case 'join-rm': S.join.draft.career.splice(+t.dataset.idx,1); render(); break;
     case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
     case 'join-finish': joinApply(t.dataset.status); me().reqId=S.join.reqId||null; if(LIVE) me().uid=S.join.reqId||null; saveMe(); S.firstRun=false; S.join.step='done'; render(); window.scrollTo(0,0); break;
     case 'join-demo-approve': { const m=me(); m.verify.school='admin'; saveMe(); render(); openRegEmail(m.first,m.email,'An admin approved your request. In the live app this lands in your inbox.'); break; }
     case 'join-code-verify': joinVerifyCode(); break;
-    case 'join-code-resend': S.join.codeSent=false; joinSubmit(); break;
+    case 'join-code-resend': API.resendSignup(S.join.draft.email).then(()=>toast('We sent a new code')).catch(e=>toast(liveErr(e))); break;
     case 'join-code-back': S.join.codeSent=false; S.join.sendErr=''; render(); break;
     case 'join-request-send': { const J=S.join; J.answer=val('j-answer'); J.agree=document.getElementById('j-agree').checked; let ok=true;
       if(J.answer.length<10){ fieldErr('j-answer','Write a sentence or two for the admin'); ok=false; } else fieldErr('j-answer','');
       if(!J.agree){ fieldErr('j-agree','Confirm this to send your request'); ok=false; } else fieldErr('j-agree','');
+      if(LIVE){ const pw=document.getElementById('j-pass').value, pw2=document.getElementById('j-pass2').value;
+        if(pw.length<PW_MIN){ fieldErr('j-pass',`Use at least ${PW_MIN} characters`); ok=false; } else fieldErr('j-pass','');
+        if(pw!==pw2){ fieldErr('j-pass2','The passwords don’t match'); ok=false; } else fieldErr('j-pass2','');
+        if(ok) J.pass=pw; }
       if(ok) joinSubmit(); break; }
     case 'jr-approve': case 'jr-decline': { const r=S.joinReqs.find(x=>x.id===id); if(!r) break;
       if(r.live){ const ok=t.dataset.act==='jr-approve'; t.disabled=true;
@@ -2480,6 +2609,10 @@ document.addEventListener('click',e=>{
     case 'delete-item': deleteItem(t.dataset.kind,t.dataset.idx); break;
     case 'add-section': openAddSection(); break;
     case 'photo-remove': photoDraft=null; document.getElementById('photo-prev').innerHTML=av({...me(),photo:null},180); break;
+    case 'acct-password': acctPassword(); break;
+    case 'acct-delete': acctDelete(); break;
+    case 'acct-out-all': if(!LIVE){ S.acct.out={bad:true,text:'Demo mode: there are no other devices.'}; render(); break; }
+      API.signOutEverywhere().catch(()=>{}).finally(()=>{ try{ localStorage.removeItem(STORE_KEY); }catch(_){ } location.reload(); }); break;
     case 'reset-me': (LIVE?API.signOut():Promise.resolve()).catch(()=>{}).finally(()=>{ try{localStorage.removeItem(STORE_KEY)}catch(_){ } location.reload(); }); break;
   }
 });
@@ -2494,7 +2627,7 @@ document.addEventListener('change',e=>{
   if(e.target.id==='star-ind'||e.target.id==='star-school'){ S[e.target.id==='star-ind'?'starInd':'starSchool']=e.target.value; document.getElementById('star-list').innerHTML=starRows(); return; }
   if(e.target.dataset.sort!==undefined){ S.sort=e.target.value; render(); }
 });
-document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target.id==='l-email'){ e.preventDefault(); loginSendCode(); } if(e.key==='Enter'&&e.target.id==='l-code'){ e.preventDefault(); loginVerify(); } if(e.key==='Enter'&&e.target.id==='j-code'){ e.preventDefault(); joinVerifyCode(); } if(e.key==='Escape'){ closeModal(); S.draftAll=null; if(S.pill){ S.pill=null; render(); } } });
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.target.id==='l-email'||e.target.id==='l-pass')){ e.preventDefault(); loginSubmit(); } if(e.key==='Enter'&&e.target.id==='l-code'){ e.preventDefault(); loginConfirm(); } if(e.key==='Enter'&&e.target.id==='f-email'){ e.preventDefault(); forgotSend(); } if(e.key==='Enter'&&e.target.id==='f-pass2'){ e.preventDefault(); forgotConfirm(); } if(e.key==='Enter'&&e.target.id==='j-code'){ e.preventDefault(); joinVerifyCode(); } if(e.key==='Escape'){ closeModal(); S.draftAll=null; if(S.pill){ S.pill=null; render(); } } });
 if(LIVE){ liveReset(); S.joinReqs=[]; }
 if(!handleLinkedInReturn()){ if(!loadMe()){ S.firstRun=true; joinStart('join'); } else checkApproval(); }
 render();
