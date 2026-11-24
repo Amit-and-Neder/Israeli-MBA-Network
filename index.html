@@ -391,12 +391,11 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 /* modal + toast */
 .scrim{position:fixed;inset:0;background:var(--scrim);z-index:60;display:grid;place-items:center;padding:16px;animation:fade .15s}
 .modal{width:min(480px,100%);background:var(--surface);border-radius:22px;box-shadow:var(--shadow-lg);padding:24px;max-height:90vh;overflow:auto;animation:pop .18s ease-out}
-.modal.guide{width:min(980px,100%)}
+.modal.guide{width:min(760px,100%)}
 .guide-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
 .modal.guide img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line)}
 .guide-steps{margin:14px 0 0;padding-left:20px;font-size:14px;line-height:1.5;color:var(--ink)}
 .guide-steps li{margin:4px 0}
-@media (min-width:720px){.guide-steps{display:none}}
 .guide-link{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:0;color:var(--accent-text);font-weight:600;font-size:13.5px;text-align:left;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .guide-link:hover{text-decoration-thickness:2px}
 .modal h3{font-family:var(--f-display);font-weight:650;font-size:21px;margin:0 0 4px;letter-spacing:-.015em}
@@ -2028,7 +2027,7 @@ function bindSearch(box){
 function openGuide(){
   document.getElementById('modal-root').innerHTML=`<div class="scrim" data-act="scrim"><div class="modal guide" role="dialog" aria-modal="true" aria-label="How to save your LinkedIn profile as a PDF">
     <div class="guide-h"><h3>Save your LinkedIn profile as a PDF</h3><button class="ibtn" data-act="close" aria-label="Close">${I.x}</button></div>
-    <img src="assets/linkedin-pdf-guide.jpg" alt="On LinkedIn: 1. open your profile (Me, then View profile). 2. Click Resources, the last button under your name and headline. 3. Choose Save to PDF. The file lands in your Downloads folder. Works on desktop; in the mobile app switch to the desktop site.">
+    <img src="assets/linkedin-pdf-guide.jpg?v=2" alt="A LinkedIn profile with three numbered markers: 1 on the profile photo, 2 on the Resources button under the name, 3 on Save to PDF in the menu that opens.">
     <ol class="guide-steps"><li><b>Open your profile.</b> On LinkedIn, click <b>Me</b> in the top bar, then <b>View profile</b>.</li><li><b>Click “Resources”.</b> It’s the last button under your name and headline.</li><li><b>Choose “Save to PDF”.</b> The file goes to your Downloads folder. Then come back and upload it.</li></ol>
     <p class="muted" style="margin:6px 0 0;font-size:13px">Works on a computer. On a phone, open LinkedIn in the browser and switch to the desktop site.</p>
     <div class="row"><button class="btn primary pill" data-act="close">Got it</button></div></div></div>`;
