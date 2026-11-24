@@ -820,7 +820,7 @@ const markSVG='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" strok
 
 /* ---------- reference data ---------- */
 const NOW_YEAR = 2026;
-/* Closed list: the top 40 US business schools (M7 first) and the top 20 in Europe. Members can only pick from these. */
+/* Closed list: the top 40 US business schools and the top 20 in Europe. Members can only pick from these; pickers show them A–Z. */
 const SCHOOLS = {
   'Harvard Business School':{region:'US',m7:true,color:'#6B1F3A',full:'Harvard Business School',tag:'HBS',domain:'alumni.hbs.edu',aliases:['harvard business school','hbs','harvard']},
   'Stanford GSB':{region:'US',m7:true,color:'#1F6A57',full:'Stanford Graduate School of Business',tag:'GSB',domain:'alumni.gsb.stanford.edu',aliases:['stanford gsb','stanford','gsb']},
@@ -883,11 +883,11 @@ const SCHOOLS = {
   'Copenhagen Business School':{region:'Europe',color:'#0E3B5C',full:'Copenhagen Business School',tag:'CBS DK',domain:'cbs.dk',aliases:['copenhagen business school','copenhagen']},
   'Alliance Manchester Business School':{region:'Europe',color:'#660099',full:'Alliance Manchester Business School',tag:'AMBS',domain:'manchester.ac.uk',aliases:['alliance manchester business school','manchester business school','ambs']},
 };
-/* School picker: M7 first, then the rest of the US top 40, then Europe's top 20. Each name ends in (US) or (EU). */
+/* School picker: one A–Z list. Each name ends in (US) or (EU). */
 const schoolRegionTag = k => SCHOOLS[k].region==='US'?'(US)':'(EU)';
 const schoolLabel = k => `${k} ${schoolRegionTag(k)}`;
-const schoolOptions = sel => [['M7',k=>SCHOOLS[k].m7],['United States',k=>SCHOOLS[k].region==='US'&&!SCHOOLS[k].m7],['Europe',k=>SCHOOLS[k].region==='Europe']]
-  .map(([g,f])=>`<optgroup label="${g}">${Object.keys(SCHOOLS).filter(f).map(k=>`<option value="${esc(k)}" ${k===sel?'selected':''}>${esc(schoolLabel(k))}</option>`).join('')}</optgroup>`).join('');
+const schoolsAZ = keys => [...keys].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'}));
+const schoolOptions = sel => schoolsAZ(Object.keys(SCHOOLS)).map(k=>`<option value="${esc(k)}" ${k===sel?'selected':''}>${esc(schoolLabel(k))}</option>`).join('');
 const INDUSTRIES = {
   'Technology':['technology','tech','software','big tech'],
   'Healthcare':['healthcare','health care','digital health','health tech','healthtech','health','biotech','pharma','medtech'],
@@ -1753,7 +1753,7 @@ function readFeedPhoto(file){
 S.feed=loadFeed(); S.feedFilter='all'; S.feedDraft={type:null,text:'',photo:null};
 function viewFeed(){
   const F=S.feed, D=S.feedDraft, f=S.feedFilter;
-  // School filter: every school that has members, in list order (M7, US, Europe).
+  // School filter: every school that has members, A–Z.
   const sch=S.feedSchool||'', bySchool=p=>!sch||(byId(p.author)?.schools||[]).some(x=>x.school===sch);
   const memberSchools=Object.keys(SCHOOLS).filter(k=>P.some(m=>m.schools.some(x=>x.school===k)));
   const pool=F.posts.filter(bySchool);
@@ -1768,7 +1768,7 @@ function viewFeed(){
       <span class="sp"></span><span class="muted" style="font-size:12.5px">Up to ${FEED_MAX} characters</span>
       <button class="btn primary pill" data-act="feed-post">Post</button></div>
     <p class="err" id="feed-err" hidden></p></div>`;
-  const schoolSel=`<label class="feed-school">${I.cap}<select id="feed-school" aria-label="Filter posts by school"><option value="">All schools</option>${[['M7',k=>SCHOOLS[k].m7],['United States',k=>SCHOOLS[k].region==='US'&&!SCHOOLS[k].m7],['Europe',k=>SCHOOLS[k].region==='Europe']].map(([g,fn])=>{ const ks=memberSchools.filter(fn); return ks.length?`<optgroup label="${g}">${ks.map(k=>`<option value="${esc(k)}" ${k===sch?'selected':''}>${esc(schoolLabel(k))}</option>`).join('')}</optgroup>`:''; }).join('')}</select></label>`;
+  const schoolSel=`<label class="feed-school">${I.cap}<select id="feed-school" aria-label="Filter posts by school"><option value="">All schools</option>${schoolsAZ(memberSchools).map(k=>`<option value="${esc(k)}" ${k===sch?'selected':''}>${esc(schoolLabel(k))}</option>`).join('')}</select></label>`;
   const filters=`<div class="feed-filters" role="group" aria-label="Show posts">${schoolSel}${[['all','All posts',pool.length],['job','Looking for a job',counts.job],['hiring','Hiring',counts.hiring],['event','Events',counts.event]]
     .map(([k,l,n])=>`<button class="chip ${f===k?'on':''}" style="${f===k?'border-color:var(--accent);color:var(--accent-text);background:var(--accent-soft)':''}" data-act="feed-filter" data-filter="${k}" aria-pressed="${f===k}">${l}<span class="n">${n}</span></button>`).join('')}</div>`;
   const post=p=>{ const a=byId(p.author), mine=p.author===ME, going=F.interested.has(p.id);
