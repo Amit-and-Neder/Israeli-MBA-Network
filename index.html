@@ -368,6 +368,8 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .feed-school select:focus{outline:none}
 .post{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px}
 .post-h{display:flex;gap:12px;align-items:center}
+.post-av{flex:none;border-radius:50%;line-height:0;transition:transform .15s,box-shadow .15s}
+.post-av:hover{transform:scale(1.05);box-shadow:0 0 0 3px var(--accent-soft)}
 .post-h .who{flex:1;min-width:0;text-align:left}
 .post-h .who small{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pmeta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none}
@@ -1894,7 +1896,7 @@ function viewFeed(){
     const acts = mine ? `<button class="btn sm ghost pill" data-act="feed-del" data-post="${p.id}">Delete</button>`
       : (p.type==='event' ? `<button class="btn sm ${going?'is-connected':'ghost'} pill" data-act="feed-interest" data-post="${p.id}" aria-pressed="${going}">${going?I.check+'Interested':I.plus+'I’m interested'}</button>` : '')+connectBtn(a.id,'sm pill');
     return `<article class="post t-${p.type}">
-      <div class="post-h">${av(a,44)}<button class="who" data-act="${mine?'nav':'profile'}" ${mine?'data-view="me"':`data-id="${a.id}"`}><b>${esc(a.name)}</b>${mine?' <span class="muted" style="font-size:13px">(you)</span>':''}<small>${esc(a.role)}${a.curCompany?' · '+esc(a.curCompany):''}</small></button>
+      <div class="post-h"><button class="post-av" data-act="${mine?'nav':'profile'}" ${mine?'data-view="me"':`data-id="${a.id}"`} aria-label="Open ${esc(a.name)}’s profile">${av(a,44)}</button><button class="who" data-act="${mine?'nav':'profile'}" ${mine?'data-view="me"':`data-id="${a.id}"`}><b>${esc(a.name)}</b>${mine?' <span class="muted" style="font-size:13px">(you)</span>':''}<small>${esc(a.role)}${a.curCompany?' · '+esc(a.curCompany):''}</small></button>
         <span class="pmeta"><span class="ptag"><span class="dot" style="width:7px;height:7px;border-radius:50%;background:currentColor"></span>${FEED_LABEL[p.type]}</span>${p.ts?`<time class="pdate" datetime="${new Date(p.ts).toISOString().slice(0,10)}">${postDate(p.ts)}</time>`:''}</span></div>
       <p class="post-b">${linkify(p.text)}</p>${p.photo?`<img class="post-img" src="${p.photo}" alt="Photo shared by ${esc(a.first)}" loading="lazy">`:''}
       <div class="post-f">${acts}</div></article>`; };
