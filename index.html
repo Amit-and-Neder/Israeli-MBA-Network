@@ -920,11 +920,11 @@ const ILL = {
   industry:'<svg viewBox="0 0 48 48"><path d="M41.59 13.61 L43.58 14.57 L43.13 16.82 L40.92 16.93 L39.93 18.38 L40.66 20.47 L38.76 21.74 L37.12 20.25 L35.39 20.59 L34.43 22.58 L32.18 22.13 L32.07 19.92 L30.62 18.93 L28.53 19.66 L27.26 17.76 L28.75 16.12 L28.41 14.39 L26.42 13.43 L26.87 11.18 L29.08 11.07 L30.07 9.62 L29.34 7.53 L31.24 6.26 L32.88 7.75 L34.61 7.41 L35.57 5.42 L37.82 5.87 L37.93 8.08 L39.38 9.07 L41.47 8.34 L42.74 10.24 L41.25 11.88Z" fill="var(--ic-3)"/><circle cx="35" cy="14" r="2.8" fill="var(--ic-bg)"/><path d="M29.76 24.74 L32.92 25.51 L32.92 28.49 L29.76 29.26 L29.04 31.50 L31.14 33.97 L29.38 36.39 L26.38 35.16 L24.48 36.54 L24.72 39.78 L21.88 40.70 L20.17 37.94 L17.83 37.94 L16.12 40.70 L13.28 39.78 L13.52 36.54 L11.62 35.16 L8.62 36.39 L6.86 33.97 L8.96 31.50 L8.24 29.26 L5.08 28.49 L5.08 25.51 L8.24 24.74 L8.96 22.50 L6.86 20.03 L8.62 17.61 L11.62 18.84 L13.52 17.46 L13.28 14.22 L16.12 13.30 L17.83 16.06 L20.17 16.06 L21.88 13.30 L24.72 14.22 L24.48 17.46 L26.38 18.84 L29.38 17.61 L31.14 20.03 L29.04 22.50Z" fill="var(--ic-1)"/><circle cx="19" cy="27" r="6.2" fill="var(--ic-2)"/><circle cx="19" cy="27" r="3" fill="var(--ic-bg)"/></svg>'
 };
 const GOALS = [
-  ['Who can refer','colleague','Colleague','Alumni who can refer you at their company'],
+  ['browse:company','colleague','Colleague','Alumni at the companies you want to join'],
   ['Investors','investor','Investor','VCs and angels in the network'],
   ['Founders','investment','Investment','Founders building their next company'],
 ];
-const EXAMPLES = ['Who can refer at Google','Sloan \'23','Product managers at Google','People from MIT working in healthcare','HBS alumni in New York','Founders in climate tech','People who worked at McKinsey'];
+const EXAMPLES = ['People at Google','Sloan \'23','Product managers at Google','People from MIT working in healthcare','HBS alumni in New York','Founders in climate tech','People who worked at McKinsey'];
 const INCOMING_NOTES = {25:'Hi Noam! Saw you were at Monday.com before Sloan. I’m a Sloan ’24 at Apple and happy to help with your PM recruiting.',16:'Hey, fellow Waze/Monday alum network here. Would love to swap notes on NYC product roles.'};
 
 /* Placeholder portraits for the sample members, from randomuser.me (free stock photos made for mock users).
@@ -1113,7 +1113,6 @@ function matchFacets(p,f){
   if(f.role.length && !f.role.includes(p.roleCat) && !(f.role.includes('Investor') && p.industry==='Venture Capital')) return false;
   if(f.location.length && !f.location.includes(p.location)) return false;
   if(f.status.length && !f.status.includes(p.status)) return false;
-  if(f.refer && !p.canRefer) return false;
   if(f.refer && f.company.length && !f.company.includes(p.curCompany)) return false; // referrals only at the current company
   return true;
 }
@@ -1126,7 +1125,6 @@ function reasonFor(p,f,rest){
   f.role.forEach(r=>{ if(p.roleCat===r) parts.push(r==='Founder'?'Founder':r==='Investor'?'Investor':r+' role'); else if(r==='Investor'&&p.industry==='Venture Capital') parts.push('Investor · Venture Capital'); });
   f.location.forEach(l=>{ if(p.location===l) parts.push(l)});
   f.status.forEach(s=>{ if(p.status===s) parts.push(s==='Student'?'Current student':'Alum')});
-  if(f.refer && p.canRefer) parts.push(`Can refer at ${p.curCompany}`);
   if(parts.length===1 && /^(Currently|Worked)/.test(parts[0])) return parts[0];
   if(parts.length) return 'Matches: '+parts.join(' + ');
   if(rest.length) return 'Name or title match';
@@ -1142,7 +1140,6 @@ const FILTER_DEFS = [
   ['location','Location',p=>[p.location]],
   ['program','Program',p=>p.schools.map(s=>s.program)],
   ['status','Student / Alum',p=>[p.status]],
-  ['refer','Can refer',p=>p.canRefer?['Can refer']:[]],
 ];
 function runSearch(q){
   const {facets,rest} = parseQuery(q);
@@ -1156,7 +1153,6 @@ function runSearch(q){
   list = list.map(p=>{
     let score = (sharedSchool(p)?1:0) + (sharedPrev(p)?1:0);
     facets.company.forEach(c=>{ if(p.curCompany===c) score+=4; });
-    if(p.canRefer) score+=.5;
     return {p,score,reason:reasonFor(p,facets,rest)};
   });
   const yr=p=>Math.max(...p.schools.map(s=>s.year));
@@ -1204,7 +1200,8 @@ function searchBox(size,id){
   </div>`;
 }
 const statusTag = (p,style='') => `<span class="tag ${p.status==='Student'?'stu':'alum'}" ${style?`style="${style}"`:''}>${p.status==='Student'?'STUDENT':'ALUMNI'}</span>`;
-const referBadge = p => p.canRefer ? `<span class="refer">${I.check}Can refer</span>` : '';
+/* Every member can refer at their company, so there's no badge for it. */
+const referBadge = p => '';
 const coName = p => p.curCompany ? `<button class="colink" data-act="company" data-co="${esc(p.curCompany)}">${esc(p.curCompany)}</button>` : esc(p.company);
 function pcard(p,signal,warm){
   const sg = signal || relevance(p);
@@ -1310,7 +1307,7 @@ function viewHome(){
     ${waiting?`<div class="notice" style="margin:18px 0 0;background:var(--warm-soft);color:var(--warm)">${I.clock}<span><b>Your request is waiting for an admin.</b> Once you’re approved, you’ll see every member here and they’ll see you. Meanwhile you can finish your profile.</span></div>`:''}
     <section class="hero">
       <h1>Find the Israeli who’s <em>already where you’re headed.</em></h1>
-      <div class="goals" role="group" aria-label="What are you looking for?">${GOALS.map(([q,ic,t,d])=>`<button class="goal" data-act="search" data-q="${esc(q)}"><span class="ico ill">${ILL[ic]}</span><span><small>Find your next</small><b>${t}</b><em>${d}</em></span></button>`).join('')}</div>
+      <div class="goals" role="group" aria-label="What are you looking for?">${GOALS.map(([q,ic,t,d])=>`<button class="goal" ${q.startsWith('browse:')?`data-act="browse" data-tab="${q.slice(7)}"`:`data-act="search" data-q="${esc(q)}"`}><span class="ico ill">${ILL[ic]}</span><span><small>Find your next</small><b>${t}</b><em>${d}</em></span></button>`).join('')}</div>
       ${searchBox('big','q-home')}
       <div class="shortcuts">${sc.map(([k,l,ic,s])=>`<button class="shortcut ${S.browse===k?'on':''}" data-act="browse" data-tab="${k}" aria-expanded="${S.browse===k}"><span class="ico ill">${ic}</span><span><b>${l}</b><small>Browse ${s}</small></span></button>`).join('')}</div>
       ${S.browse?browsePanel(S.browse):''}
@@ -1335,7 +1332,7 @@ function browsePanel(tab){
   return `<div class="browse"><div class="browse-h"><span>${title}</span><button class="arrow" data-act="browse" data-tab="${tab}" aria-label="Close">${I.x}</button></div>
     <div class="chips">${items.map(([k,n])=>`<button class="chip" ${tab==='company'?`data-act="company" data-co="${esc(k)}"`:`data-act="search" data-q="${esc(k)}"`}>${esc(k)}<span class="n">${n}</span>${tab==='company'&&companyStats(k).refer?`<span class="refer" style="padding:1px 6px;font-size:11px">${companyStats(k).refer} can refer</span>`:''}</button>`).join('')}</div></div>`;
 }
-const PILLS=['refer','school','year','curCompany','industry','location'];
+const PILLS=['school','year','curCompany','industry','location'];
 const FL = Object.fromEntries(FILTER_DEFS.map(([k,l])=>[k,l]));
 FL.location='Locations';
 const optLabel=(k,v)=> k==='year'?`Class of ${v}`: k==='location'?locFull(v): v;
@@ -1415,7 +1412,7 @@ function starsBox(){
 }
 function companyStats(co){
   const current=P.filter(p=>p.curCompany===co), past=P.filter(p=>p.prev.includes(co)&&p.curCompany!==co);
-  return {current,past,refer:current.filter(p=>p.canRefer).length};
+  return {current,past,refer:0};
 }
 function viewCompany(){
   const co=S.params.co; const {current,past,refer}=companyStats(co);
@@ -1490,7 +1487,7 @@ function viewProfile(id){
   const prefLabel = p.pref==='whatsapp'?'Prefers WhatsApp':'Prefers email';
   const how = isMe ? '' : `<div class="how">${I.spark.replace('<svg','<svg width="18" height="18"')}<span>${cg.length?`You share: <b>${esc(cg[0][1])}</b>.`:'Everyone here joined to be reached, so a short intro goes a long way.'}</span></div>`;
   const st = connState(id);
-  const actions = isMe ? `<div class="pactions">${p.curCompany?`<button class="switch" role="switch" aria-checked="${!!p.canRefer}" data-act="toggle-refer"><span class="knob"></span>I can refer people at ${esc(p.curCompany)}</button>`:''}
+  const actions = isMe ? `<div class="pactions">
       <button class="btn ghost pill" data-act="edit" data-kind="contact">${I.mail}Contact info</button>
       <button class="btn ghost pill" data-act="join-start" data-mode="sync">${I.link}Update from LinkedIn</button>
       <button class="btn ghost pill" data-act="nav" data-view="settings">${I.shield}Account settings</button></div>`
