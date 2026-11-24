@@ -108,6 +108,15 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .eyebrow svg{width:14px;height:14px}
 .hero h1{font-family:var(--f-display);font-weight:750;font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-.03em;margin:18px 0 26px;text-wrap:balance}
 .hero h1 em,.page-h1 em{font-style:normal;color:var(--accent);background:linear-gradient(180deg,transparent 72%,color-mix(in srgb,var(--accent) 16%,transparent) 72%)}
+.goals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 16px;text-align:left}
+.goal{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:18px;background:linear-gradient(135deg,var(--surface) 0%,color-mix(in srgb,var(--accent-soft) 70%,var(--surface)) 100%);border:1px solid color-mix(in srgb,var(--accent) 18%,var(--line));box-shadow:var(--shadow);text-align:left;transition:transform .15s,box-shadow .15s,border-color .15s}
+.goal:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.goal .ico{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);flex:none}
+.goal .ico svg{width:22px;height:22px}
+.goal small{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.01em}
+.goal b{display:block;font-family:var(--f-display);font-weight:750;font-size:20px;line-height:1.1;letter-spacing:-.015em;color:var(--accent-text)}
+.goal em{display:block;font-style:normal;font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.3}
+@media (max-width:720px){.goals{grid-template-columns:1fr;gap:8px}.goal{padding:12px 14px}.goal b{font-size:18px}}
 .shortcuts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
 .shortcut{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-align:left;transition:border-color .15s,box-shadow .15s}
 .shortcut:hover{border-color:var(--faint)}
@@ -544,6 +553,10 @@ body:has(.landing) .top{position:relative;background:transparent;border-bottom-c
 .land-h1{font-family:var(--f-display);font-weight:750;font-size:clamp(40px,5.4vw,68px);line-height:1.02;letter-spacing:-.025em;margin:0 0 22px}
 .land-h1 em{font-style:normal;color:var(--accent);background:linear-gradient(180deg,transparent 72%,color-mix(in srgb,var(--accent) 16%,transparent) 72%)}
 .land-tag{color:var(--muted);font-weight:650}
+.land-goals{font-family:var(--f-display);font-weight:650;font-size:clamp(18px,1.9vw,23px);line-height:1.3;letter-spacing:-.01em;color:var(--ink);margin:-6px 0 18px}
+.land-goals span{white-space:nowrap}
+.land-goals b{font-weight:750;color:var(--accent-text)}
+.land-goals i{font-style:normal;color:var(--faint);margin:0 .15em}
 .land-sub{font-size:clamp(17px,1.6vw,20px);line-height:1.45;color:var(--muted);max-width:34em;margin:0 0 30px}
 .land-login{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:20px 22px;max-width:560px}
 .land-login .field{margin-bottom:12px}
@@ -761,6 +774,9 @@ const I = {
   user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>',
   shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5" stroke-linecap="round"/></svg>',
   filter:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>',
+  briefcase:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12.5h18"/></svg>',
+  coin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M14.8 9.2c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2.1 0 2.9 5.8 1.5 5.8 4.3 0 1.3-1.3 2.1-3 2.1-1.3 0-2.5-.6-3-1.5M12 6v1.8M12 16.3V18"/></svg>',
+  rocket:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M14 4c3.5 0 6 2.5 6 6-1.6 3.2-4.4 5.7-7.6 7.1L7 11.6C8.3 8.4 10.8 5.6 14 4z"/><circle cx="14.5" cy="9.5" r="1.6"/><path d="M7 11.6 4 12l2-4 3.2-.4M12.4 17.1 12 20l4-2 .4-3.2M6.5 17.5 4 20"/></svg>',
   spark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg>',
   link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
   pencil:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>',
@@ -868,6 +884,11 @@ const ME = 0;
 const JOIN_REQS = [
   {id:101,name:'Tal Ben-David',first:'Tal',last:'Ben-David',hair:'long',role:'Incoming PM',company:'Ramp',schools:[{school:'MIT Sloan',program:'MBA',year:2026}],li:{edu:'MIT Sloan · MBA, 2024–2026',id:false,israeli:'IDF · Intelligence Corps, Wix (Tel Aviv)'},knows:17,email:'tal.bendavid@example.com',answer:'Grew up in Haifa. PM at Wix for 4 years before Sloan, now moving to NYC for a fintech role.',url:'linkedin.com/in/tal-bendavid',asked:'2 hours ago'},
   {id:102,name:'Shai Mor',first:'Shai',last:'Mor',hair:'short',role:'MBA Candidate',company:'MIT Sloan',schools:[{school:'MIT Sloan',program:'MBA',year:2028}],li:{edu:null,id:true,israeli:'Technion, Intel (Haifa)'},knows:null,email:'shai.mor@example.com',answer:'From Tel Aviv, ex-Intel engineer. Started at Sloan this fall and haven’t updated LinkedIn yet.',url:'linkedin.com/in/shaimor',asked:'Yesterday'},
+];
+const GOALS = [
+  ['Who can refer','briefcase','Colleague','Alumni who can refer you at their company'],
+  ['Investors','coin','Investor','VCs and angels in the network'],
+  ['Founders','rocket','Investment','Founders building their next company'],
 ];
 const EXAMPLES = ['Who can refer at Google','Sloan \'23','Product managers at Google','People from MIT working in healthcare','HBS alumni in New York','Founders in climate tech','People who worked at McKinsey'];
 const INCOMING_NOTES = {25:'Hi Noam! Saw you were at Monday.com before Sloan. I’m a Sloan ’24 at Apple and happy to help with your PM recruiting.',16:'Hey, fellow Waze/Monday alum network here. Would love to swap notes on NYC product roles.'};
@@ -1055,7 +1076,7 @@ function matchFacets(p,f){
   if(f.year && f.year.length && !p.schools.some(s=>f.year.includes(s.year) && (!f.school.length || f.school.includes(s.school)))) return false;
   if(f.company.length && !f.company.some(c=>p.curCompany===c||p.prev.includes(c))) return false;
   if(f.industry.length && !f.industry.includes(p.industry)) return false;
-  if(f.role.length && !f.role.includes(p.roleCat)) return false;
+  if(f.role.length && !f.role.includes(p.roleCat) && !(f.role.includes('Investor') && p.industry==='Venture Capital')) return false;
   if(f.location.length && !f.location.includes(p.location)) return false;
   if(f.status.length && !f.status.includes(p.status)) return false;
   if(f.refer && !p.canRefer) return false;
@@ -1068,7 +1089,7 @@ function reasonFor(p,f,rest){
   if(!f.school.length && f.year.length){ const e=p.schools.find(x=>f.year.includes(x.year)); if(e) parts.push(schoolTag(e)); }
   f.company.forEach(c=>{ if(p.curCompany===c) parts.push(`Currently at ${c}`); else if(p.prev.includes(c)) parts.push(`Worked at ${c}`)});
   f.industry.forEach(i=>{ if(p.industry===i) parts.push(i)});
-  f.role.forEach(r=>{ if(p.roleCat===r) parts.push(r==='Founder'?'Founder':r==='Investor'?'Investor':r+' role')});
+  f.role.forEach(r=>{ if(p.roleCat===r) parts.push(r==='Founder'?'Founder':r==='Investor'?'Investor':r+' role'); else if(r==='Investor'&&p.industry==='Venture Capital') parts.push('Investor · Venture Capital'); });
   f.location.forEach(l=>{ if(p.location===l) parts.push(l)});
   f.status.forEach(s=>{ if(p.status===s) parts.push(s==='Student'?'Current student':'Alum')});
   if(f.refer && p.canRefer) parts.push(`Can refer at ${p.curCompany}`);
@@ -1252,6 +1273,7 @@ function viewHome(){
     ${waiting?`<div class="notice" style="margin:18px 0 0;background:var(--warm-soft);color:var(--warm)">${I.clock}<span><b>Your request is waiting for an admin.</b> Once you’re approved, you’ll see every member here and they’ll see you. Meanwhile you can finish your profile.</span></div>`:''}
     <section class="hero">
       <h1>Find the Israeli who’s <em>already where you’re headed.</em></h1>
+      <div class="goals" role="group" aria-label="What are you looking for?">${GOALS.map(([q,ic,t,d])=>`<button class="goal" data-act="search" data-q="${esc(q)}"><span class="ico">${I[ic]}</span><span><small>Find your next</small><b>${t}</b><em>${d}</em></span></button>`).join('')}</div>
       ${searchBox('big','q-home')}
       <div class="shortcuts">${sc.map(([k,l,ic,s])=>`<button class="shortcut ${S.browse===k?'on':''}" data-act="browse" data-tab="${k}" aria-expanded="${S.browse===k}"><span class="ico">${ic}</span><span><b>${l}</b><small>Browse ${s}</small></span></button>`).join('')}</div>
       ${S.browse?browsePanel(S.browse):''}
@@ -2336,7 +2358,7 @@ function landingArt(){
     ${card('lc-us',flagUS(),'United States','HBS · Stanford · Wharton · MIT')}
     ${card('lc-il',flagIL(),'Israel','Where we all started')}
     ${card('lc-eu',flagEU(),'Europe','INSEAD · LBS · IESE')}
-    ${card('lc-bulb',bulbArt(),'Alumni network','Intros, referrals, advice')}
+    ${card('lc-bulb',bulbArt(),'Alumni network','Colleagues, investors, deals')}
     ${card('lc-route',routeArt(),'Alumni & students','Every class, every campus')}
     <div class="lc-chip lc-chip1"><span class="mini-il">${flagIL()}</span>Intro accepted</div>
     <div class="lc-chip lc-chip2"><span class="dot-ok"></span>Alumni &amp; students</div>
@@ -2360,7 +2382,8 @@ function viewJoin(){
     </div>`
     :`<div class="land-copy">
         <h1 class="land-h1">Israeli MBAs<br><span class="land-tag">(US &amp; EU)</span><br><em>one network.</em></h1>
-        <p class="land-sub">The private networking community for Israeli MBA alumni who studied in the US and Europe, and the students there now. Connect with alumni at the companies and cities you care about, trade intros and referrals, and give back to the next class.</p>
+        <p class="land-goals"><span>Find your next <b>colleague</b></span> <i aria-hidden="true">·</i> <span>your next <b>investor</b></span> <i aria-hidden="true">·</i> <span>your next <b>investment</b></span></p>
+        <p class="land-sub">The private networking community for Israeli MBA alumni who studied in the US and Europe, and the students there now. Meet the alumni who can hire you, back you or bring you their next deal, trade intros and referrals, and give back to the next class.</p>
         <div class="land-login">
           ${errBox(L.err)}${L.note?`<div class="notice" style="margin-bottom:14px">${I.check}<span>${L.note}</span></div>`:''}
           <div class="two">${fld('l-email','Email',`<input type="email" id="l-email" value="${esc(L.email||'')}" placeholder="you@example.com" autocomplete="username">`)}${fld('l-pass','Password',`<input type="password" id="l-pass" autocomplete="current-password" placeholder="Your password">`)}</div>
