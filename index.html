@@ -444,7 +444,7 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .btn.outline:hover{background:var(--accent-soft);filter:none}
 .btn.outline.is-pending{border-color:var(--warm);color:var(--warm);background:transparent}
 .btn.outline.is-connected{border-color:var(--ok);color:var(--ok);background:transparent}
-.pillbar{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-block:12px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.pillbar{position:sticky;top:calc(var(--top-h,64px) + env(safe-area-inset-top,0px));z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-block:12px;margin-bottom:6px;border-bottom:1px solid var(--line)}
 .pillw{position:relative}
 .fpill{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 14px;border-radius:99px;border:1px solid var(--faint);background:var(--surface);font-weight:600;font-size:14px;color:var(--muted);white-space:nowrap}
 .fpill svg{width:15px;height:15px;transition:transform .15s}
@@ -514,7 +514,7 @@ button.how .chev svg{width:16px;height:16px}
 @media (max-width:720px){
   .pillbar{flex-wrap:nowrap;overflow-x:auto;margin-inline:-20px;padding-inline:20px;scrollbar-width:none}
   .fhead{display:block}
-  .fpanel{position:fixed;left:12px;right:12px;top:auto;bottom:calc(76px + env(safe-area-inset-bottom,0px));width:auto}
+  .fpanel{position:fixed;left:12px;right:12px;top:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:auto}
   .rrow{grid-template-columns:auto minmax(0,1fr);gap:12px;padding:14px 16px}
   .rrow .acts{grid-column:2}
   .rrow .av{width:52px!important;height:52px!important}
@@ -697,15 +697,16 @@ body:has(.landing) .top{position:relative;background:transparent;border-bottom-c
   .pgrid{grid-template-columns:1fr}
 }
 @media (max-width:720px){
-  .top .nav{display:none}
-  .top .wrap{gap:12px}
-  .brand span.full{display:none}
-  .bottom-nav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+  .top .wrap{gap:8px 12px;flex-wrap:wrap;height:auto;padding-block:10px}
+  .top .nav{order:3;width:100%;margin-left:0;overflow-x:auto;scrollbar-width:none;gap:2px}
+  .top .nav::-webkit-scrollbar{display:none}
+  .top .nav button{padding:7px 10px;font-size:13.5px;flex:none}
+  :root{--top-h:106px}
+  .bottom-nav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
   .bottom-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;font-size:11.5px;font-weight:600;color:var(--muted);position:relative}
   .bottom-nav button.on{color:var(--accent-text)}
   .bottom-nav svg{width:21px;height:21px}
   .bottom-nav .badge{position:absolute;top:2px;left:calc(50% + 6px)}
-  main{padding-bottom:72px}
   .hero{padding-block:30px 10px}
   .search.big .search-input{height:58px;font-size:16px;padding-left:48px}
   .search.big .search-ico{left:16px}
@@ -723,6 +724,12 @@ body:has(.landing) .top{position:relative;background:transparent;border-bottom-c
   .tl .rail-l{grid-row:1 / span 2}
   .tl .entry{grid-column:2}
   .pactions .btn{flex:1}
+}
+@media (max-width:440px){
+  .top .nav{justify-content:space-between}
+  .top .nav button{padding:7px 6px;gap:6px}
+  .top .nav button > svg{display:none}
+  .brand span.full{display:none}
 }
 </style>
 
