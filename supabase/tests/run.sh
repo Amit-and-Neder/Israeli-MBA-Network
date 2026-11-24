@@ -10,6 +10,7 @@ psql -q -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/supabase_shim.sql
 for f in supabase/migrations/*.sql; do psql -q -d "$DB" -v ON_ERROR_STOP=1 -f "$f"; done
 psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/privacy_test.sql
 psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/contact_sharing_test.sql
+psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/status_note_test.sql
 psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/member_data_test.sql
 psql -d "$DB" -c "select case when ok then 'PASS' else 'FAIL' end as result, msg from t.results order by n" \
      -c "select count(*) filter (where ok) as passed, count(*) filter (where not ok) as failed from t.results" | tee /tmp/imn_privacy_test.out
