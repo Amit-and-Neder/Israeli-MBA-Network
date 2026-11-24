@@ -528,6 +528,62 @@ button.how .chev svg{width:16px;height:16px}
 .steps li.on{color:var(--ink)}
 .steps li.on::before,.steps li.done::before{background:var(--accent)}
 .steps li.done{color:var(--muted)}
+/* ---------- landing (login) page ---------- */
+.landing{overflow-x:clip}
+.land-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px;align-items:center;min-height:calc(100vh - 64px);padding-block:48px 64px}
+.land-h1{font-family:var(--f-display);font-weight:750;font-size:clamp(40px,5.4vw,68px);line-height:1.02;letter-spacing:-.025em;margin:0 0 22px}
+.land-h1 em{font-style:normal;color:var(--accent);background:linear-gradient(180deg,transparent 72%,color-mix(in srgb,var(--accent) 16%,transparent) 72%)}
+.land-sub{font-size:clamp(17px,1.6vw,20px);line-height:1.45;color:var(--muted);max-width:34em;margin:0 0 30px}
+.land-login{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:20px 22px;max-width:560px}
+.land-login .field{margin-bottom:12px}
+.land-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:4px}
+.land-join{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:22px;max-width:560px;color:var(--muted);font-size:14.5px}
+.land-join span{flex:1 1 240px}
+.land-join b{color:var(--ink)}
+.land-cta{background:var(--ok);color:#fff;border-color:transparent}
+.land-cta:hover{filter:brightness(1.06)}
+.land-art{position:relative;height:640px}
+.lc-stage{position:absolute;inset:0}
+.lc{position:absolute;margin:0;width:230px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);overflow:hidden;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.lc:hover{transform:rotate(0deg) translateY(-6px) scale(1.03)!important;z-index:9}
+.lc-img{aspect-ratio:3/2;background:var(--surface-2);display:grid;place-items:center;padding:12px}
+.lc-img svg{width:100%;height:100%;filter:drop-shadow(0 6px 10px rgba(22,26,38,.18))}
+.lc-bulb .lc-img,.lc-route .lc-img{padding:0}
+.lc-bulb .lc-img svg,.lc-route .lc-img svg{filter:none}
+.lc figcaption{padding:12px 16px 14px;display:grid;gap:2px}
+.lc figcaption b{font-family:var(--f-display);font-weight:650;font-size:16px}
+.lc figcaption small{color:var(--muted);font-size:12.5px}
+.lc-us{top:0;left:0;transform:rotate(-6deg);z-index:2}
+.lc-il{top:236px;left:calc(50% - 132px);width:240px;transform:rotate(3deg);z-index:5}
+.lc-eu{top:20px;right:0;transform:rotate(7deg);z-index:1;width:210px}
+.lc-bulb{bottom:0;left:0;transform:rotate(4deg);z-index:3;width:210px}
+.lc-route{bottom:0;right:0;transform:rotate(-5deg);z-index:6;width:250px}
+.lc-chip{position:absolute;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;box-shadow:var(--shadow);padding:8px 14px 8px 10px;font-size:13px;font-weight:600;z-index:6;white-space:nowrap}
+.mini-il{width:26px;height:18px;display:block}
+.mini-il svg{width:100%;height:100%}
+.dot-ok{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px var(--ok-soft)}
+.lc-chip1{top:262px;right:0;transform:rotate(-3deg);z-index:7}
+.lc-chip2{top:262px;left:0;transform:rotate(2deg);z-index:7}
+@media (prefers-reduced-motion:no-preference){
+  .lc,.lc-chip{animation:lc-in .8s cubic-bezier(.2,.7,.2,1) both}
+  .lc-il{animation-delay:.05s}.lc-us{animation-delay:.12s}.lc-eu{animation-delay:.2s}.lc-route{animation-delay:.28s}.lc-bulb{animation-delay:.36s}.lc-chip{animation-delay:.5s}
+  @keyframes lc-in{from{opacity:0;translate:0 18px}to{opacity:1;translate:0 0}}
+}
+@media (max-width:960px){
+  .land-grid{grid-template-columns:1fr;min-height:0;padding-block:28px 56px;gap:8px}
+  .land-art{order:-1;height:300px;margin-inline:-20px}
+  .lc{width:150px;border-radius:14px}
+  .lc figcaption{padding:8px 10px 10px}.lc figcaption b{font-size:13px}.lc figcaption small{display:none}
+  .lc-img{padding:8px}
+  .lc-us{top:12px;left:4%}.lc-il{top:40px;left:calc(50% - 85px);width:170px}.lc-eu{top:8px;right:4%;width:140px}
+  .lc-bulb{bottom:6px;left:10%;width:140px}.lc-route{bottom:0;right:8%;width:160px}
+  .lc-chip{display:none}
+}
+@media (max-width:520px){
+  .land-art{height:250px}
+  .lc{width:120px}.lc-il{width:140px;left:calc(50% - 70px)}.lc-eu{width:112px}.lc-bulb{width:116px}.lc-route{width:130px}
+  .land-login .two{grid-template-columns:1fr}
+}
 .jcard{background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:28px}
 .jcard h1{font-family:var(--f-display);font-weight:750;font-size:clamp(24px,4vw,30px);letter-spacing:-.025em;margin:0 0 8px;text-wrap:balance}
 .jcard .lead{color:var(--muted);font-size:15.5px;margin:0 0 20px;max-width:60ch}
@@ -2191,6 +2247,57 @@ async function joinPdf(file){
   }catch(err){ J.pdf='none'; J.pdfErr='We couldn’t read that file. Use the PDF from your LinkedIn profile: More → Save to PDF.'; }
   render();
 }
+/* ---------- landing illustration (all inline SVG, no image files) ---------- */
+const FOLDS = id => `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0.25"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".22" stop-color="#000" stop-opacity=".07"/><stop offset=".45" stop-color="#fff" stop-opacity=".16"/><stop offset=".7" stop-color="#000" stop-opacity=".08"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>`;
+const WAVE = 'M0 10 C 55 -4, 110 24, 165 10 S 275 -4, 330 10 L 330 210 C 275 224, 220 196, 165 210 S 55 224, 0 210 Z';
+const star5 = (cx,cy,r,fill) => { let d=''; for(let k=0;k<10;k++){ const a=Math.PI/2+k*Math.PI/5, rr=k%2?r*.42:r; d+=(k?'L':'M')+(cx+rr*Math.cos(a)).toFixed(2)+' '+(cy-rr*Math.sin(a)).toFixed(2); } return `<path d="${d}Z" fill="${fill}"/>`; };
+function flagIL(){
+  const tri=(up)=>{ const r=34, cx=165, cy=110; const pts=[0,1,2].map(k=>{const a=(up?-90:90)+k*120; return `${(cx+r*Math.cos(a*Math.PI/180)).toFixed(1)},${(cy+r*Math.sin(a*Math.PI/180)).toFixed(1)}`}).join(' '); return `<polygon points="${pts}" fill="none" stroke="#0038B8" stroke-width="7" stroke-linejoin="miter"/>`; };
+  return `<svg viewBox="0 0 330 220"><defs>${FOLDS('fil')}<clipPath id="cil"><path d="${WAVE}"/></clipPath></defs><g clip-path="url(#cil)"><rect width="330" height="220" fill="#fff"/><rect y="28" width="330" height="30" fill="#0038B8"/><rect y="162" width="330" height="30" fill="#0038B8"/>${tri(true)}${tri(false)}<rect width="330" height="220" fill="url(#fil)"/></g></svg>`;
+}
+function flagUS(){
+  let stripes=''; for(let k=0;k<13;k++) if(k%2===0) stripes+=`<rect y="${(k*220/13).toFixed(2)}" width="330" height="${(220/13).toFixed(2)}" fill="#B22234"/>`;
+  let stars=''; for(let r=0;r<9;r++) for(let c=0;c<(r%2?5:6);c++) stars+=star5(12+c*22+(r%2?11:0),11+r*12.6,4.6,'#fff');
+  return `<svg viewBox="0 0 330 220"><defs>${FOLDS('fus')}<clipPath id="cus"><path d="${WAVE}"/></clipPath></defs><g clip-path="url(#cus)"><rect width="330" height="220" fill="#fff"/>${stripes}<rect width="140" height="${(220*7/13).toFixed(2)}" fill="#3C3B6E"/>${stars}<rect width="330" height="220" fill="url(#fus)"/></g></svg>`;
+}
+function flagEU(){
+  let stars=''; for(let k=0;k<12;k++){ const a=k*Math.PI/6; stars+=star5(165+58*Math.cos(a),110+58*Math.sin(a),10,'#FFCC00'); }
+  return `<svg viewBox="0 0 330 220"><defs>${FOLDS('feu')}<clipPath id="ceu"><path d="${WAVE}"/></clipPath></defs><g clip-path="url(#ceu)"><rect width="330" height="220" fill="#003399"/>${stars}<rect width="330" height="220" fill="url(#feu)"/></g></svg>`;
+}
+function bulbArt(){
+  return `<svg viewBox="0 0 330 220"><defs><radialGradient id="bglow" cx=".5" cy=".42" r=".5"><stop offset="0" stop-color="#FFE9A8" stop-opacity=".95"/><stop offset=".35" stop-color="#FFD166" stop-opacity=".35"/><stop offset="1" stop-color="#FFD166" stop-opacity="0"/></radialGradient>
+    <linearGradient id="bbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1B2A6B"/><stop offset="1" stop-color="#0038B8"/></linearGradient>
+    <radialGradient id="bglass" cx=".42" cy=".35" r=".7"><stop offset="0" stop-color="#FFFBEA"/><stop offset=".6" stop-color="#FFE08A"/><stop offset="1" stop-color="#F4B740"/></radialGradient></defs>
+    <rect width="330" height="220" fill="url(#bbg)"/><circle cx="165" cy="92" r="105" fill="url(#bglow)"/>
+    <g stroke="#FFE08A" stroke-width="4" stroke-linecap="round" opacity=".85"><path d="M165 14v14M103 38l10 10M227 38l-10 10M84 92h14M232 92h14M106 146l9-8M224 146l-9-8"/></g>
+    <path d="M165 44c-27 0-48 21-48 47 0 17 9 29 18 38 6 6 9 12 9 19v6h42v-6c0-7 3-13 9-19 9-9 18-21 18-38 0-26-21-47-48-47z" fill="url(#bglass)"/>
+    <path d="M153 152v-26l12 12 12-12v26" fill="none" stroke="#C98A12" stroke-width="3.5" stroke-linejoin="round"/>
+    <rect x="143" y="156" width="44" height="8" rx="4" fill="#C9CEDC"/><rect x="145" y="167" width="40" height="8" rx="4" fill="#AEB4C6"/><path d="M152 178h26l-5 9h-16z" fill="#8F96AB"/>
+    <path d="M139 78c3-12 12-20 23-22" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".75"/></svg>`;
+}
+function routeArt(){
+  // A stylised globe with a route from Tel Aviv to Boston, New York and San Francisco.
+  return `<svg viewBox="0 0 330 220"><defs><linearGradient id="rbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EEF2FF"/><stop offset="1" stop-color="#DCE4FB"/></linearGradient></defs>
+    <rect width="330" height="220" fill="url(#rbg)"/>
+    <g fill="none" stroke="#B9C5EE" stroke-width="1.2"><ellipse cx="165" cy="250" rx="230" ry="150"/><ellipse cx="165" cy="250" rx="160" ry="150"/><ellipse cx="165" cy="250" rx="80" ry="150"/><path d="M-70 170h470M-70 120h470M-70 210h470"/></g>
+    <path d="M272 120 C 220 40, 120 40, 78 96" fill="none" stroke="#0038B8" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>
+    <path d="M272 120 C 210 70, 110 80, 58 118" fill="none" stroke="#0038B8" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round" opacity=".6"/>
+    <path d="M272 120 C 200 20, 60 30, 30 130" fill="none" stroke="#0038B8" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round" opacity=".4"/>
+    ${[[78,96,'BOS'],[58,118,'NYC'],[30,130,'SF']].map(([x,y,t])=>`<circle cx="${x}" cy="${y}" r="6" fill="#fff" stroke="#0038B8" stroke-width="3"/><text x="${x}" y="${y-12}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="500" fill="#1B2A6B">${t}</text>`).join('')}
+    <circle cx="272" cy="120" r="9" fill="#0038B8"/><circle cx="272" cy="120" r="16" fill="none" stroke="#0038B8" stroke-opacity=".3" stroke-width="6"/><text x="272" y="148" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="500" fill="#1B2A6B">TLV</text></svg>`;
+}
+function landingArt(){
+  const card=(cls,art,title,sub)=>`<figure class="lc ${cls}"><div class="lc-img">${art}</div><figcaption><b>${title}</b><small>${sub}</small></figcaption></figure>`;
+  return `<div class="lc-stage">
+    ${card('lc-us',flagUS(),'United States','Boston · New York · Bay Area')}
+    ${card('lc-il',flagIL(),'Israel','Where we all started')}
+    ${card('lc-eu',flagEU(),'Europe','INSEAD · LBS · IESE alumni')}
+    ${card('lc-bulb',bulbArt(),'Ideas & intros','Ask, share, refer')}
+    ${card('lc-route',routeArt(),'Tel Aviv → the US','One network, every campus')}
+    <div class="lc-chip lc-chip1"><span class="mini-il">${flagIL()}</span>Intro accepted</div>
+    <div class="lc-chip lc-chip2"><span class="dot-ok"></span>Admin-approved members</div>
+  </div>`;
+}
 function stepIdx(st){ return st==='connecting'||st==='imported'?0: st==='review'?1: st==='verify'?2:3; }
 function viewJoin(){
   const J=S.join; if(!J) return '';
@@ -2207,21 +2314,18 @@ function viewJoin(){
       <div class="jsec">${fld('l-code','Code from the email',`<input type="text" id="l-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456">`)}</div>
       <div class="row"><button class="btn lg primary pill" data-act="login-confirm" ${L.busy?'disabled':''}>${L.busy?'Checking…':'Confirm and log in'}</button><button class="link" data-act="login-back">Back</button></div>
     </div>`
-    :`<div class="jcard">
-      <h1>Log in</h1>
-      <p class="lead">Welcome back to the network of Israeli MBAs in the US.</p>
-      ${errBox(L.err)}${L.note?`<div class="notice" style="margin-bottom:14px">${I.check}<span>${L.note}</span></div>`:''}
-      <div class="jsec">${fld('l-email','Email',`<input type="email" id="l-email" value="${esc(L.email||'')}" placeholder="you@example.com" autocomplete="username">`)}</div>
-      <div class="jsec">${fld('l-pass','Password',`<input type="password" id="l-pass" autocomplete="current-password" placeholder="Your password">`)}
-        <p class="fine" style="margin:6px 0 0;font-size:14px"><button class="link" data-act="forgot-start">Forgot password?</button></p></div>
-      <div class="row"><button class="btn lg primary pill" data-act="login-submit" ${L.busy?'disabled':''}>${L.busy?'Logging in…':'Log in'}</button>${LINKEDIN_LOGIN?`<button class="btn lg li pill" data-act="login-li">${I.link}Log in with LinkedIn</button>`:''}</div>
-    </div>
-    <div class="jcard" style="margin-top:16px">
-      <h2 style="margin:0 0 6px;font-family:var(--f-display)">New here? Join the network of Israeli MBAs in the US</h2>
-      <p class="lead">Upload your LinkedIn profile PDF and we fill in your profile for you. An admin reviews every request, and we email you as soon as you’re approved.</p>
-      <div class="row"><button class="btn lg li pill" data-act="join-go" data-step="imported">${I.doc}Sign up with your LinkedIn PDF</button></div>
-      <p class="fine">The PDF is read in your browser. We use your name, email, headline, location, MBA and career history, and you can edit everything before you submit.</p>
-    </div>`;
+    :`<div class="land-copy">
+        <h1 class="land-h1">Every Israeli MBA<br>in the US,<br><em>one intro away.</em></h1>
+        <p class="land-sub">The private network of Israeli MBA students and alumni, from Boston to the Bay Area. Find people, ask for intros, and help the next Israeli who’s on the way.</p>
+        <div class="land-login">
+          ${errBox(L.err)}${L.note?`<div class="notice" style="margin-bottom:14px">${I.check}<span>${L.note}</span></div>`:''}
+          <div class="two">${fld('l-email','Email',`<input type="email" id="l-email" value="${esc(L.email||'')}" placeholder="you@example.com" autocomplete="username">`)}${fld('l-pass','Password',`<input type="password" id="l-pass" autocomplete="current-password" placeholder="Your password">`)}</div>
+          <div class="land-actions"><button class="btn lg primary pill" data-act="login-submit" ${L.busy?'disabled':''}>${L.busy?'Logging in…':'Log in'}</button>${LINKEDIN_LOGIN?`<button class="btn lg li pill" data-act="login-li">${I.link}Log in with LinkedIn</button>`:''}<button class="link" data-act="forgot-start">Forgot password?</button></div>
+        </div>
+        <div class="land-join"><span><b>New here?</b> Upload your LinkedIn PDF and we fill in your profile. An admin approves every member.</span>
+          <button class="btn lg pill land-cta" data-act="join-go" data-step="imported">${I.doc}Join with your LinkedIn PDF</button></div>
+      </div>
+      <div class="land-art" aria-hidden="true">${landingArt()}</div>`;
   }
   if(J.step==='forgot'){
     const F=J.forgot||(J.forgot={});
@@ -2318,6 +2422,7 @@ function viewJoin(){
       <div style="display:flex;justify-content:center;margin:6px 0 18px">${pcard(me(),{txt:me().schools[0].school+' · Class of '+me().schools[0].year,ico:'cap'})}</div>
       <div class="row" style="justify-content:center"><button class="btn lg primary pill" data-act="nav" data-view="home">${I.search}Find people</button><button class="btn lg ghost pill" data-act="nav" data-view="me">View my profile</button></div></div>`;
   }
+  if(J.step==='login'&&!(J.login&&J.login.confirm)) return `<main class="landing"><div class="wrap land-grid">${body}</div></main>`;
   return `<main><div class="wrap join">${head}${body}</div></main>`;
 }
 function joinReadReview(){
