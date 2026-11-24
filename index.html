@@ -4,7 +4,14 @@
 <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png?v=2" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
-<meta name="theme-color" content="#2E49C2">
+<meta name="theme-color" content="#EEF2FB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0C1020" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Israeli MBA">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650;12..96,750&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -644,7 +651,11 @@ body:has(.landing) .top{position:relative;background:transparent;border-bottom-c
 }
 @media (max-width:520px){
   .land-art{height:250px}
-  .lc{width:120px}.lc-il{width:140px;left:calc(50% - 70px)}.lc-eu{width:112px}.lc-bulb{width:116px}.lc-route{width:130px}
+  .land-art{height:280px}
+  .lc{width:118px}.lc-us{top:4px;left:3%}.lc-eu{top:10px;right:3%;width:112px}
+  .lc-il{top:104px;width:112px;left:calc(50% - 56px)}
+  .lc-bulb{bottom:0;left:2%;width:112px}.lc-route{bottom:0;right:2%;width:124px}
+  .lc-cap b{font-size:12px}
   .land-login .two{grid-template-columns:1fr}
 }
 .field.jphoto,.jphoto{display:flex;flex-direction:row;gap:16px;align-items:center;margin-bottom:18px;padding:14px;border:1px dashed color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:16px;background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
@@ -794,6 +805,68 @@ body:has(.landing) .top{position:relative;background:transparent;border-bottom-c
   .wm-2 i{display:none}
   .brand-mark{width:32px;height:32px}
 }
+
+/* ================= Phones: app-like experience =================
+   Only on real phones (touch screen, no mouse hover). A narrow desktop window keeps the website layout. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (hover:none) and (pointer:coarse){
+  html,body{overflow-x:clip}
+  body{-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+  button,a,label,select,input,textarea{touch-action:manipulation}
+  /* iPhone zooms the page into any text box under 16px. Keep them at 16px so the page never jumps. */
+  input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea,.search-input,.modal textarea{font-size:16px!important}
+}
+@media (max-width:720px) and (hover:none) and (pointer:coarse){
+  /* Top bar: logo + search only. Navigation moves to a tab bar at the bottom, like an app. */
+  .top{padding-top:0}
+  .top .wrap{flex-wrap:nowrap;height:58px;padding-block:0;gap:10px}
+  .top .nav{display:none}
+  :root{--top-h:58px}
+  .wm-2{display:none}
+  .bottom-nav{display:flex!important;position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:saturate(1.2) blur(18px);-webkit-backdrop-filter:saturate(1.2) blur(18px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+  .bottom-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;min-height:48px;font-size:11px;font-weight:650;color:var(--muted);position:relative;border-radius:12px}
+  .bottom-nav button.on{color:var(--accent-text)}
+  .bottom-nav button.on svg{transform:translateY(-1px)}
+  .bottom-nav svg{width:23px;height:23px;transition:transform .15s}
+  .bottom-nav .badge{position:absolute;top:2px;left:calc(50% + 6px)}
+  main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  body:has(.landing) main{padding-bottom:24px}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .fpanel{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+  /* Discover: tighter hero, the three "Find your next" cards side by side. */
+  .hero{padding-block:22px 6px}
+  .hero h1{font-size:28px;margin:6px 0 18px}
+  .goals{grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
+  .goal{flex-direction:column;align-items:flex-start;gap:8px;padding:12px!important;border-radius:16px}
+  .goal .ico{width:44px;height:44px;border-radius:13px}
+  .goal small{font-size:11px}
+  .goal b{font-size:16px!important}
+  .goal em{display:none}
+  /* Pop-up windows slide up from the bottom as sheets, sized to the screen. */
+  .scrim{place-items:end center;padding:0}
+  .modal,.modal.edit,.modal.guide{width:100%!important;max-width:100%;border-radius:22px 22px 0 0;max-height:92dvh;animation:sheet .24s cubic-bezier(.2,.8,.2,1)}
+  .modal{padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+  .modal.edit{padding-bottom:0}
+  .modal.edit .edit-f{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .modal::before{content:"";display:block;width:40px;height:5px;border-radius:3px;background:var(--line);margin:-12px auto 12px}
+  .modal.edit::before{margin:8px auto 0}
+  .kv{grid-template-columns:1fr auto}
+  .kv dt{grid-column:1/-1;margin-bottom:-4px}
+  .mail-open{grid-template-columns:1fr}
+  .mail-open .btn{height:50px}
+  /* Bigger touch targets and full-width actions. */
+  .btn{min-height:44px}
+  .btn.sm{min-height:38px}
+  .pactions .btn{flex:1}
+  .feed-filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-20px;padding-inline:20px}
+  .feed-filters::-webkit-scrollbar{display:none}
+  .feed-filters>*{flex:none}
+  .rail-h .arrow{display:none}
+  .rail-h .link{white-space:nowrap}
+  .rail-h p{font-size:13px}
+}
+@keyframes sheet{from{transform:translateY(100%)}}
+@media (prefers-reduced-motion:reduce){.modal{animation:none!important}}
 </style>
 
 <div id="app"></div>
