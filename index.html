@@ -529,7 +529,17 @@ button.how .chev svg{width:16px;height:16px}
 .steps li.on::before,.steps li.done::before{background:var(--accent)}
 .steps li.done{color:var(--muted)}
 /* ---------- landing (login) page ---------- */
-.landing{overflow-x:clip}
+.landing{overflow-x:clip;position:relative;isolation:isolate}
+/* Soft blue-and-white wash behind the landing page, fixed so it stays smooth while scrolling. */
+.landing::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(60% 55% at 85% 20%, var(--land-glow1) 0%, transparent 70%),
+  radial-gradient(55% 60% at 10% 90%, var(--land-glow2) 0%, transparent 70%),
+  radial-gradient(40% 40% at 45% 45%, var(--land-glow3) 0%, transparent 75%),
+  linear-gradient(160deg, var(--land-top) 0%, var(--land-bottom) 100%)}
+:root{--land-cta-ink:#fff;--land-top:#FBFCFF;--land-bottom:#EEF2FB;--land-glow1:#DCE5FF;--land-glow2:#E8E4FA;--land-glow3:rgba(255,255,255,.9)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--land-cta-ink:#0C1A12;--land-top:#111523;--land-bottom:#0C1020;--land-glow1:rgba(64,92,200,.30);--land-glow2:rgba(110,80,190,.20);--land-glow3:rgba(255,255,255,.03)}}
+:root[data-theme="dark"]{--land-cta-ink:#0C1A12;--land-top:#111523;--land-bottom:#0C1020;--land-glow1:rgba(64,92,200,.30);--land-glow2:rgba(110,80,190,.20);--land-glow3:rgba(255,255,255,.03)}
+body:has(.landing) .top{background:transparent;border-bottom-color:transparent}
 .land-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px;align-items:center;min-height:calc(100vh - 64px);padding-block:48px 64px}
 .land-h1{font-family:var(--f-display);font-weight:750;font-size:clamp(40px,5.4vw,68px);line-height:1.02;letter-spacing:-.025em;margin:0 0 22px}
 .land-h1 em{font-style:normal;color:var(--accent);background:linear-gradient(180deg,transparent 72%,color-mix(in srgb,var(--accent) 16%,transparent) 72%)}
@@ -541,7 +551,7 @@ button.how .chev svg{width:16px;height:16px}
 .land-join{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:22px;max-width:560px;color:var(--muted);font-size:14.5px}
 .land-join span{flex:1 1 240px}
 .land-join b{color:var(--ink)}
-.land-cta{background:var(--ok);color:#fff;border-color:transparent}
+.land-cta{background:var(--ok);color:var(--land-cta-ink,#fff);border-color:transparent}
 .land-cta:hover{filter:brightness(1.06)}
 .land-art{position:relative;height:640px}
 .lc-stage{position:absolute;inset:0}
