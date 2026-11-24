@@ -634,6 +634,15 @@ body:has(.landing) .top{position:relative;background:transparent;border-bottom-c
   .lc{width:120px}.lc-il{width:140px;left:calc(50% - 70px)}.lc-eu{width:112px}.lc-bulb{width:116px}.lc-route{width:130px}
   .land-login .two{grid-template-columns:1fr}
 }
+.field.jphoto,.jphoto{display:flex;flex-direction:row;gap:16px;align-items:center;margin-bottom:18px;padding:14px;border:1px dashed color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:16px;background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
+.jphoto.bad{border-color:var(--warm);border-style:solid}
+.jphoto-av{flex:none;width:88px;height:88px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:var(--surface);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 25%,var(--line))}
+.jphoto-av img{width:100%;height:100%;object-fit:cover}
+.jphoto-empty{color:var(--accent-text);opacity:.7}
+.jphoto-empty svg{width:30px;height:30px}
+.jphoto-t{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.jphoto-t small{color:var(--muted);font-size:13px;line-height:1.35}
+.jphoto-t .err{margin:0}
 .jcard{background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:28px}
 .jcard h1{font-family:var(--f-display);font-weight:750;font-size:clamp(24px,4vw,30px);letter-spacing:-.025em;margin:0 0 8px;text-wrap:balance}
 .jcard .lead{color:var(--muted);font-size:15.5px;margin:0 0 20px;max-width:60ch}
@@ -2226,6 +2235,19 @@ function openAddSection(){
       ${row('photo',I.camera,'Add profile photo','Help members recognize you')}
     </div></div></div></div>`;
 }
+/* Sign-up photo: square crop, 360px, kept in the draft until the account exists. */
+const joinPhotoPrev = src => src ? `<img src="${src}" alt="Your profile photo">` : `<span class="jphoto-empty">${I.camera}</span>`;
+function readJoinPhoto(file){
+  if(!file||!file.type.startsWith('image/')){ toast('Choose an image file (JPG or PNG)'); return; }
+  const fr=new FileReader(); fr.onload=()=>{ const img=new Image(); img.onload=()=>{
+    const c=document.createElement('canvas'), n=360; c.width=c.height=n; const k=Math.min(img.width,img.height);
+    c.getContext('2d').drawImage(img,(img.width-k)/2,(img.height-k)/2,k,k,0,0,n,n);
+    const d=S.join.draft; d.photo=c.toDataURL('image/jpeg',.85);
+    document.getElementById('j-photo-prev').innerHTML=joinPhotoPrev(d.photo);
+    const b=document.querySelector('#fw-j-photo .upload'); if(b) b.firstChild&&b.childNodes.forEach(nd=>{ if(nd.nodeType===3) nd.textContent='Change photo'; });
+    fieldErr('j-photo','');
+  }; img.src=fr.result; }; fr.readAsDataURL(file);
+}
 function readPhoto(file){
   if(!file||!file.type.startsWith('image/')){ toast('Choose an image file (JPG or PNG)'); return; }
   const fr=new FileReader(); fr.onload=()=>{ const img=new Image(); img.onload=()=>{
@@ -2426,7 +2448,7 @@ function joinStart(mode){
   const m=me();
   S.join={mode, step: mode==='sync'?'connecting':'login', login:{}, pdf:'none', pdfErr:'', found:null,
     draft: mode==='sync'
-      ? {first:m.first,last:m.last,role:m.role,email:m.email,location:m.location,industry:m.industry,phone:m.phone,shareEmail:m.shareEmail!==false,pref:m.pref,about:m.about,schools:m.schools.map(x=>({...x})),career:m.career.map(c=>({...c,src:'you'})),src:{}}
+      ? {first:m.first,last:m.last,role:m.role,email:m.email,location:m.location,industry:m.industry,phone:m.phone,shareEmail:m.shareEmail!==false,pref:m.pref,about:m.about,photo:m.photo||null,schools:m.schools.map(x=>({...x})),career:m.career.map(c=>({...c,src:'you'})),src:{}}
       : {first:'',last:'',role:'',email:'',location:'Boston',industry:Object.keys(INDUSTRIES)[0],phone:'',pref:'whatsapp',about:'',schools:[],career:[],src:{}}};
   go('join');
   if(mode==='sync') joinConnect();
@@ -2584,6 +2606,9 @@ function viewJoin(){
     const e=d.schools[0]||{school:'',program:'MBA',year:NOW_YEAR+1,start:NOW_YEAR-1};
     body=`<div class="jcard">
       <h1>Review your profile</h1><p class="lead">This is what members will see. Edit anything that’s off.</p>
+      <div class="jsec field jphoto" id="fw-j-photo"><span class="jphoto-av" id="j-photo-prev">${joinPhotoPrev(d.photo)}</span>
+        <span class="jphoto-t"><b>Profile photo*</b><small>Every member has a clear photo of their face, so people recognize each other. JPG or PNG.</small>
+        <span class="btn sm ghost pill upload">${I.camera}${d.photo?'Change photo':'Upload photo'}<input type="file" id="j-photo" accept="image/*" aria-label="Upload your profile photo"></span><p class="err" hidden></p></span></div>
       <div class="two">${fld('j-first','First name*',`<input type="text" id="j-first" value="${esc(d.first)}" maxlength="${LIMITS.name}">`)}${fld('j-last','Last name*',`<input type="text" id="j-last" value="${esc(d.last)}" maxlength="${LIMITS.name}">`)}</div>
       <div class="jsec">${fld('j-email','Email*',`<input type="email" id="j-email" value="${esc(d.email||'')}" placeholder="you@example.com">`,'<p class="hint"><span>We send your registration email here once an admin approves you.</span></p>')}</div>
       <div class="jsec">${fld('j-head','Headline*',`<input type="text" id="j-head" value="${esc(d.role)}" maxlength="${LIMITS.headline}" placeholder="Ex: MBA Candidate · ex-PM at Monday.com">`)}</div>
@@ -2640,6 +2665,7 @@ function joinReadReview(){
   const need=(id,msg)=>{ const bad=!val(id); fieldErr(id,bad?msg:''); if(bad) ok=false; };
   need('j-first','Enter your first name'); const em=val('j-email'); if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ fieldErr('j-email','Enter a valid email address'); ok=false; } else fieldErr('j-email',''); need('j-last','Enter your last name'); need('j-head','Enter a headline'); need('j-school','Select your school');
   const c=readContactFields('j'); if(!c) ok=false;
+  if(!d.photo){ fieldErr('j-photo','Add a photo of your face. Every member needs one.'); ok=false; } else fieldErr('j-photo','');
   if(!ok) return false;
   const y=+val('j-year'), sch=val('j-school'), prev=d.schools[0]||{};
   if(document.getElementById('j-liurl')) J.liurl=val('j-liurl').replace(/^https?:\/\/(www\.)?/,'');
@@ -2696,7 +2722,10 @@ async function joinVerifyCode(){
 async function joinSave(){
   const J=S.join;
   try{ const row=await API.submitJoin(joinPayload()); J.reqId=row.id; J.reqSent=true; J.codeSent=false;
-    const d=J.draft; await API.saveContact({phone:d.phone||'',shareEmail:d.shareEmail!==false,pref:d.pref}).catch(e=>console.error('Contact save failed:', e&&e.detail||e)); }
+    const d=J.draft; await API.saveContact({phone:d.phone||'',shareEmail:d.shareEmail!==false,pref:d.pref}).catch(e=>console.error('Contact save failed:', e&&e.detail||e));
+    if(d.photo&&d.photo.startsWith('data:')){
+      try{ const path=await API.uploadPhoto('avatars',d.photo); await API.saveProfile({photoPath:path}); J.photoPath=path; }
+      catch(e){ console.error('Photo upload failed:', e&&e.detail||e); toast('Your request was sent, but we couldn’t save your photo. Add it from your profile.', null, 12000); } } }
   catch(err){ J.sendErr=joinErrText(err); }
   J.sending=false; render(); window.scrollTo(0,0);
 }
@@ -2935,9 +2964,9 @@ function liveReq(r){
 const BLANK_DETAILS = () => ({canRefer:false,unit:'',ilUni:'',hometown:'',topics:[]});
 function joinApply(schoolStatus){
   const d=S.join.draft, m=me();
-  Object.assign(m,{first:d.first,last:d.last,role:d.role,email:d.email,location:d.location,industry:d.industry,phone:d.phone,shareEmail:d.shareEmail!==false,pref:d.pref,about:d.about,
+  Object.assign(m,{first:d.first,last:d.last,role:d.role,email:d.email,location:d.location,industry:d.industry,phone:d.phone,shareEmail:d.shareEmail!==false,pref:d.pref,about:d.about,photo:d.photo||null,
     schools:d.schools.map(s=>({...s})), career:d.career.map(({src,...c})=>c)});
-  if(S.join.mode!=='sync') Object.assign(m,{photo:null,...BLANK_DETAILS()});
+  if(S.join.mode!=='sync') Object.assign(m,{...BLANK_DETAILS()});
   m.verify={school:schoolStatus||m.verify.school, identity:false, workplace:false};
   recompute(m); saveMe();
 }
@@ -3005,8 +3034,8 @@ document.addEventListener('click',e=>{
     case 'forgot-confirm': forgotConfirm(); break;
     case 'join-go': S.join.step=t.dataset.step; render(); window.scrollTo(0,0); break;
     case 'join-rm': S.join.draft.career.splice(+t.dataset.idx,1); render(); break;
-    case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); liveSaveProfile(); liveSaveContact(); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else if(LIVE){ joinCheckEmail(); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
-    case 'join-finish': joinApply(t.dataset.status); me().reqId=S.join.reqId||null; if(LIVE) me().uid=S.join.reqId||null; saveMe(); S.firstRun=false; S.join.step='done'; render(); window.scrollTo(0,0); break;
+    case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); liveSaveProfile(); liveSaveContact(); if(LIVE&&me().photo&&me().photo.startsWith('data:')) livePhoto(me()); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else if(LIVE){ joinCheckEmail(); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
+    case 'join-finish': joinApply(t.dataset.status); me().reqId=S.join.reqId||null; if(LIVE){ me().uid=S.join.reqId||null; if(S.join.photoPath) me().photoPath=S.join.photoPath; } saveMe(); S.firstRun=false; S.join.step='done'; render(); window.scrollTo(0,0); break;
     case 'join-demo-approve': { const m=me(); m.verify.school='admin'; saveMe(); render(); openRegEmail(m.first,m.email,'An admin approved your request. In the live app this lands in your inbox.'); break; }
     case 'join-taken-login': { const email=S.join.draft.email; closeModal(); S.join.login={email}; S.join.step='login'; render(); window.scrollTo(0,0); break; }
     case 'join-taken-change': closeModal(); S.join.step='review'; render(); fieldErr('j-email','This email already has an account. Use a different one.'); document.getElementById('j-email')?.focus(); break;
@@ -3058,6 +3087,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('input',e=>{ if(e.target.id==='star-q'){ S.starQ=e.target.value; document.getElementById('star-list').innerHTML=starRows(); return; } const c=e.target.dataset.count; if(c){ const max=e.target.maxLength; document.getElementById(c).textContent=`${e.target.value.length}/${max.toLocaleString()}`; } });
 document.addEventListener('change',e=>{
   if(e.target.id==='photo-file'){ readPhoto(e.target.files[0]); return; }
+  if(e.target.id==='j-photo'){ readJoinPhoto(e.target.files[0]); return; }
   if(e.target.id==='feed-photo'){ readFeedPhoto(e.target.files[0]); return; }
   if(e.target.id==='li-pdf'){ if(e.target.files[0]) joinPdf(e.target.files[0]); return; }
   if(e.target.id==='e-current'){ const end=document.getElementById('e-end'); end.disabled=e.target.checked; if(e.target.checked){ end.insertAdjacentHTML('afterbegin','<option>Present</option>'); end.value='Present'; } else { [...end.options].filter(o=>o.text==='Present').forEach(o=>o.remove()); end.value=String(NOW_YEAR); } return; }
