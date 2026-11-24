@@ -2276,26 +2276,28 @@ function bulbArt(){
     <path d="M139 78c3-12 12-20 23-22" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".75"/></svg>`;
 }
 function routeArt(){
-  // A stylised globe with a route from Tel Aviv to Boston, New York and San Francisco.
+  // A stylised globe with routes from Tel Aviv to US and European MBA cities.
   return `<svg viewBox="0 0 330 220"><defs><linearGradient id="rbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EEF2FF"/><stop offset="1" stop-color="#DCE4FB"/></linearGradient></defs>
     <rect width="330" height="220" fill="url(#rbg)"/>
     <g fill="none" stroke="#B9C5EE" stroke-width="1.2"><ellipse cx="165" cy="250" rx="230" ry="150"/><ellipse cx="165" cy="250" rx="160" ry="150"/><ellipse cx="165" cy="250" rx="80" ry="150"/><path d="M-70 170h470M-70 120h470M-70 210h470"/></g>
     <path d="M272 120 C 220 40, 120 40, 78 96" fill="none" stroke="#0038B8" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>
     <path d="M272 120 C 210 70, 110 80, 58 118" fill="none" stroke="#0038B8" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round" opacity=".6"/>
     <path d="M272 120 C 200 20, 60 30, 30 130" fill="none" stroke="#0038B8" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round" opacity=".4"/>
-    ${[[78,96,'BOS'],[58,118,'NYC'],[30,130,'SF']].map(([x,y,t])=>`<circle cx="${x}" cy="${y}" r="6" fill="#fff" stroke="#0038B8" stroke-width="3"/><text x="${x}" y="${y-12}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="500" fill="#1B2A6B">${t}</text>`).join('')}
+    <path d="M272 120 C 250 80, 220 70, 196 78" fill="none" stroke="#0038B8" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>
+    <path d="M272 120 C 255 100, 235 96, 214 104" fill="none" stroke="#0038B8" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round" opacity=".6"/>
+    ${[[78,96,'BOS'],[58,118,'NYC'],[30,130,'SF'],[196,78,'LON'],[214,104,'PAR']].map(([x,y,t])=>`<circle cx="${x}" cy="${y}" r="6" fill="#fff" stroke="#0038B8" stroke-width="3"/><text x="${x}" y="${y-12}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="500" fill="#1B2A6B">${t}</text>`).join('')}
     <circle cx="272" cy="120" r="9" fill="#0038B8"/><circle cx="272" cy="120" r="16" fill="none" stroke="#0038B8" stroke-opacity=".3" stroke-width="6"/><text x="272" y="148" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="500" fill="#1B2A6B">TLV</text></svg>`;
 }
 function landingArt(){
   const card=(cls,art,title,sub)=>`<figure class="lc ${cls}"><div class="lc-img">${art}</div><figcaption><b>${title}</b><small>${sub}</small></figcaption></figure>`;
   return `<div class="lc-stage">
-    ${card('lc-us',flagUS(),'United States','Boston · New York · Bay Area')}
+    ${card('lc-us',flagUS(),'United States','HBS · Stanford · Wharton · MIT')}
     ${card('lc-il',flagIL(),'Israel','Where we all started')}
-    ${card('lc-eu',flagEU(),'Europe','INSEAD · LBS · IESE alumni')}
-    ${card('lc-bulb',bulbArt(),'Ideas & intros','Ask, share, refer')}
-    ${card('lc-route',routeArt(),'Tel Aviv → the US','One network, every campus')}
+    ${card('lc-eu',flagEU(),'Europe','INSEAD · LBS · IESE')}
+    ${card('lc-bulb',bulbArt(),'Alumni network','Intros, referrals, advice')}
+    ${card('lc-route',routeArt(),'Alumni & students','Every class, every campus')}
     <div class="lc-chip lc-chip1"><span class="mini-il">${flagIL()}</span>Intro accepted</div>
-    <div class="lc-chip lc-chip2"><span class="dot-ok"></span>Admin-approved members</div>
+    <div class="lc-chip lc-chip2"><span class="dot-ok"></span>Alumni &amp; students</div>
   </div>`;
 }
 function stepIdx(st){ return st==='connecting'||st==='imported'?0: st==='review'?1: st==='verify'?2:3; }
@@ -2315,14 +2317,14 @@ function viewJoin(){
       <div class="row"><button class="btn lg primary pill" data-act="login-confirm" ${L.busy?'disabled':''}>${L.busy?'Checking…':'Confirm and log in'}</button><button class="link" data-act="login-back">Back</button></div>
     </div>`
     :`<div class="land-copy">
-        <h1 class="land-h1">Every Israeli MBA<br>in the US,<br><em>one intro away.</em></h1>
-        <p class="land-sub">The private network of Israeli MBA students and alumni, from Boston to the Bay Area. Find people, ask for intros, and help the next Israeli who’s on the way.</p>
+        <h1 class="land-h1">Israeli MBAs,<br>alumni &amp; students,<br><em>one network.</em></h1>
+        <p class="land-sub">The private networking community for Israelis who did, or are doing, an MBA in the US or Europe. Connect with alumni at the companies and cities you care about, trade intros and referrals, and give back to the next class.</p>
         <div class="land-login">
           ${errBox(L.err)}${L.note?`<div class="notice" style="margin-bottom:14px">${I.check}<span>${L.note}</span></div>`:''}
           <div class="two">${fld('l-email','Email',`<input type="email" id="l-email" value="${esc(L.email||'')}" placeholder="you@example.com" autocomplete="username">`)}${fld('l-pass','Password',`<input type="password" id="l-pass" autocomplete="current-password" placeholder="Your password">`)}</div>
           <div class="land-actions"><button class="btn lg primary pill" data-act="login-submit" ${L.busy?'disabled':''}>${L.busy?'Logging in…':'Log in'}</button>${LINKEDIN_LOGIN?`<button class="btn lg li pill" data-act="login-li">${I.link}Log in with LinkedIn</button>`:''}<button class="link" data-act="forgot-start">Forgot password?</button></div>
         </div>
-        <div class="land-join"><span><b>New here?</b> Upload your LinkedIn PDF and we fill in your profile. An admin approves every member.</span>
+        <div class="land-join"><span><b>Alum or current student?</b> Upload your LinkedIn PDF and we fill in your profile. An admin approves every member.</span>
           <button class="btn lg pill land-cta" data-act="join-go" data-step="imported">${I.doc}Join with your LinkedIn PDF</button></div>
       </div>
       <div class="land-art" aria-hidden="true">${landingArt()}</div>`;
