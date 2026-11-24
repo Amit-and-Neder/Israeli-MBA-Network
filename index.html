@@ -377,6 +377,14 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 /* modal + toast */
 .scrim{position:fixed;inset:0;background:var(--scrim);z-index:60;display:grid;place-items:center;padding:16px;animation:fade .15s}
 .modal{width:min(480px,100%);background:var(--surface);border-radius:22px;box-shadow:var(--shadow-lg);padding:24px;max-height:90vh;overflow:auto;animation:pop .18s ease-out}
+.modal.guide{width:min(980px,100%)}
+.guide-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.modal.guide img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line)}
+.guide-steps{margin:14px 0 0;padding-left:20px;font-size:14px;line-height:1.5;color:var(--ink)}
+.guide-steps li{margin:4px 0}
+@media (min-width:720px){.guide-steps{display:none}}
+.guide-link{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:0;color:var(--accent-text);font-weight:600;font-size:13.5px;text-align:left;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.guide-link:hover{text-decoration-thickness:2px}
 .modal h3{font-family:var(--f-display);font-weight:650;font-size:21px;margin:0 0 4px;letter-spacing:-.015em}
 .modal .sub{color:var(--muted);font-size:14px;margin:0 0 16px}
 .modal textarea{width:100%;min-height:118px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface-2);resize:vertical;font-size:14px;line-height:1.5}
@@ -1936,6 +1944,15 @@ function bindSearch(box){
 }
 
 /* ---------- modals, toasts, contact ---------- */
+/* LinkedIn "Save to PDF" how-to, shown from the sign-up upload step. The image lives in assets/. */
+function openGuide(){
+  document.getElementById('modal-root').innerHTML=`<div class="scrim" data-act="scrim"><div class="modal guide" role="dialog" aria-modal="true" aria-label="How to save your LinkedIn profile as a PDF">
+    <div class="guide-h"><h3>Save your LinkedIn profile as a PDF</h3><button class="ibtn" data-act="close" aria-label="Close">${I.x}</button></div>
+    <img src="assets/linkedin-pdf-guide.jpg" alt="On LinkedIn: 1. open your profile (Me, then View profile). 2. Click Resources, the last button under your name and headline. 3. Choose Save to PDF. The file lands in your Downloads folder. Works on desktop; in the mobile app switch to the desktop site.">
+    <ol class="guide-steps"><li><b>Open your profile.</b> On LinkedIn, click <b>Me</b> in the top bar, then <b>View profile</b>.</li><li><b>Click “Resources”.</b> It’s the last button under your name and headline.</li><li><b>Choose “Save to PDF”.</b> The file goes to your Downloads folder. Then come back and upload it.</li></ol>
+    <p class="muted" style="margin:6px 0 0;font-size:13px">Works on a computer. On a phone, open LinkedIn in the browser and switch to the desktop site.</p>
+    <div class="row"><button class="btn primary pill" data-act="close">Got it</button></div></div></div>`;
+}
 function openModal(html){ document.getElementById('modal-root').innerHTML=`<div class="scrim" data-act="scrim"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`; setTimeout(()=>document.querySelector('.modal textarea, .modal .btn.primary')?.focus(),30); }
 function closeModal(){ document.getElementById('modal-root').innerHTML=''; }
 let toastTimer;
@@ -2480,7 +2497,7 @@ async function joinPdf(file){
     d.src={name:'pdf',edu:mba?'pdf':'',role:'pdf'};
     J.found={...r,mba:mba?matchSchool(mba.school):null,locMapped:loc};
     J.pdf='done';
-  }catch(err){ J.pdf='none'; J.pdfErr='We couldn’t read that file. Use the PDF from your LinkedIn profile: More → Save to PDF.'; }
+  }catch(err){ J.pdf='none'; J.pdfErr='We couldn’t read that file. Use the PDF from your LinkedIn profile: Resources → Save to PDF.'; }
   render();
 }
 /* ---------- landing illustration (all inline SVG, no image files) ---------- */
@@ -2600,7 +2617,8 @@ function viewJoin(){
         ${row('About',f.about?'Imported from your summary':'',1)}
       </ul>`:`<div class="drop" style="margin-top:0">
         <span class="ico">${I.doc}</span>
-        <span class="t"><b>Add your LinkedIn profile PDF</b><small>On your LinkedIn profile, click <b>More → Save to PDF</b>. Then upload the file here. It’s read in your browser and never uploaded.</small>
+        <span class="t"><b>Add your LinkedIn profile PDF</b><small>On your LinkedIn profile, click <b>Resources → Save to PDF</b>. Then upload the file here. It’s read in your browser and never uploaded.</small>
+          <button class="guide-link" data-act="li-guide">${I.spark.replace('<svg','<svg width="15" height="15"')}How do I download my LinkedIn PDF? See the 3-step guide</button>
           ${J.pdf==='reading'?'<div class="progress"><i></i></div><small>Reading your profile…</small>':''}
           ${J.pdfErr?`<small style="color:#C2362F;font-weight:600;display:block;margin-top:6px">${esc(J.pdfErr)}</small>`:''}</span>
         ${J.pdf==='none'?`<span class="btn primary pill upload">${I.doc}Upload PDF<input type="file" id="li-pdf" accept="application/pdf,.pdf" aria-label="Upload LinkedIn profile PDF"></span>`:''}
@@ -2986,6 +3004,7 @@ document.addEventListener('click',e=>{
   switch(t.dataset.act){
     case 'scrim': if(e.target===t) closeModal(); break;
     case 'close': closeModal(); break;
+    case 'li-guide': openGuide(); break;
     case 'nav': S.browse=null; go(t.dataset.view); break;
     case 'back': back(); break;
     case 'profile': go('profile',{id}); break;
