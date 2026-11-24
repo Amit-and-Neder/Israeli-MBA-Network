@@ -1704,10 +1704,10 @@ function bindSearch(box){
 function openModal(html){ document.getElementById('modal-root').innerHTML=`<div class="scrim" data-act="scrim"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`; setTimeout(()=>document.querySelector('.modal textarea, .modal .btn.primary')?.focus(),30); }
 function closeModal(){ document.getElementById('modal-root').innerHTML=''; }
 let toastTimer;
-function toast(msg,action){
+function toast(msg,action,ms){
   const root=document.getElementById('toast-root');
   root.innerHTML=`<div class="toast" role="status"><span>${msg}</span>${action?`<button data-act="${action.act}" ${action.id!=null?`data-id="${action.id}"`:''} ${action.co?`data-co="${esc(action.co)}"`:''}>${action.label}</button>`:''}</div>`;
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>root.innerHTML='',action?6500:3200);
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>root.innerHTML='',ms||(action?6500:3200));
 }
 function introText(p){
   const m=me(); const ms=m.schools[0]; const s=sharedSchool(p); const c=sharedPrev(p);
@@ -1802,6 +1802,15 @@ const STORE_KEY='imn-my-profile-v2';
 const ME_FIELDS=['first','last','role','location','industry','schools','career','email','phone','pref','photo','about','verify','reqId','canRefer','unit','ilUni','hometown','topics','uid','photoPath','linkedin'];
 const LOC_OPTIONS=['Boston','New York','SF Bay Area','Seattle','Los Angeles','Chicago','Washington, DC','Austin','Miami'];
 const PROGRAMS=['MBA','EMBA','Sloan Fellows MBA','Part-time MBA','MBA/MS'];
+/* Phone numbers pasted from Contacts or WhatsApp often carry hidden direction marks, non-breaking spaces
+   or long dashes. The server only accepts digits, spaces, + ( ) . and -, so clean the number before checking it. */
+const PHONE_RE=/^\+?[0-9 ().-]{9,25}$/;
+function cleanPhone(v){
+  let t=String(v||'').normalize('NFKC').replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g,'')
+    .replace(/[\u2010-\u2015\u2212]/g,'-').replace(/\s+/g,' ').replace(/[^0-9 +().-]/g,'').trim();
+  return (t.startsWith('+')?'+':'')+t.replace(/\+/g,'').trim();
+}
+const phoneOk = v => !v || (PHONE_RE.test(v) && v.replace(/\D/g,'').length>=9);
 const ySpan = y=>{const m=String(y).split('–'),st=+m[0],en=m[1]?(m[1]==='Present'?null:+m[1]):st; return [st,en]};
 const fmtYears = (st,en)=> en==null?`${st}–Present`: st===en?`${st}`:`${st}–${en}`;
 function recompute(p){
@@ -1909,7 +1918,7 @@ function saveEdit(kind,idx){
     Object.assign(p,{first:val('e-first'),last:val('e-last'),role:val('e-head'),location:val('e-loc'),industry:val('e-ind')}); }
   if(kind==='contact'){
     const em=val('e-email'); const emOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em); fieldErr('e-email',!em?'Enter your email':!emOk?'Enter a valid email address':''); if(!emOk) ok=false;
-    const ph=val('e-phone'); const digits=ph.replace(/\D/g,''); const phOk=!ph||digits.length>=9; fieldErr('e-phone',phOk?'':'Enter a full number with country code'); if(!phOk) ok=false;
+    const ph=cleanPhone(val('e-phone')); const phOk=phoneOk(ph); fieldErr('e-phone',phOk?'':'Enter a full number with country code, using digits only (e.g. +972 54 123 4567)'); if(!phOk) ok=false;
     const pref=document.querySelector('input[name=e-pref]:checked')?.value;
     if(pref==='whatsapp'&&!ph){ fieldErr('e-pref','Add a WhatsApp number, or choose email'); ok=false; } else fieldErr('e-pref','');
     if(!ok) return; Object.assign(p,{email:em,phone:ph,pref}); }
@@ -2315,7 +2324,7 @@ function joinReadReview(){
   const J=S.join, d=J.draft; let ok=true;
   const need=(id,msg)=>{ const bad=!val(id); fieldErr(id,bad?msg:''); if(bad) ok=false; };
   need('j-first','Enter your first name'); const em=val('j-email'); if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ fieldErr('j-email','Enter a valid email address'); ok=false; } else fieldErr('j-email',''); need('j-last','Enter your last name'); need('j-head','Enter a headline'); need('j-school','Select your school');
-  const ph=val('j-phone'); if(ph && ph.replace(/\D/g,'').length<9){ fieldErr('j-phone','Enter a full number with country code'); ok=false; } else fieldErr('j-phone','');
+  const ph=cleanPhone(val('j-phone')); if(!phoneOk(ph)){ fieldErr('j-phone','Enter a full number with country code, using digits only (e.g. +972 54 123 4567)'); ok=false; } else fieldErr('j-phone','');
   if(!ok) return false;
   const y=+val('j-year'), sch=val('j-school'), prev=d.schools[0]||{};
   if(document.getElementById('j-liurl')) J.liurl=val('j-liurl').replace(/^https?:\/\/(www\.)?/,'');
@@ -2571,7 +2580,14 @@ function profilePayload(m){
 /* Saves your profile after an edit. The screen already shows the change; this only warns if saving failed. */
 function liveSaveProfile(){
   if(!LIVE||!me().uid) return;
-  API.saveProfile(profilePayload(me())).catch(()=>toast('We couldn’t save that change. Check your connection and try again.'));
+  API.saveProfile(profilePayload(me())).catch(e=>{
+    console.error('Profile save failed:', e&&e.detail||e);
+    const why = e&&e.code==='offline'?'You’re offline. Check your connection and try again.'
+      : e&&(e.code==='not-logged-in'||/jwt|token/i.test(e.detail||''))?'Your login expired. Log out and log in again, then redo the change.'
+      : e&&e.code==='invalid'?'One of the values isn’t in a format we accept. Check your phone number and try again.'
+      : 'Try again in a moment. If it keeps happening, tell an admin: '+esc(String(e&&e.detail||e&&e.message||'unknown error').slice(0,140));
+    toast('We couldn’t save that change. '+why, null, 12000);
+  });
 }
 const liveErr=e=>e&&e.code==='offline'?'You’re offline. Check your connection and try again.':'Something went wrong. Try again.';
 /* Admins: real pending requests replace the sample ones. */
