@@ -74,7 +74,7 @@ async function sendWelcome(admin: any, memberId: string) {
   const html = `
     <div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#161A26;max-width:560px">
       <h2 style="margin:0 0 12px">Welcome to ${NETWORK}, ${esc(m.first_name)}!</h2>
-      <p>Your request to join has been approved. You're now an official member of ${NETWORK}, the network of Israeli MBA students and alumni in the US.</p>
+      <p>Your request to join has been approved. You're now an official member of ${NETWORK}, the network of Israeli MBA alumni and students from programs in the US and Europe.</p>
       <p style="margin-bottom:4px"><b>What you can do now:</b></p>
       <ul style="margin-top:0">
         <li>Search for Israeli MBAs by school, company or industry</li>

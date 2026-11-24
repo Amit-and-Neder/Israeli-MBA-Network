@@ -757,13 +757,34 @@ const markSVG='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" strok
 /* ---------- reference data ---------- */
 const NOW_YEAR = 2026;
 const SCHOOLS = {
-  'MIT Sloan':{color:'#A31F34',full:'MIT Sloan School of Management',tag:'Sloan',domain:'sloan.mit.edu',aliases:['mit sloan','sloan','mit']},
-  'Harvard Business School':{color:'#6B1F3A',full:'Harvard Business School',tag:'HBS',domain:'alumni.hbs.edu',aliases:['harvard business school','hbs','harvard']},
-  'Stanford GSB':{color:'#1F6A57',full:'Stanford Graduate School of Business',tag:'GSB',domain:'alumni.gsb.stanford.edu',aliases:['stanford gsb','stanford','gsb']},
-  'Wharton':{color:'#1F3B78',full:'The Wharton School',tag:'Wharton',domain:'wharton.upenn.edu',aliases:['wharton','upenn','penn']},
-  'Columbia Business School':{color:'#2E77A8',full:'Columbia Business School',tag:'CBS',domain:'gsb.columbia.edu',aliases:['columbia business school','columbia','cbs']},
-  'Kellogg':{color:'#5A3A8E',full:'Kellogg School of Management',tag:'Kellogg',domain:'kellogg.northwestern.edu',aliases:['kellogg','northwestern']},
+  'MIT Sloan':{region:'US',color:'#A31F34',full:'MIT Sloan School of Management',tag:'Sloan',domain:'sloan.mit.edu',aliases:['mit sloan','sloan','mit','massachusetts institute of technology']},
+  'Harvard Business School':{region:'US',color:'#6B1F3A',full:'Harvard Business School',tag:'HBS',domain:'alumni.hbs.edu',aliases:['harvard business school','hbs','harvard']},
+  'Stanford GSB':{region:'US',color:'#1F6A57',full:'Stanford Graduate School of Business',tag:'GSB',domain:'alumni.gsb.stanford.edu',aliases:['stanford gsb','stanford','gsb']},
+  'Wharton':{region:'US',color:'#1F3B78',full:'The Wharton School',tag:'Wharton',domain:'wharton.upenn.edu',aliases:['wharton','upenn','penn']},
+  'Columbia Business School':{region:'US',color:'#2E77A8',full:'Columbia Business School',tag:'CBS',domain:'gsb.columbia.edu',aliases:['columbia business school','columbia','cbs']},
+  'Kellogg':{region:'US',color:'#5A3A8E',full:'Kellogg School of Management',tag:'Kellogg',domain:'kellogg.northwestern.edu',aliases:['kellogg','northwestern']},
+  'Chicago Booth':{region:'US',color:'#800000',full:'University of Chicago Booth School of Business',tag:'Booth',domain:'chicagobooth.edu',aliases:['chicago booth','booth','university of chicago']},
+  'Yale SOM':{region:'US',color:'#00356B',full:'Yale School of Management',tag:'Yale',domain:'yale.edu',aliases:['yale som','yale']},
+  'Berkeley Haas':{region:'US',color:'#003262',full:'Berkeley Haas School of Business',tag:'Haas',domain:'berkeley.edu',aliases:['berkeley haas','haas','berkeley']},
+  'Tuck':{region:'US',color:'#00693E',full:'Tuck School of Business at Dartmouth',tag:'Tuck',domain:'tuck.dartmouth.edu',aliases:['tuck','dartmouth']},
+  'NYU Stern':{region:'US',color:'#57068C',full:'NYU Stern School of Business',tag:'Stern',domain:'stern.nyu.edu',aliases:['nyu stern','stern','new york university','nyu']},
+  'Duke Fuqua':{region:'US',color:'#012169',full:'Duke Fuqua School of Business',tag:'Fuqua',domain:'duke.edu',aliases:['duke fuqua','fuqua','duke']},
+  'Michigan Ross':{region:'US',color:'#00274C',full:'Michigan Ross School of Business',tag:'Ross',domain:'umich.edu',aliases:['michigan ross','ross school','university of michigan']},
+  'UCLA Anderson':{region:'US',color:'#2774AE',full:'UCLA Anderson School of Management',tag:'Anderson',domain:'anderson.ucla.edu',aliases:['ucla anderson','anderson','ucla']},
+  'Cornell Johnson':{region:'US',color:'#B31B1B',full:'Cornell SC Johnson College of Business',tag:'Johnson',domain:'cornell.edu',aliases:['cornell johnson','johnson graduate school','cornell']},
+  'INSEAD':{region:'Europe',color:'#006A4E',full:'INSEAD',tag:'INSEAD',domain:'insead.edu',aliases:['insead']},
+  'London Business School':{region:'Europe',color:'#001E62',full:'London Business School',tag:'LBS',domain:'london.edu',aliases:['london business school','lbs']},
+  'IESE':{region:'Europe',color:'#002F6C',full:'IESE Business School',tag:'IESE',domain:'iese.edu',aliases:['iese']},
+  'HEC Paris':{region:'Europe',color:'#00205B',full:'HEC Paris',tag:'HEC',domain:'hec.edu',aliases:['hec paris','hec']},
+  'IE Business School':{region:'Europe',color:'#0D2C6C',full:'IE Business School',tag:'IE',domain:'ie.edu',aliases:['ie business school','ie university']},
+  'Oxford Saïd':{region:'Europe',color:'#002147',full:'Saïd Business School, University of Oxford',tag:'Saïd',domain:'sbs.ox.ac.uk',aliases:['said business school','saïd business school','oxford said','oxford saïd','oxford']},
+  'Cambridge Judge':{region:'Europe',color:'#85B09A',full:'Cambridge Judge Business School',tag:'Judge',domain:'jbs.cam.ac.uk',aliases:['cambridge judge','judge business school','university of cambridge']},
+  'ESADE':{region:'Europe',color:'#00205C',full:'ESADE Business School',tag:'ESADE',domain:'esade.edu',aliases:['esade']},
+  'IMD':{region:'Europe',color:'#C8102E',full:'IMD Business School',tag:'IMD',domain:'imd.org',aliases:['imd']},
+  'SDA Bocconi':{region:'Europe',color:'#00285F',full:'SDA Bocconi School of Management',tag:'Bocconi',domain:'unibocconi.it',aliases:['sda bocconi','bocconi']},
 };
+/* School picker grouped by region. */
+const schoolOptions = sel => ['US','Europe'].map(r=>`<optgroup label="${r==='US'?'United States':'Europe'}">${Object.keys(SCHOOLS).filter(k=>SCHOOLS[k].region===r).map(k=>`<option value="${esc(k)}" ${k===sel?'selected':''}>${esc(SCHOOLS[k].full)}</option>`).join('')}</optgroup>`).join('');
 const INDUSTRIES = {
   'Technology':['technology','tech','software','big tech'],
   'Healthcare':['healthcare','health care','digital health','health tech','healthtech','health','biotech','pharma','medtech'],
@@ -788,6 +809,9 @@ const LOCATIONS = {
   'SF Bay Area':['san francisco','bay area','silicon valley','sf'],
   'Boston':['boston','cambridge'],
   'Seattle':['seattle'],
+  'Tel Aviv':['tel aviv','israel'],
+  'London':['london'],
+  'Paris':['paris'],
 };
 const STATUS = {'Student':['current students','students','student'],'Alum':['alumni','alums','alum','graduates']};
 const COMPANY_ALIASES = {'McKinsey & Company':['mckinsey'],'Bain & Company':['bain'],'Teva Pharmaceuticals':['teva'],'Elbit Systems':['elbit'],'J.P. Morgan':['jp morgan','jpmorgan','j.p. morgan'],'Flare Capital Partners':['flare capital','flare'],'Flatiron Health':['flatiron'],'Insight Partners':['insight partners'],'Goldman Sachs':['goldman'],'Monday.com':['monday'],'Sheba Medical Center':['sheba'],'Oscar Health':['oscar'],'Form Energy':['form energy'],'Bank Hapoalim':['hapoalim'],'Bank Leumi':['leumi']};
@@ -1442,7 +1466,7 @@ function liveGate(){
     </div></div></main>`;
   if(st==='declined') return `<main><div class="wrap join"><div class="jcard" style="text-align:center">
       <h1>Your request wasn’t approved</h1>
-      <p class="lead" style="margin-inline:auto">The network is for Israeli MBA students and alumni in the US, and an admin couldn’t confirm that for this request. If you think that’s a mistake, reply to any of our emails.</p>
+      <p class="lead" style="margin-inline:auto">The network is for Israeli MBA alumni and students from programs in the US and Europe, and an admin couldn’t confirm that for this request. If you think that’s a mistake, reply to any of our emails.</p>
       <div class="row" style="justify-content:center"><button class="btn lg ghost pill" data-act="reset-me">Log out</button></div>
     </div></div></main>`;
   return '';
@@ -1856,7 +1880,7 @@ function sendRequest(id){
 /* ---------- profile editing (LinkedIn-style) ---------- */
 const STORE_KEY='imn-my-profile-v2';
 const ME_FIELDS=['first','last','role','location','industry','schools','career','email','phone','pref','photo','about','verify','reqId','canRefer','unit','ilUni','hometown','topics','uid','photoPath','linkedin'];
-const LOC_OPTIONS=['Boston','New York','SF Bay Area','Seattle','Los Angeles','Chicago','Washington, DC','Austin','Miami'];
+const LOC_OPTIONS=['Boston','New York','SF Bay Area','Seattle','Los Angeles','Chicago','Washington, DC','Austin','Miami','Tel Aviv','Jerusalem','Haifa','London','Paris','Barcelona','Madrid','Berlin','Other'];
 const PROGRAMS=['MBA','EMBA','Sloan Fellows MBA','Part-time MBA','MBA/MS'];
 /* Phone numbers pasted from Contacts or WhatsApp often carry hidden direction marks, non-breaking spaces
    or long dashes. The server only accepts digits, spaces, + ( ) . and -, so clean the number before checking it. */
@@ -1935,13 +1959,13 @@ function openEdit(kind,idx){
     const isNew = idx===undefined||idx===''; const s=isNew?{school:'',program:'MBA',year:NOW_YEAR+1}:p.schools[+idx];
     const only = !isNew && p.schools.length===1;
     html=editShell(isNew?'Add education':'Edit education',`<p class="req-note">* Indicates required</p>
-      ${fld('e-school','School*',`<select id="e-school"><option value="">Select your US MBA program</option>${Object.keys(SCHOOLS).map(k=>`<option value="${esc(k)}" ${k===s.school?'selected':''}>${esc(SCHOOLS[k].full)}</option>`).join('')}</select>`)}
+      ${fld('e-school','School*',`<select id="e-school"><option value="">Select your MBA program</option>${schoolOptions(s.school)}</select>`)}
       ${fld('e-prog','Program*',`<select id="e-prog">${PROGRAMS.map(x=>`<option ${x===s.program?'selected':''}>${x}</option>`).join('')}</select>`)}
       <div class="two">${fld('e-ystart','Start year*',`<select id="e-ystart">${yearOpts(s.start||s.year-2,NOW_YEAR)}</select>`)}${fld('e-yend','Class year (or expected)*',`<select id="e-yend">${yearOpts(s.year)}</select>`)}</div>
       ${fld('e-conc','Concentration',`<input type="text" id="e-conc" value="${esc(s.concentration||'')}" placeholder="Ex: Entrepreneurship & Innovation" maxlength="80">`)}
       ${fld('e-clubs','Clubs',`<input type="text" id="e-clubs" value="${esc((s.clubs||[]).join(', '))}" placeholder="Ex: Israeli Business Club, Product Management Club" maxlength="200">`,'<p class="hint"><span>Separate clubs with commas</span></p>')}
       <div class="notice">${I.shield}<span>Your school and class year are the first thing members see. ${isNew?'A new school is marked verified once you confirm your school email.':'Changing your school sends a new verification link to your school email.'}</span></div>
-      ${only?'<p class="req-note">You need at least one US MBA program on your profile, so this entry can’t be deleted.</p>':''}`,
+      ${only?'<p class="req-note">You need at least one MBA program on your profile, so this entry can’t be deleted.</p>':''}`,
       {saveKind:'edu',idx:isNew?'':idx,del:isNew||only?null:'Delete education'});
   }
   if(kind==='israel'){
@@ -2016,7 +2040,7 @@ function openAddSection(){
     <div class="edit-h"><h3>Add to profile</h3><button class="ibtn" data-act="close" aria-label="Dismiss">${I.x}</button></div>
     <div class="edit-b"><div class="sec-list">
       ${row('about',I.doc,'Add about','What you’re working on and how members can help')}
-      ${row('edu',I.cap,'Add education','Your US MBA program and class year')}
+      ${row('edu',I.cap,'Add education','Your MBA program and class year')}
       ${row('exp',I.building,'Add position','A current or past role')}
       ${row('israel',I.shield,'Israeli background','Unit (optional), Israeli university, hometown')}
       ${row('topics',I.spark,'Open to talking about','Industries and topics members can ask you about')}
@@ -2198,7 +2222,7 @@ function matchSchool(name){
 }
 function matchLocation(loc){
   const l=(loc||'').toLowerCase();
-  const map=[['Boston',/boston|cambridge|massachusetts/],['New York',/new york|nyc|brooklyn/],['SF Bay Area',/san francisco|bay area|palo alto|menlo park|mountain view|san jose|oakland/],['Seattle',/seattle|redmond|bellevue/],['Los Angeles',/los angeles/],['Chicago',/chicago|evanston/],['Washington, DC',/washington/],['Austin',/austin/],['Miami',/miami/]];
+  const map=[['Boston',/boston|cambridge|massachusetts/],['New York',/new york|nyc|brooklyn/],['SF Bay Area',/san francisco|bay area|palo alto|menlo park|mountain view|san jose|oakland/],['Seattle',/seattle|redmond|bellevue/],['Los Angeles',/los angeles/],['Chicago',/chicago|evanston/],['Washington, DC',/washington/],['Austin',/austin/],['Miami',/miami/],['Tel Aviv',/tel aviv|herzliya|ramat gan|petah tikva|ra'?anana|givatayim|holon/],['Jerusalem',/jerusalem/],['Haifa',/haifa/],['London',/london/],['Paris',/paris/],['Barcelona',/barcelona/],['Madrid',/madrid/],['Berlin',/berlin/]];
   return (map.find(([,re])=>re.test(l))||[])[0]||null;
 }
 const JOIN_STEPS=[['connect','Sign up'],['review','Review profile'],['verify','Admin approval'],['done','Done']];
@@ -2381,7 +2405,7 @@ function viewJoin(){
       <div class="jsec">${fld('j-head','Headline*',`<input type="text" id="j-head" value="${esc(d.role)}" maxlength="${LIMITS.headline}" placeholder="Ex: MBA Candidate · ex-PM at Monday.com">`)}</div>
       <div class="jsec">${fld('j-about','About',`<textarea id="j-about" maxlength="${LIMITS.about}" placeholder="A few lines about your background and what you’re looking for">${esc(d.about||'')}</textarea>`)}</div>
       <div class="jsec"><h3>${I.cap.replace('<svg','<svg width="17" height="17"')}Your MBA ${d.src.edu==='pdf'?srcTag('pdf'):''}</h3>
-        <div class="two">${fld('j-school','School*',`<select id="j-school"><option value="">Select your US MBA program</option>${Object.keys(SCHOOLS).map(k=>`<option value="${esc(k)}" ${k===e.school?'selected':''}>${esc(SCHOOLS[k].full)}</option>`).join('')}</select>`)}
+        <div class="two">${fld('j-school','School*',`<select id="j-school"><option value="">Select your MBA program</option>${schoolOptions(e.school)}</select>`)}
         ${fld('j-year','Class year*',`<select id="j-year">${yearOpts(e.year)}</select>`)}</div></div>
       <div class="jsec"><h3>${I.building.replace('<svg','<svg width="17" height="17"')}Career path</h3>
         ${d.career.length?d.career.map((c,i)=>`<div class="exrow">${logo(c.company,false,'','',i)}<span class="t"><b>${esc(c.role)} · ${esc(c.company)}</b><small>${esc(c.years)}${c.location?' · '+esc(c.location):''}</small></span>${srcTag(c.src)}<button class="ibtn" data-act="join-rm" data-idx="${i}" aria-label="Remove ${esc(c.company)}">${I.x}</button></div>`).join(''):'<p class="muted" style="margin:0;font-size:14px">No positions yet. You can add them from your profile anytime.</p>'}
