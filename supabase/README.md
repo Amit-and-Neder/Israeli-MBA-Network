@@ -8,9 +8,10 @@ This replaces the Google Sheet + Apps Script backend in `backend/`, which `index
 | File | What it does |
 |---|---|
 | `migrations/20261116000000_init.sql` | Members, sign-up, admin approval: tables, privacy rules and functions. Run once. |
+| `migrations/20261125000000_accounts.sql` | Lets a member delete their own account. Run once, after the member-data file. |
 | `migrations/20261124000000_member_data.sql` | Everything members do after joining: profile edits, photos, stars, Feed posts, "interested" and intros. Run once, after the first file. |
 | `functions/notify/index.ts` | Sends the app's emails: new join request (to admins), welcome (on approval), intro request (to the person asked) and intro accepted (to the person who asked). |
-| `tests/` | Privacy tests that run on a local Postgres (`tests/run.sh`). 114 checks, e.g. a member can't read another member's phone number or post as someone else. |
+| `tests/` | Privacy tests that run on a local Postgres (`tests/run.sh`). 120 checks, e.g. a member can't read another member's phone number or post as someone else. |
 
 ## Who can see what
 
@@ -28,9 +29,14 @@ The database enforces all of this itself. The page can't override it, and nobody
 
 ## Sign-up and login
 
-- **Sign up:** the member fills in the form. When they submit, we email them a code. The code proves the email is theirs and creates their login. Then the request is saved as "pending" and the admins get an email.
+- **The first page is Log in:** email and password, with **Forgot password?** under the fields and the sign-up banner below.
+- **Sign up:** the member fills in the form from their LinkedIn PDF and chooses a password. Supabase emails them a 6-digit code ("Confirm sign up" template). The code proves the email is theirs; then the request is saved as "pending" and the admins get an email.
 - **Approval:** an admin logs in and goes to **Network → Admin: join requests**. Approving sends the welcome email.
-- **Log in on any device:** enter your email and get a code. LinkedIn login can be turned on later (step 7).
+- **Staying logged in:** the login is saved in the browser and renewed automatically. Sessions have no time limit (Authentication → Sessions), so members stay logged in until they log out or change their password.
+- **Forgot password:** Supabase emails a 6-digit code ("Reset password" template); the member enters it with a new password and is logged in. Their other devices are logged out.
+- **Account settings** (in the app): change password (checks the current one; other devices are logged out, this one stays in), log out, log out of all devices, delete account (`migrations/20261125000000_accounts.sql`).
+- Members who joined before passwords existed use **Forgot password?** once to set one.
+- LinkedIn login can be turned on later (step 7).
 
 ## One-time setup (about an hour)
 
@@ -59,8 +65,9 @@ Gmail works for both kinds of email, at up to about 500 a day. Messages come fro
 
 Switching to Resend later: replace the SMTP settings in step 2 with Resend's, delete the `SMTP_*` secrets and add `RESEND_API_KEY`.
 
-### 4. Make the login emails show a code
-Under **Authentication → Emails → Templates**, edit both **Confirm signup** and **Magic link** so the body shows the code instead of a link. For example:
+### 4. Make the emails show a code
+Under **Authentication → Sign In / Providers → Email**, set **Minimum password length** to 8 and **Email OTP length** to 6.
+Under **Authentication → Emails → Templates**, edit **Confirm sign up**, **Reset password** and **Magic link** so the body shows the code instead of a link. For example:
 ```html
 <h2>Your Israeli MBA Network code</h2>
 <p>Enter this code to continue: <b style="font-size:22px;letter-spacing:3px">{{ .Token }}</b></p>

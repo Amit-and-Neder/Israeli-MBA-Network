@@ -193,3 +193,29 @@ insert into public.intro_requests(requester_id, recipient_id, note, status)
 begin; :asC
 select t.fails('select public.send_intro(''aaaaaaaa-0000-0000-0000-000000000000'', ''hi again'')', 'rate-limit', 'the 11th intro request in 24 hours is refused');
 commit;
+
+-- ---------- deleting your own account (20261125000000_accounts.sql)
+begin; set local role anon;
+select t.fails('select public.delete_my_account()', 'permission denied', 'anon cannot delete accounts');
+commit;
+begin; :asB
+insert into public.stars(member_id) values (:'C');
+commit;
+begin; :asC
+insert into public.stars(member_id) values (:'B');
+commit;
+-- a (admin) decided on b; deleting a must not touch b's approval
+begin; :asA
+select public.delete_my_account();
+commit;
+select t.ok(not exists (select 1 from auth.users where id = :'A'), 'member can delete their own login');
+select t.ok(not exists (select 1 from public.members where id = :'A') and not exists (select 1 from public.admins where user_id = :'A')
+  and not exists (select 1 from public.intro_requests where :'A' in (requester_id, recipient_id)), 'their profile, admin rights and intros go with it');
+select t.ok((select status from public.members where id = :'B') = 'approved' and (select decided_by from public.members where id = :'B') is null,
+  'members they approved stay approved');
+begin; :asB
+select public.delete_my_account();
+commit;
+select t.ok(not exists (select 1 from public.posts where author_id = :'B') and not exists (select 1 from public.stars where :'B' in (owner_id, member_id)),
+  'their posts and stars (given and received) go with it');
+select t.ok(exists (select 1 from auth.users where id = :'C') and exists (select 1 from public.members where id = :'C'), 'nobody else is affected');
