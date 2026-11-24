@@ -1029,9 +1029,9 @@ function classBadge(s,size=''){
 }
 const badges = (p,size='') => p.schools.map(s=>classBadge(s,size)).join(' ');
 const lastIntro = id => [...S.intros].reverse().find(r=>r.to===id);
-const connState = id => S.unlocked.has(id)?'unlocked':S.pending.has(id)?'pending':S.incoming.has(id)?'incoming':lastIntro(id)?.status==='declined'?'declined':'none';
-/* Phone and email unlock only once an intro between you was accepted. */
-const canSeeContact = id => id===ME || S.unlocked.has(id);
+const connState = id => canSeeContact(id)?'unlocked':S.pending.has(id)?'pending':S.incoming.has(id)?'incoming':lastIntro(id)?.status==='declined'?'declined':'none';
+/* Members share email, WhatsApp or both with the whole network. Live: what the server returned (approved members only). */
+const canSeeContact = id => id===ME || !LIVE || S.unlocked.has(id);
 const me = () => byId(ME);
 const sharedSchool = p => p.schools.find(s=>me().schools.some(m=>m.school===s.school));
 const sharedPrev = p => [...p.prev, p.curCompany].filter(Boolean).find(c=>me().prev.includes(c));
@@ -1182,13 +1182,13 @@ function connectBtn(id,size=''){
   if(st==='unlocked'){ const ways=contactWays(p), w=ways.includes(p.pref)?p.pref:ways[0];
     return w==='whatsapp' ? `<button class="btn ${size} wa" ${a} data-act="wa" data-id="${id}">${I.wa}WhatsApp</button>`
       : w==='email' ? `<button class="btn ${size} mail" ${a} data-act="email" data-id="${id}">${I.mail}Email</button>`
-      : `<button class="btn ${size} is-connected" ${a} disabled>${I.check}Intro accepted</button>`; }
+      : ''; }
   if(st==='pending') return `<button class="btn ${size} is-pending" ${a} data-act="pending" data-id="${id}">${I.clock}Intro sent</button>`;
   if(st==='incoming') return `<button class="btn ${size} primary" ${a} data-act="accept" data-id="${id}">${I.check}Accept intro</button>`;
   if(st==='declined') return `<button class="btn ${size} ghost" ${a} data-act="declined-info" data-id="${id}">Not available</button>`;
-  return `<button class="btn ${size} primary" ${a} data-act="connect" data-id="${id}">${I.users}Request intro</button>`;
+  return '';
 }
-/* The ways a member shared, after they accepted your intro. */
+/* The ways a member shares with the network. */
 const contactWays=p=>[...(p.phone?['whatsapp']:[]),...(p.email&&p.shareEmail!==false?['email']:[])];
 function searchBox(size,id){
   const v = S.view==='results' && size!=='compact' ? S.query : (size==='compact'?'':'');
@@ -1288,7 +1288,7 @@ function rail(key){
 function plainBar(){ return `<header class="top"><div class="wrap"><span class="brand">${brandInner()}</span></div></header>`; }
 function topbar(){
   if(S.view==='join') return `<header class="top"><div class="wrap"><span class="brand">${brandInner()}</span><span style="margin-left:auto"></span>${S.join&&S.join.step!=='done'&&!S.firstRun?`<button class="btn sm ghost pill" data-act="join-exit">Exit preview</button>`:''}</div></header>`;
-  const n = S.incoming.size + S.joinReqs.length;
+  const n = S.joinReqs.length;
   const tab = (v,label,ico)=>`<button class="${S.view===v?'on':''}" data-act="nav" data-view="${v}">${ico}<span>${label}</span>${v==='network'&&n?`<span class="badge">${n}</span>`:''}</button>`;
   const showSearch = S.view!=='home' && S.view!=='results';
   return `<header class="top"><div class="wrap">
@@ -1493,7 +1493,7 @@ function viewProfile(id){
     : st==='unlocked' ? `<div class="pactions">${starBtn(id,'lg')}
       ${contactWays(p).includes('email')?`<button class="btn lg mail" data-act="email" data-id="${id}">${I.mail}Email${p.pref==='email'?'<span class="pref-dot">PREFERRED</span>':''}</button>`:''}
       ${contactWays(p).includes('whatsapp')?`<button class="btn lg wa" data-act="wa" data-id="${id}">${I.wa}WhatsApp${p.pref==='whatsapp'?'<span class="pref-dot">PREFERRED</span>':''}</button>`:''}</div>`
-    : `<div class="pactions">${starBtn(id,'lg')}${connectBtn(id,'lg')}<span class="muted" style="font-size:13px;align-self:center">${st==='pending'?`${esc(p.first)} gets one email and can accept or decline.`:st==='declined'?`${esc(p.first)} can’t take intros right now.`:`Once ${esc(p.first)} accepts, you’ll see how they prefer to be reached.`}</span></div>`;
+    : `<div class="pactions">${starBtn(id,'lg')}</div>`;
   return `<main><div class="wrap page">
     ${isMe?'':`<button class="back" data-act="back">${I.left}Back</button>`}
     <section class="phead" style="--sc:${SCHOOLS[p.schools[0].school].color}"><div class="phead-band"><span class="band-label"><b>${esc(SCHOOLS[p.schools[0].school].full)}</b><span>${esc(p.schools[0].program)} · CLASS OF ${p.schools[0].year}</span></span><span class="band-mark">${esc(SCHOOLS[p.schools[0].school].tag)} ${yy(p.schools[0].year)}</span></div><div class="phead-body">
@@ -1633,7 +1633,8 @@ async function acctDelete(){
 }
 
 function viewNetwork(){
-  const tabs = [['stars','Starred',S.stars.size],['requests','Intro requests',S.incoming.size],...(!LIVE||S.isAdmin?[['joinreqs','Admin: join requests',S.joinReqs.length]]:[]),['sent','Sent intros',S.pending.size]];
+  const tabs = [['stars','Starred',S.stars.size],...(!LIVE||S.isAdmin?[['joinreqs','Admin: join requests',S.joinReqs.length]]:[])];
+  if(!tabs.some(t=>t[0]===S.netTab)) S.netTab='stars';
   let body='';
   if(S.netTab==='stars') body = starsBox();
   if(S.netTab==='requests') body = S.incoming.size?`<div class="rlist">${[...S.incoming].map(id=>{const p=byId(id);return `<div class="req">${av(p,52)}<button class="who" data-act="profile" data-id="${id}"><b>${esc(p.name)}</b> ${badges(p)}<div class="muted" style="font-size:13.5px">${esc(p.role)} · ${esc(p.company)}</div></button>
@@ -1657,7 +1658,7 @@ function viewNetwork(){
       <span class="btn sm is-pending">${I.clock}Waiting for ${esc(p.first)}</span>${LIVE?'':`<button class="btn ghost sm" data-act="preview-email" data-id="${id}">${I.mail}See email</button>`}<button class="btn ghost sm" data-act="withdraw" data-id="${id}">Withdraw</button></div>`}).join('')}</div>`:`<div class="empty-rail">No requests waiting. Find someone on <button class="link" data-act="nav" data-view="home">Discover</button>.</div>`;
   return `<main><div class="wrap page">
     <h1 class="page-h1">My Network</h1>
-    <div class="stats"><div class="stat"><b>${S.stars.size}</b><span>Starred</span></div><div class="stat"><b>${S.incoming.size}</b><span>Requests to review</span></div><div class="stat"><b>${S.pending.size}</b><span>Waiting on reply</span></div><div class="stat"><b>${S.intros.length}</b><span>Intros sent</span></div></div>
+    <div class="stats"><div class="stat"><b>${S.stars.size}</b><span>Starred</span></div>${!LIVE||S.isAdmin?`<div class="stat"><b>${S.joinReqs.length}</b><span>Join requests</span></div>`:''}</div>
     <div class="tabs" role="tablist">${tabs.map(([k,l,n])=>`<button role="tab" class="${S.netTab===k?'on':''}" data-act="net-tab" data-tab="${k}">${l}${n?`<span class="badge" style="${k==='requests'?'':'background:var(--faint)'}">${n}</span>`:''}</button>`).join('')}</div>
     ${body}
   </div></main>`;
@@ -2001,7 +2002,7 @@ const yearOpts=(sel,from=NOW_YEAR+3,to=1990)=>{let o='';for(let y=from;y>=to;y--
 /* Contact sharing, used by sign-up (j-) and Contact info (e-). Members share email, WhatsApp or both, and pick one as preferred. */
 function contactFields(px,d){
   const share=d.shareEmail!==false, pref=d.pref||(d.phone?'whatsapp':'email');
-  return `<p class="req-note" style="margin-top:0">Members see these only after you accept their intro. Share at least one.</p>
+  return `<p class="req-note" style="margin-top:0">Every member of the network can see what you share. Share at least one.</p>
     <div class="field" id="fw-${px}-share"><label class="check"><input type="checkbox" id="${px}-share" ${share?'checked':''}><span>Share my email${d.email?` <b>${esc(d.email)}</b>`:''}</span></label><p class="err" hidden></p></div>
     ${fld(px+'-phone','WhatsApp number',`<input type="tel" id="${px}-phone" value="${esc(d.phone||'')}" placeholder="+1 (617) 555-0100">`,'<p class="hint"><span>Include the country code. Israeli numbers work too. Leave empty to not share WhatsApp.</span></p>')}
     <div class="field" id="fw-${px}-pref"><span class="fl">Preferred way to be reached*</span><div class="radios"><label><input type="radio" name="${px}-pref" value="whatsapp" ${pref==='whatsapp'?'checked':''}>${I.wa}WhatsApp</label><label><input type="radio" name="${px}-pref" value="email" ${pref==='email'?'checked':''}>${I.mail}Email</label></div><p class="err" hidden></p></div>`;
