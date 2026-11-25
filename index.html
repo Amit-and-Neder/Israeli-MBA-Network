@@ -3233,7 +3233,7 @@ async function loginFinish(){
   try{ p=await API.myProfile(); }catch(_){ L.err='We couldn’t load your profile. Try again.'; L.busy=L.liBusy=false; render(); return; }
   if(!p||p.status==='declined'){
     const email=await API.sessionEmail().catch(()=>null); await API.signOut().catch(()=>{});
-    L.err=!p?`No member uses ${esc(email||'that email')}. Sign up first, or log in with the email you signed up with.`
+    L.err=!p?`You haven’t joined Ba-mba yet${email?' with '+esc(email):''}. Sign up first with “Join with your LinkedIn PDF”, and use the same LinkedIn account at the end.`
       :'Your request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.';
     L.busy=L.liBusy=false; render(); return;
   }
