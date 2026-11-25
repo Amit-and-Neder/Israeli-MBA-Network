@@ -9,6 +9,7 @@ This replaces the Google Sheet + Apps Script backend in `backend/`, which `index
 |---|---|
 | `migrations/20261116000000_init.sql` | Members, sign-up, admin approval: tables, privacy rules and functions. Run once. |
 | `migrations/20261201000000_reports.sql` | Members report a profile to the admins (`report_member`); admins review and resolve (`admin_reports`, `admin_resolve_report`). No blocking. Run once, after the status-note file. |
+| `migrations/20261202000000_name_validation.sql` | First and last names: letters (English, accented, Hebrew, Arabic, Cyrillic), spaces, hyphens, apostrophes and periods only. No digits, SQL symbols or `--`. Run once, after the reports file. |
 | `migrations/20261130000000_status_note.sql` | Status notes: a short public "speech bubble" each member writes (`set_my_status`, `status_notes`). Run once, after the contacts-for-members file. |
 | `migrations/20261129000000_contacts_for_members.sql` | Every approved member sees the email and WhatsApp each approved member shares, with no intro. Run once, after the contact-sharing file. |
 | `migrations/20261128000000_contact_sharing.sql` | Members share email, WhatsApp or both, and pick a preferred one. Emails are read through `visible_contacts()`, which hides unshared ones. Run once, after the email-check file, at the same time the matching site change goes live. |
