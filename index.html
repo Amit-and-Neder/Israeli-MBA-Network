@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://ipslqfrtebxtugcoechb.supabase.co https://randomuser.me; connect-src 'self' https://ipslqfrtebxtugcoechb.supabase.co wss://ipslqfrtebxtugcoechb.supabase.co https://cdnjs.cloudflare.com; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Israeli MBA Network</title>
 <link rel="icon" href="favicon.ico?v=2" sizes="48x48">
 <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
@@ -2274,7 +2274,7 @@ function mailLink(app,email){
     href: app==='gmail' ? `googlegmail:///co?to=${to}` : `ms-outlook://compose?to=${to}`};
   if(PHONE_OS==='android') return {native:true, web, label:`Open in ${name} app`,
     // Android intent: a "send email" to this address, handed to that app only; Chrome opens the web version if it's missing.
-    href: `intent:${email}#Intent;scheme=mailto;action=android.intent.action.SENDTO;package=${app==='gmail'?'com.google.android.gm':'com.microsoft.office.outlook'};S.browser_fallback_url=${encodeURIComponent(web)};end`};
+    href: `intent:${encodeURIComponent(email).replace(/%40/g,'@')}#Intent;scheme=mailto;action=android.intent.action.SENDTO;package=${app==='gmail'?'com.google.android.gm':'com.microsoft.office.outlook'};S.browser_fallback_url=${encodeURIComponent(web)};end`};
   // Computer: the normal inbox with a small compose window, not a full-page draft.
   // Outlook fills in the address; Gmail can't from a link, so the address is copied for pasting into "To".
   if(app==='gmail') return {native:false, web, copy:true, href:'https://mail.google.com/mail/u/0/#inbox?compose=new', label:'Open in Gmail'};
@@ -2590,9 +2590,11 @@ const SUPABASE_ANON_KEY='sb_publishable__Ka4KLe6RCbwMb-4kOlTqA_trhLGtK8';  // Se
 const LINKEDIN_LOGIN=false;     // true once LinkedIn is turned on under Authentication → Providers
 const LIVE=!!(SUPABASE_URL&&SUPABASE_ANON_KEY);
 const SUPABASE_JS='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js';
+// Integrity check: the browser refuses the file if the CDN ever serves anything else. Update it with the version.
+const SUPABASE_JS_SRI='sha384-uteMfOloLDGt042uDz+xHGF3ym63/WQ6rFq7murQRG8Ih7QrXGEGNtWd8688sb4O';
 let sbReady=null;
 function sb(){
-  if(!sbReady) sbReady=new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src=SUPABASE_JS;
+  if(!sbReady) sbReady=new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src=SUPABASE_JS; sc.integrity=SUPABASE_JS_SRI; sc.crossOrigin='anonymous';
     sc.onload=()=>res(window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{flowType:'pkce',persistSession:true,detectSessionInUrl:true}}));
     sc.onerror=()=>{ sbReady=null; rej(Object.assign(new Error('offline'),{code:'offline'})); }; document.head.appendChild(sc); });
   return sbReady;
@@ -2609,7 +2611,7 @@ function apiErr(e){
     : /signups not allowed|user not found/i.test(m)?'not-member'
     : /expired|invalid|otp/i.test(m)&&s!==429?'wrong-code'
     : s===429||/rate limit|security purposes/i.test(m)?'rate-limit'
-    : /already-approved|already-declined|already-open|not-admin|not-approved|not-pending|not-member|missing-school|bad-name|not-logged-in|no-profile|bad-photo|rate-limit/.exec(m)?.[0]
+    : /already-approved|already-declined|already-open|not-admin|not-approved|not-pending|not-member|missing-school|bad-name|too-many-rows|not-logged-in|no-profile|bad-photo|rate-limit/.exec(m)?.[0]
     || (/row-level security/i.test(m)?'not-allowed': /check constraint/i.test(m)?'invalid':'failed');
   return Object.assign(new Error(code),{code,detail:m});
 }
@@ -2693,9 +2695,10 @@ const API={
     return error?{}:Object.fromEntries(data.filter(x=>x.signedUrl).map(x=>[x.path,x.signedUrl])); },
 };
 const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+const PDFJS_SRI='sha512-q+4liFwdPC/bNdhUpZx6aXDx/h77yEQtn4I1slHydcbZK34nLaR3cAeYSJshoxIOq3mjEf7xJE8YWIUHMn+oCQ==';  // cdnjs's published hash
 let pdfjsReady=null;
 function loadPdfJs(){
-  if(!pdfjsReady) pdfjsReady=new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src=PDFJS+'pdf.min.js';
+  if(!pdfjsReady) pdfjsReady=new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src=PDFJS+'pdf.min.js'; sc.integrity=PDFJS_SRI; sc.crossOrigin='anonymous';
     sc.onload=()=>{ pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS+'pdf.worker.min.js'; res(pdfjsLib); }; sc.onerror=()=>{ pdfjsReady=null; rej(new Error('pdf.js failed to load')); }; document.head.appendChild(sc); });
   return pdfjsReady;
 }
@@ -2706,7 +2709,7 @@ const MONTH_YR=/^(?:[A-Za-z]+ )?(\d{4}) ?- ?(?:(?:[A-Za-z]+ )?(\d{4})|Present)/;
    the largest body text, then the job title, then smaller date, location and description lines. */
 async function parseLinkedInPdf(file){
   const lib=await loadPdfJs();
-  const doc=await lib.getDocument({data:await file.arrayBuffer()}).promise;
+  const doc=await lib.getDocument({data:await file.arrayBuffer(),isEvalSupported:false}).promise;
   const side=[], main=[];
   for(let i=1;i<=doc.numPages;i++){
     const pg=await doc.getPage(i), w=pg.getViewport({scale:1}).width, tc=await pg.getTextContent(), rows=new Map();
@@ -3194,7 +3197,7 @@ const roleCatFor=h=>Object.keys(ROLES).find(k=>ROLES[k].some(a=>new RegExp('\\b'
 const liveYears=c=>c.start?`${c.start}–${c.end||'Present'}`:c.end?String(c.end):'Present';
 function liveSchools(list){
   const fb=Object.keys(SCHOOLS)[0];
-  const out=(list||[]).map(s=>{ const y=+s.year||NOW_YEAR; return {school:SCHOOLS[s.school]?s.school:(matchSchool(s.school||'')||fb),program:s.program||'MBA',year:y,start:+s.start||y-2,concentration:s.concentration||'',clubs:s.clubs||[]}; });
+  const out=(list||[]).map(s=>{ const y=+s.year||NOW_YEAR; return {school:Object.hasOwn(SCHOOLS,s.school||'')?s.school:(matchSchool(s.school||'')||fb),program:s.program||'MBA',year:y,start:+s.start||y-2,concentration:s.concentration||'',clubs:s.clubs||[]}; });
   return out.length?out:[{school:fb,program:'MBA',year:NOW_YEAR,start:NOW_YEAR-2,concentration:'',clubs:[]}];
 }
 function livePerson(r,id){
@@ -3261,7 +3264,7 @@ function liveSaveProfile(){
     const why = e&&e.code==='offline'?'You’re offline. Check your connection and try again.'
       : e&&(e.code==='not-logged-in'||/jwt|token/i.test(e.detail||''))?'Your login expired. Log out and log in again, then redo the change.'
       : e&&e.code==='bad-name'?NAME_MSG
-      : e&&e.code==='invalid'?'One of the values isn’t in a format we accept. Check your phone number and try again.'
+      : e&&(e.code==='invalid'||e.code==='too-many-rows')?'One of the values is too long or isn’t in a format we accept. Check your entries and try again.'
       : 'Try again in a moment. If it keeps happening, tell an admin: '+esc(String(e&&e.detail||e&&e.message||'unknown error').slice(0,140));
     toast('We couldn’t save that change. '+why, null, 12000);
   });
@@ -3290,7 +3293,7 @@ function ago(ts){
   return h<1?'just now':h<24?`${Math.floor(h)} hour${h<2?'':'s'} ago`:h<48?'yesterday':`${Math.floor(h/24)} days ago`;
 }
 function liveReq(r){
-  const school=SCHOOLS[r.school]?r.school:(matchSchool(r.school||'')||Object.keys(SCHOOLS)[0]);
+  const school=Object.hasOwn(SCHOOLS,r.school||'')?r.school:(matchSchool(r.school||'')||Object.keys(SCHOOLS)[0]);
   const cur=(r.career||[]).find(c=>c.start&&!c.end)||(r.career||[])[0];
   let h=0; for(const ch of r.id) h=(h*31+ch.charCodeAt(0))>>>0;   // stable number for the generated avatar
   return {id:100000+h%900000,uid:r.id,live:true,name:`${r.first_name} ${r.last_name}`,first:r.first_name,last:r.last_name,hair:h%2?'short':'long',
@@ -3325,7 +3328,7 @@ document.addEventListener('click',e=>{
     case 'inv-copy': { const txt=invBody(); try{ navigator.clipboard.writeText(txt).then(()=>{ t.innerHTML=I.check+'Copied'; toast('Invite copied. Paste it anywhere.'); },()=>{}); }catch(_){ } break; }
     case 'inv-wa': window.open('https://wa.me/?text='+encodeURIComponent(invBody()),'_blank','noopener'); break;
     case 'inv-email': { const t2=inviteText(inviteLang); location.href='mailto:?subject='+encodeURIComponent(t2.subject)+'&body='+encodeURIComponent(invBody()); break; }
-    case 'mail-copy-open': { const em=t.dataset.email; try{ navigator.clipboard.writeText(em).then(()=>toast(`Copied ${em}. Paste it into “To” in Gmail.`),()=>{}); }catch(_){ } break; }
+    case 'mail-copy-open': { const em=t.dataset.email; try{ navigator.clipboard.writeText(em).then(()=>toast(`Copied ${esc(em)}. Paste it into “To” in Gmail.`),()=>{}); }catch(_){ } break; }
     case 'mail-app': e.preventDefault(); if(PHONE_OS==='ios') openMailApp(t.getAttribute('href'),t.dataset.web); else location.href=t.getAttribute('href'); break;
     case 'nav': S.browse=null; go(t.dataset.view); break;
     case 'back': back(); break;

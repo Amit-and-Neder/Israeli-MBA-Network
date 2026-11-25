@@ -13,6 +13,7 @@ psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/contact_sharing_
 psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/status_note_test.sql
 psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/reports_test.sql
 psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/name_validation_test.sql
+psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/security_hardening_test.sql
 psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/member_data_test.sql
 psql -d "$DB" -c "select case when ok then 'PASS' else 'FAIL' end as result, msg from t.results order by n" \
      -c "select count(*) filter (where ok) as passed, count(*) filter (where not ok) as failed from t.results" | tee /tmp/imn_privacy_test.out
