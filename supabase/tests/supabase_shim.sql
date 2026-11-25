@@ -7,10 +7,13 @@ do $$ begin
 end $$;
 create schema auth;
 create table auth.users (id uuid primary key, email text);
+-- Logins from outside providers (e.g. LinkedIn), as Supabase stores them.
+create table auth.identities (id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
+  provider text not null, identity_data jsonb not null default '{}', created_at timestamptz default now());
 create function auth.uid() returns uuid language sql stable as
-  $$ select nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'sub', '')::uuid $$;
+  $$ select nullif(nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub', '')::uuid $$;
 create function auth.jwt() returns jsonb language sql stable as
-  $$ select coalesce(current_setting('request.jwt.claims', true), '{}')::jsonb $$;
+  $$ select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb $$;
 grant usage on schema auth to anon, authenticated, service_role;
 grant execute on all functions in schema auth to anon, authenticated, service_role;
 grant usage on schema public to anon, authenticated, service_role;
