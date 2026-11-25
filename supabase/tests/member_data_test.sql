@@ -244,5 +244,6 @@ begin; set local role anon;
 select t.ok(public.email_in_use('c@example.com'), 'sign-up form: a registered email is reported as taken');
 select t.ok(public.email_in_use('  C@Example.COM '), 'the check ignores capital letters and spaces');
 select t.ok(not public.email_in_use('nobody@example.com'), 'an unused email is reported as free');
+select t.ok(not public.email_in_use('o@example.com'), 'a login without a profile (e.g. LinkedIn sign-in before signing up) is reported as free');
 select t.fails('select count(*) from auth.users', 'permission denied', 'the check does not open the login table');
 commit;
