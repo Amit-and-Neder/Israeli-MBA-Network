@@ -3061,7 +3061,7 @@ function joinPayload(){
 }
 /* Before asking for a password, make sure the email isn't already registered. */
 async function joinCheckEmail(){
-  const J=S.join, email=J.draft.email, btn=document.querySelector('[data-act=join-review-next]');
+  const J=S.join, email=liSignup()?J.pdfEmail:J.draft.email, btn=document.querySelector('[data-act=join-review-next]');
   if(btn){ btn.disabled=true; btn.textContent='Checking…'; }
   let taken=false;
   try{ taken=await API.emailInUse(email); }catch(_){ }   // if the check fails, sign-up itself still refuses a taken email
@@ -3072,7 +3072,7 @@ async function joinCheckEmail(){
 function emailTakenPopup(email){
   openModal(`<h3 style="display:flex;gap:8px;align-items:center"><span style="color:#C2362F">${I.x}</span>This email already has an account</h3>
     <p class="sub"><b>${esc(email)}</b> is already registered with Ba-mba. Each email can only sign up once.</p>
-    <p class="sub">If it’s yours, log in instead, or use “Forgot password?” on the login page.${S.join&&S.join.pdfEmail?' This email comes from your LinkedIn PDF, so to use a different one, change it on LinkedIn and download the PDF again.':' Otherwise, go back and use a different email.'}</p>
+    <p class="sub">If it’s yours, log in instead${LINKEDIN_LOGIN?' with LinkedIn or your password':''}, or use “Forgot password?” on the login page.${S.join&&S.join.pdfEmail?' This email comes from your LinkedIn PDF, so to use a different one, change it on LinkedIn and download the PDF again.':' Otherwise, go back and use a different email.'}</p>
     <div class="row">${S.join&&S.join.pdfEmail?'':'<button class="btn ghost" data-act="join-taken-change">Use a different email</button>'}<button class="btn primary" data-act="join-taken-login">Log in instead</button></div>`);
 }
 /* Live sign-up: create the login with the chosen password (Supabase emails a code to prove the address is theirs),
@@ -3471,7 +3471,7 @@ document.addEventListener('click',e=>{
     case 'forgot-confirm': forgotConfirm(); break;
     case 'join-go': S.join.step=t.dataset.step; render(); window.scrollTo(0,0); break;
     case 'join-rm': S.join.draft.career.splice(+t.dataset.idx,1); render(); break;
-    case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); liveSaveProfile(); liveSaveContact(); if(LIVE&&me().photo&&me().photo.startsWith('data:')) livePhoto(me()); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else if(LIVE&&!liSignup()){ joinCheckEmail(); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
+    case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); liveSaveProfile(); liveSaveContact(); if(LIVE&&me().photo&&me().photo.startsWith('data:')) livePhoto(me()); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else if(LIVE&&(!liSignup()||S.join.pdfEmail)){ joinCheckEmail(); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
     case 'join-finish': joinApply(t.dataset.status); me().reqId=S.join.reqId||null; if(LIVE){ me().uid=S.join.reqId||null; if(S.join.photoPath) me().photoPath=S.join.photoPath; } saveMe(); S.firstRun=false; S.join.step='done'; render(); window.scrollTo(0,0); break;
     case 'join-demo-approve': { const m=me(); m.verify.school='admin'; saveMe(); render(); openRegEmail(m.first,m.email,'An admin approved your request. In the live app this lands in your inbox.'); break; }
     case 'join-taken-login': { const email=S.join.draft.email; closeModal(); S.join.login={email}; S.join.step='login'; render(); window.scrollTo(0,0); break; }
