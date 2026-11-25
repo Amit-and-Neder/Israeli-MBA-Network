@@ -12,6 +12,7 @@ psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/privacy_test.sql
 psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/contact_sharing_test.sql
 psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/status_note_test.sql
 psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/reports_test.sql
+psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/name_validation_test.sql
 psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/security_hardening_test.sql
 psql -d "$DB" -v ON_ERROR_STOP=1 -o /dev/null -f supabase/tests/member_data_test.sql
 psql -d "$DB" -c "select case when ok then 'PASS' else 'FAIL' end as result, msg from t.results order by n" \

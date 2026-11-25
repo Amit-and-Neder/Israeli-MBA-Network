@@ -2493,9 +2493,16 @@ function openEdit(kind,idx){
 }
 function fieldErr(id,msg){ const w=document.getElementById('fw-'+id); if(!w) return; w.classList.toggle('bad',!!msg); const e=w.querySelector('.err'); e.hidden=!msg; e.textContent=msg||''; }
 const val=id=>(document.getElementById(id)?.value||'').trim();
+/* Names: letters (English, accented, Hebrew, Arabic, Cyrillic), spaces, hyphens, apostrophes and periods only.
+   The database enforces the same rule (20261202000000_name_validation.sql). */
+const NAME_L='A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u0400-\u04FF\u05D0-\u05EA\u0620-\u064A';
+const NAME_RE=new RegExp(`^[${NAME_L}][${NAME_L} '\u2019\u05F3.-]*$`);
+const NAME_MSG='Use letters only. Spaces, hyphens (-), apostrophes (\') and periods are fine.';
+const nameErr=(v,empty)=>!v?empty:(v.length>80||!NAME_RE.test(v)||v.includes('--'))?NAME_MSG:'';
 function saveEdit(kind,idx){
   const p=me(); let ok=true; const need=(id,msg)=>{ const bad=!val(id); fieldErr(id,bad?msg:''); if(bad) ok=false; };
-  if(kind==='intro'){ need('e-first','Enter your first name'); need('e-last','Enter your last name'); need('e-head','Enter a headline'); if(!ok) return;
+  const needName=(id,msg)=>{ const m=nameErr(val(id),msg); fieldErr(id,m); if(m) ok=false; };
+  if(kind==='intro'){ needName('e-first','Enter your first name'); needName('e-last','Enter your last name'); need('e-head','Enter a headline'); if(!ok) return;
     Object.assign(p,{first:val('e-first'),last:val('e-last'),role:val('e-head'),location:val('e-loc'),industry:val('e-ind')}); }
   if(kind==='contact'){
     const em=val('e-email'); const emOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em); fieldErr('e-email',!em?'Enter your email':!emOk?'Enter a valid email address':''); if(!emOk) ok=false;
@@ -2604,7 +2611,7 @@ function apiErr(e){
     : /signups not allowed|user not found/i.test(m)?'not-member'
     : /expired|invalid|otp/i.test(m)&&s!==429?'wrong-code'
     : s===429||/rate limit|security purposes/i.test(m)?'rate-limit'
-    : /already-approved|already-declined|already-open|not-admin|not-approved|not-pending|not-member|missing-school|too-many-rows|not-logged-in|no-profile|bad-photo|rate-limit/.exec(m)?.[0]
+    : /already-approved|already-declined|already-open|not-admin|not-approved|not-pending|not-member|missing-school|bad-name|too-many-rows|not-logged-in|no-profile|bad-photo|rate-limit/.exec(m)?.[0]
     || (/row-level security/i.test(m)?'not-allowed': /check constraint/i.test(m)?'invalid':'failed');
   return Object.assign(new Error(code),{code,detail:m});
 }
@@ -2718,7 +2725,7 @@ async function parseLinkedInPdf(file){
   const nameRow=main.reduce((a,b)=>b.h>a.h?b:a);
   const secH=Math.max(...main.filter(r=>r!==nameRow).map(r=>r.h));
   const isHead=r=>r!==nameRow && r.h>=secH-.5;
-  const ni=main.indexOf(nameRow); const [first,...rest]=nameRow.t.split(' '); out.first=first; out.last=rest.join(' ');
+  const ni=main.indexOf(nameRow); const cleanName=nameRow.t.replace(/\([^)]*\)/g,' ').split(/[,|]/)[0].replace(new RegExp(`[^${NAME_L} '\u2019\u05F3.-]`,'g'),' ').replace(/\s+/g,' ').trim(); const [first,...rest]=cleanName.split(' '); out.first=first||''; out.last=rest.join(' ');
   const top=[]; for(let i=ni+1;i<main.length&&!isHead(main[i]);i++) top.push(main[i].t);
   if(top.length>1) out.location=top.pop(); out.headline=top.join(' ');
   const sec={}; let cur=null; main.slice(ni+1).forEach(r=>{ if(isHead(r)){ cur=r.t.toLowerCase(); sec[cur]=[]; } else if(cur) sec[cur].push(r); });
@@ -2986,7 +2993,8 @@ function viewJoin(){
 function joinReadReview(){
   const J=S.join, d=J.draft; let ok=true;
   const need=(id,msg)=>{ const bad=!val(id); fieldErr(id,bad?msg:''); if(bad) ok=false; };
-  need('j-first','Enter your first name'); const em=val('j-email'); if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ fieldErr('j-email','Enter a valid email address'); ok=false; } else fieldErr('j-email',''); need('j-last','Enter your last name'); need('j-head','Enter a headline'); need('j-school','Select your school');
+  const needName=(id,msg)=>{ const m=nameErr(val(id),msg); fieldErr(id,m); if(m) ok=false; };
+  needName('j-first','Enter your first name'); const em=val('j-email'); if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ fieldErr('j-email','Enter a valid email address'); ok=false; } else fieldErr('j-email',''); needName('j-last','Enter your last name'); need('j-head','Enter a headline'); need('j-school','Select your school');
   const c=readContactFields('j'); if(!c) ok=false;
   if(!d.photo){ fieldErr('j-photo','Add a photo of your face. Every member needs one.'); ok=false; } else fieldErr('j-photo','');
   if(!ok) return false;
@@ -3055,6 +3063,7 @@ async function joinSave(){
 function joinErrText(err){
   return err.code==='already-approved'||err.code==='already-registered'?'This email already has an account. Go back to the first page and log in, or use “Forgot password?”.'
     :err.code==='weak-password'?`Choose a stronger password: at least ${PW_MIN} characters.`
+    :err.code==='bad-name'?'Your name can only have letters, spaces, hyphens (-), apostrophes (\') and periods. Go back and fix it.'
     :err.code==='already-declined'?'This email’s request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.'
     :err.code==='rate-limit'?'Too many codes requested. Wait a minute and try again.'
     :err.code==='offline'?'We couldn’t reach the server. Check your connection and try again.'
@@ -3254,6 +3263,7 @@ function liveSaveProfile(){
     console.error('Profile save failed:', e&&e.detail||e);
     const why = e&&e.code==='offline'?'You’re offline. Check your connection and try again.'
       : e&&(e.code==='not-logged-in'||/jwt|token/i.test(e.detail||''))?'Your login expired. Log out and log in again, then redo the change.'
+      : e&&e.code==='bad-name'?NAME_MSG
       : e&&(e.code==='invalid'||e.code==='too-many-rows')?'One of the values is too long or isn’t in a format we accept. Check your entries and try again.'
       : 'Try again in a moment. If it keeps happening, tell an admin: '+esc(String(e&&e.detail||e&&e.message||'unknown error').slice(0,140));
     toast('We couldn’t save that change. '+why, null, 12000);
