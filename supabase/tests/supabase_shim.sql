@@ -18,7 +18,9 @@ grant usage on schema public to anon, authenticated, service_role;
 -- new tables" turned off skip the table grants; the migration sets table access explicitly either way.)
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
-alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
+-- New functions: like the live project, service_role does NOT get EXECUTE by default (seen 2026-11-25:
+-- "permission denied for function valid_person_name" from the email function). Grant it explicitly where needed.
+alter default privileges in schema public grant execute on functions to anon, authenticated;
 -- Storage: just enough of Supabase's storage schema for the photo policies.
 create schema storage;
 create table storage.buckets (id text primary key, name text not null, public boolean default false,
