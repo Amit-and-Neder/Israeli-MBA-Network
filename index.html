@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset=utf8><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://ipslqfrtebxtugcoechb.supabase.co https://randomuser.me; connect-src 'self' https://ipslqfrtebxtugcoechb.supabase.co wss://ipslqfrtebxtugcoechb.supabase.co https://cdnjs.cloudflare.com; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Israeli MBA Network</title>
+<title>Ba-mba · The Israeli MBA network</title>
 <link rel="icon" href="favicon.ico?v=2" sizes="48x48">
 <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png?v=2" type="image/png" sizes="32x32">
@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Israeli MBA">
+<meta name="apple-mobile-web-app-title" content="Ba-mba">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="format-detection" content="telephone=no">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -62,7 +62,7 @@ svg{display:block}
 .wm{display:flex;flex-direction:column;line-height:1}
 .wm-1{font-family:var(--f-display);font-weight:650;font-size:18px;letter-spacing:-.02em;color:var(--ink)}
 .wm-1 b{font-weight:800;color:var(--accent-text);letter-spacing:-.01em}
-.wm-2{display:flex;align-items:center;gap:7px;margin-top:4px;font-family:var(--f-body);font-weight:700;font-size:9.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted)}
+.wm-2{display:flex;align-items:center;gap:7px;margin-top:4px;font-family:var(--f-body);font-weight:600;font-size:11.5px;letter-spacing:.01em;color:var(--muted);white-space:nowrap}
 .wm-2 i{font-style:normal;font-weight:600;letter-spacing:.14em;color:var(--faint);padding-left:7px;border-left:1px solid var(--line)}
 .top-search{flex:1;max-width:460px;min-width:0}
 .nav{display:flex;gap:4px;margin-left:auto}
@@ -839,7 +839,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .top .wrap{flex-wrap:nowrap;height:58px;padding-block:0;gap:10px}
   .top .nav{display:none}
   :root{--top-h:58px}
-  .wm-2{display:none}
+  .wm-2{font-size:10.5px;margin-top:3px}
   .bottom-nav{display:flex!important;position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:saturate(1.2) blur(18px);-webkit-backdrop-filter:saturate(1.2) blur(18px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
   .bottom-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;min-height:48px;font-size:11px;font-weight:650;color:var(--muted);position:relative;border-radius:12px}
   .bottom-nav button.on{color:var(--accent-text)}
@@ -1025,7 +1025,7 @@ const SITE_URL = 'https://ba-mba.com/';
 const BRAND_LOGO='';
 function brandInner(){
   const mark = BRAND_LOGO?`<img src="${BRAND_LOGO}" alt="">`:markSVG;
-  return `<span class="brand-mark">${mark}</span><span class="wm full"><span class="wm-1">Israeli <b>MBA</b></span><span class="wm-2">Network<i>US · EU</i></span></span>`;
+  return `<span class="brand-mark">${mark}</span><span class="wm full"><span class="wm-1">Ba-<b>mba</b></span><span class="wm-2">The Israeli MBA network</span></span>`;
 }
 const markSVG='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.1" stroke-linecap="round"><circle cx="9" cy="12" r="5.2" stroke="#fff"/><circle cx="15" cy="12" r="5.2" stroke="#A9BBFF" stroke-opacity=".95"/><path d="M12 7.85a5.2 5.2 0 0 1 0 8.3" stroke="#fff"/><circle cx="12" cy="12" r="1.1" fill="#fff" stroke="none"/></svg>';
 
@@ -2189,10 +2189,10 @@ let inviteLang='he';
 function inviteText(lang){
   const m=me(), sc=SCHOOLS[m.schools[0].school], first=m.first||'';
   return lang==='he'
-    ? {subject:'הצטרפו אליי ל-Israeli MBA Network',
-       body:`היי! הצטרפתי ל-Israeli MBA Network, הקהילה הפרטית של ישראלים בוגרי וסטודנטים של MBA בארה״ב ובאירופה.\nכבר יש שם ישראלים מ-${sc.tag}, וזו דרך מעולה למצוא את הקולגה, המשקיע או ההשקעה הבאה, ולעזור אחד לשני.\nההצטרפות לוקחת 2 דקות עם ה-PDF מהלינקדאין:\n${SITE_URL}\n\n${first}`}
-    : {subject:'Join me on the Israeli MBA Network',
-       body:`Hi! I joined the Israeli MBA Network, the private community of Israeli MBA alumni and students in the US and Europe.\nIsraelis from ${sc.tag} are already there, and it’s a great way to find your next colleague, investor or investment, and to help each other.\nJoining takes 2 minutes with your LinkedIn PDF:\n${SITE_URL}\n\n${first}`};
+    ? {subject:'הצטרפו אליי ל-Ba-mba',
+       body:`היי! הצטרפתי ל-Ba-mba, הקהילה הפרטית של ישראלים בוגרי וסטודנטים של MBA בארה״ב ובאירופה.\nכבר יש שם ישראלים מ-${sc.tag}, וזו דרך מעולה למצוא את הקולגה, המשקיע או ההשקעה הבאה, ולעזור אחד לשני.\nההצטרפות לוקחת 2 דקות עם ה-PDF מהלינקדאין:\n${SITE_URL}\n\n${first}`}
+    : {subject:'Join me on Ba-mba',
+       body:`Hi! I joined Ba-mba, the private community of Israeli MBA alumni and students in the US and Europe.\nIsraelis from ${sc.tag} are already there, and it’s a great way to find your next colleague, investor or investment, and to help each other.\nJoining takes 2 minutes with your LinkedIn PDF:\n${SITE_URL}\n\n${first}`};
 }
 function openInvite(){
   const t=inviteText(inviteLang), sc=SCHOOLS[me().schools[0].school];
@@ -2222,7 +2222,7 @@ function introText(p){
   const past=m.career.find(x=>!/Present/.test(x.years)); const cur=m.career.find(x=>/Present/.test(x.years));
   const bg = m.status==='Student' ? (past?` (ex-${past.role} at ${past.company})`:'') : (cur?` (${cur.role} at ${cur.company})`:'');
   const hook = s?` We’re both ${SCHOOLS[s.school].tag}.`:c?` We both worked at ${c}.`:'';
-  return `Hi ${p.first}! I’m ${m.first}, ${SCHOOLS[ms.school].tag} ${yy(ms.year)}${bg}. I found you through the Israeli MBA Network.${hook} I’m exploring ${p.industry.toLowerCase()} roles and would love 15 minutes to hear how you got to ${p.company}.`;
+  return `Hi ${p.first}! I’m ${m.first}, ${SCHOOLS[ms.school].tag} ${yy(ms.year)}${bg}. I found you through Ba-mba.${hook} I’m exploring ${p.industry.toLowerCase()} roles and would love 15 minutes to hear how you got to ${p.company}.`;
 }
 function openConnect(id){
   const p=byId(id);
@@ -2238,9 +2238,9 @@ function introEmail(id){
   const used = r.status!=='pending';
   openModal(`<p class="sub" style="margin:0 0 12px"><b>Demo:</b> this is the one email ${esc(p.first)} gets. Click a button as ${esc(p.first)} would.</p>
     <div class="email-mock">
-      <div class="eh"><span>From <b>Israeli MBA Network</b></span><span>To <b>${esc(p.first)}</b></span><span>Subject <b>${esc(m.name)}, ${esc(schoolTag(m.schools[0]))}, would like an intro</b></span></div>
+      <div class="eh"><span>From <b>Ba-mba</b></span><span>To <b>${esc(p.first)}</b></span><span>Subject <b>${esc(m.name)}, ${esc(schoolTag(m.schools[0]))}, would like an intro</b></span></div>
       <div class="eb">
-        <span>Hi ${esc(p.first)}, ${esc(m.first)} found you on Israeli MBA Network and wrote:</span>
+        <span>Hi ${esc(p.first)}, ${esc(m.first)} found you on Ba-mba and wrote:</span>
         <p class="note">${esc(r.note)}</p>
         <div class="mini" style="margin:0">${av(m,46)}<span><b>${esc(m.name)}</b> ${statusTag(m)}<small style="display:block">${esc(m.role)} · ${esc(m.company)} · ${esc(SCHOOLS[m.schools[0].school].full)}, Class of ${m.schools[0].year}</small></span></div>
         ${used?`<p class="notice" style="margin:0">${I.check}<span>This link was already used. You ${r.status==='accepted'?'accepted':'declined'} this intro.</span></p>`
@@ -2779,8 +2779,8 @@ function matchLocation(loc){
 const JOIN_STEPS=[['connect','Sign up'],['review','Review profile'],['verify','Admin approval'],['done','Done']];
 /* Registration email sent to an applicant once an admin approves them. In the live app the server sends it. */
 function regEmail(first,email){
-  return {to:email, subject:'You’re approved: welcome to Israeli MBA Network',
-    body:`Hi ${first},\n\nGood news: an admin reviewed your request and approved you. Your registration is complete and your profile is now live in the network.\n\nWhat you can do now:\n• Search for Israeli MBAs by school, company or industry\n• Connect with members and ask for warm intros\n• Keep your profile current with “Update from LinkedIn”\n\nLog in on any device with “Log in” and this email address.\n\nWelcome aboard,\nThe Israeli MBA Network team`};
+  return {to:email, subject:'You’re approved: welcome to Ba-mba',
+    body:`Hi ${first},\n\nGood news: an admin reviewed your request and approved you. Your registration is complete and your profile is now live in the network.\n\nWhat you can do now:\n• Search for Israeli MBAs by school, company or industry\n• Connect with members and ask for warm intros\n• Keep your profile current with “Update from LinkedIn”\n\nLog in on any device with “Log in” and this email address.\n\nWelcome aboard,\nThe Ba-mba team`};
 }
 function openRegEmail(first,email,note){
   const m=regEmail(first,email);
@@ -3055,7 +3055,7 @@ async function joinCheckEmail(){
 }
 function emailTakenPopup(email){
   openModal(`<h3 style="display:flex;gap:8px;align-items:center"><span style="color:#C2362F">${I.x}</span>This email already has an account</h3>
-    <p class="sub"><b>${esc(email)}</b> is already registered with Israeli MBA Network. Each email can only sign up once.</p>
+    <p class="sub"><b>${esc(email)}</b> is already registered with Ba-mba. Each email can only sign up once.</p>
     <p class="sub">If it’s yours, log in instead, or use “Forgot password?” on the login page. Otherwise, go back and use a different email.</p>
     <div class="row"><button class="btn ghost" data-act="join-taken-change">Use a different email</button><button class="btn primary" data-act="join-taken-login">Log in instead</button></div>`);
 }
