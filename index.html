@@ -62,7 +62,7 @@ svg{display:block}
 .wm{display:flex;flex-direction:column;line-height:1}
 .wm-1{font-family:var(--f-display);font-weight:650;font-size:18px;letter-spacing:-.02em;color:var(--ink)}
 .wm-1 b{font-weight:800;color:var(--accent-text);letter-spacing:-.01em}
-.wm-2{display:flex;align-items:center;gap:7px;margin-top:4px;font-family:var(--f-body);font-weight:700;font-size:9.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted)}
+.wm-2{display:flex;align-items:center;gap:7px;margin-top:4px;font-family:var(--f-body);font-weight:600;font-size:11.5px;letter-spacing:.01em;color:var(--muted);white-space:nowrap}
 .wm-2 i{font-style:normal;font-weight:600;letter-spacing:.14em;color:var(--faint);padding-left:7px;border-left:1px solid var(--line)}
 .top-search{flex:1;max-width:460px;min-width:0}
 .nav{display:flex;gap:4px;margin-left:auto}
@@ -839,7 +839,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .top .wrap{flex-wrap:nowrap;height:58px;padding-block:0;gap:10px}
   .top .nav{display:none}
   :root{--top-h:58px}
-  .wm-2{display:none}
+  .wm-2{font-size:10.5px;margin-top:3px}
   .bottom-nav{display:flex!important;position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:saturate(1.2) blur(18px);-webkit-backdrop-filter:saturate(1.2) blur(18px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
   .bottom-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;min-height:48px;font-size:11px;font-weight:650;color:var(--muted);position:relative;border-radius:12px}
   .bottom-nav button.on{color:var(--accent-text)}
@@ -1025,7 +1025,7 @@ const SITE_URL = 'https://ba-mba.com/';
 const BRAND_LOGO='';
 function brandInner(){
   const mark = BRAND_LOGO?`<img src="${BRAND_LOGO}" alt="">`:markSVG;
-  return `<span class="brand-mark">${mark}</span><span class="wm full"><span class="wm-1">Israeli <b>MBA</b></span><span class="wm-2">Network<i>US · EU</i></span></span>`;
+  return `<span class="brand-mark">${mark}</span><span class="wm full"><span class="wm-1">Ba-<b>mba</b></span><span class="wm-2">The Israeli MBA network</span></span>`;
 }
 const markSVG='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.1" stroke-linecap="round"><circle cx="9" cy="12" r="5.2" stroke="#fff"/><circle cx="15" cy="12" r="5.2" stroke="#A9BBFF" stroke-opacity=".95"/><path d="M12 7.85a5.2 5.2 0 0 1 0 8.3" stroke="#fff"/><circle cx="12" cy="12" r="1.1" fill="#fff" stroke="none"/></svg>';
 
