@@ -19,3 +19,19 @@ commit;
 begin; select set_config('request.jwt.claims','{"sub":"ffffffff-0000-0000-0000-000000000000","email":"f@example.com"}',true); set local role authenticated;
 select t.fails($q$select public.submit_join_request('{"first":"<b>Eve</b>","last":"Smith","headline":"PM","school":"MIT Sloan","classYear":"2024"}'::jsonb)$q$, 'bad-name', 'a join request with a bad name is refused');
 commit;
+
+-- The email function writes to members with the service_role key (admin_notified_at, welcome_sent_at,
+-- status from the emailed Approve button). The name rule must not block it.
+do $$ declare n int := 0; e text := ''; begin
+  set local role service_role;
+  begin
+    update public.members set admin_notified_at = admin_notified_at where id = 'bbbbbbbb-0000-0000-0000-000000000000';
+    get diagnostics n = row_count;
+    update public.members set first_name = first_name where id = 'bbbbbbbb-0000-0000-0000-000000000000';
+  exception when others then e := sqlerrm; end;
+  reset role;
+  perform t.ok(n = 1 and e = '', 'the email function (service_role) can update a member row [' || e || ']');
+end $$;
+begin; select set_config('request.jwt.claims','{"sub":"bbbbbbbb-0000-0000-0000-000000000000","email":"b@example.com"}',true); set local role authenticated;
+select t.fails('select public.valid_person_name(''x'')', 'permission denied', 'members still cannot call the name check directly');
+commit;
