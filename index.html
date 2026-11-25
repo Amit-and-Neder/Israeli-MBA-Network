@@ -2668,6 +2668,7 @@ const API={
   async linkedIn(kind){ const c=await sb(); const {error}=await c.auth.signInWithOAuth({provider:'linkedin_oidc',options:{redirectTo:location.origin+location.pathname+(kind?'?li='+kind:'')}}); if(error) throw apiErr(error); },
   async sessionEmail(){ const c=await sb(); const {data}=await c.auth.getSession(); return data.session?.user?.email||null; },
   async sessionUser(){ const c=await sb(); const {data}=await c.auth.getSession(); return data.session?.user||null; },
+  async exchangeCode(code){ const c=await sb(); const {data,error}=await c.auth.exchangeCodeForSession(code); if(error) throw apiErr(error); return data.session?.user||null; },
   async signOut(){ const c=await sb(); await c.auth.signOut(); },
   /* The logged-in member's own profile, or null if they haven't asked to join. */
   myProfile:()=>rpc('my_profile'),
@@ -3191,14 +3192,18 @@ function joinLinkedInSubmit(){
 /* Back from LinkedIn after "Continue with LinkedIn and send": restore the draft and send it as the LinkedIn account. */
 function handleJoinLinkedInReturn(q){
   let saved=null; try{ saved=JSON.parse(sessionStorage.getItem(JOIN_LI_KEY)||'null'); }catch(_){ }
-  history.replaceState(null,'',location.pathname);
+  // Keep ?code in the address until Supabase has turned it into a login (it reads it when it starts).
+  const clearUrl=()=>history.replaceState(null,'',location.pathname);
   S.firstRun=!loadMe(); joinStart('join');
-  if(!saved||!saved.join||Date.now()-saved.at>3600e3){ S.join.step='login'; S.join.login={err:'Your sign-up form expired. Start again with your LinkedIn PDF.'}; render(); return; }
+  if(!saved||!saved.join||Date.now()-saved.at>3600e3){ clearUrl(); S.join.step='login'; S.join.login={err:'Your sign-up form expired. Start again with your LinkedIn PDF.'}; render(); return; }
   Object.assign(S.join, saved.join, {step:'verify', reqSent:false, sending:false, sendErr:''});
-  if(q.has('error')){ S.join.sendErr=liReturnErr(q); console.warn('LinkedIn sign-in error:', q.get('error'), q.get('error_description')); render(); return; }
+  if(q.has('error')){ clearUrl(); S.join.sendErr=liReturnErr(q); console.warn('LinkedIn sign-in error:', q.get('error'), q.get('error_description')); render(); return; }
   S.join.sending=true; render();
   (async()=>{
-    const J=S.join, d=J.draft, user=await API.sessionUser().catch(()=>null);
+    const J=S.join, d=J.draft;
+    let user=await API.sessionUser().catch(()=>null);
+    if(!user&&q.get('code')) user=await API.exchangeCode(q.get('code')).catch(e=>{ console.warn('LinkedIn code exchange failed:', e&&e.detail||e); return null; });
+    clearUrl();
     if(!user){ J.sending=false; J.sendErr='LinkedIn didn’t log you in. Try again.'; render(); return; }
     const md=user.user_metadata||{}, liName=(md.full_name||md.name||[md.given_name,md.family_name].filter(Boolean).join(' ')||'').trim();
     d.email=user.email||d.email;
