@@ -19,7 +19,7 @@
 //   RESEND_API_KEY  key from resend.com
 //   FROM_EMAIL      e.g. "Israeli MBA Network <you@gmail.com>" (with Gmail it must be SMTP_USER's address)
 //   ADMIN_EMAILS    comma-separated, who gets "new request" emails
-//   APP_URL         the site's address, e.g. https://neder-nesel.github.io/israeli-mba-network/
+//   APP_URL         the site's address, e.g. https://ba-mba.com/
 // SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided automatically.
 
 import { createClient } from "npm:@supabase/supabase-js@2.119.0";
