@@ -225,7 +225,7 @@ insert into auth.users values ('99999999-0000-0000-0000-000000000000','q@example
 begin; select set_config('request.jwt.claims','{"sub":"99999999-0000-0000-0000-000000000000","email":"q@example.com"}',true); set local role authenticated;
 select public.submit_join_request('{"first":"Q","last":"R","headline":"PM","school":"MIT Sloan","classYear":"2027"}'::jsonb);
 select t.fails('select count(*) from public.review_tokens', 'permission denied', 'members cannot read review keys');
-select public.submit_join_request('{"first":"Q","last":"R2","headline":"PM","school":"MIT Sloan","classYear":"2027"}'::jsonb);
+select public.submit_join_request('{"first":"Q","last":"Rr","headline":"PM","school":"MIT Sloan","classYear":"2027"}'::jsonb);
 commit;
 begin; set local role anon;
 select t.fails('select count(*) from public.review_tokens', 'permission denied', 'anon cannot read review keys');
