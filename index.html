@@ -1927,7 +1927,7 @@ function viewNetwork(){
     body = `<div class="notice" style="margin:-6px 0 14px">${I.shield}<span><b>Admins only.</b> Every new member is approved here by hand. Approve someone only if you’re confident they’re Israeli and studied where they say. Approving sends them their official welcome email. ${LIVE?'Each new request also arrives in your inbox.':'In the live app, each new request also arrives in the admin’s inbox with an Approve link.'}</span></div>`
       + (S.joinReqs.length?`<div class="rlist">${S.joinReqs.map(r=>{ const k=r.knows!=null?byId(r.knows):null; return `<div class="jr">
         <div class="jr-top">${av(r,52)}<span class="who"><b>${esc(r.name)}</b> ${badges(r,'md')}<div class="muted" style="font-size:13.5px">${esc(r.role)} · ${esc(r.company)} · asked ${esc(r.asked)}</div></span></div>
-        ${r.live?`<div class="ev"><span class="evc ok">${I.cap}${esc(SCHOOLS[r.schools[0].school].tag)} ${yy(r.schools[0].year)} (self-reported)</span><span class="evc ok">${I.mail||''}${esc(r.email)} (confirmed)</span>${r.phone?`<span class="evc ok">${esc(r.phone)}</span>`:''}<span class="evc ${r.url?'ok':'no'}">${r.url?I.link+'LinkedIn URL added':I.x+'No LinkedIn URL'}</span></div>`
+        ${r.live?`<div class="ev"><span class="evc ${r.liVerified?'ok':'no'}">${r.liVerified?I.check+'Verified via LinkedIn as '+esc(r.liName):I.x+'Not verified via LinkedIn'}</span><span class="evc ok">${I.cap}${esc(SCHOOLS[r.schools[0].school].tag)} ${yy(r.schools[0].year)} (self-reported)</span><span class="evc ok">${I.mail||''}${esc(r.email)} (confirmed)</span>${r.phone?`<span class="evc ok">${esc(r.phone)}</span>`:''}<span class="evc ${r.url?'ok':'no'}">${r.url?I.link+'LinkedIn URL added':I.x+'No LinkedIn URL'}</span></div>`
           +(r.career.length?`<div class="qa"><span>Career</span>${r.career.map(c=>esc(`${c.role} · ${c.company}${c.start?` (${c.start}–${c.end||'Present'})`:''}`)).join('<br>')}</div>`:'')
         :`<div class="ev"><span class="evc ${r.li.edu?'ok':'no'}">${r.li.edu?I.check:I.x}${r.li.edu?'LinkedIn: '+esc(r.li.edu):'School not listed on LinkedIn'}</span>
           <span class="evc ${r.li.id?'ok':'no'}">${r.li.id?I.check:I.x}${r.li.id?'ID verified on LinkedIn':'ID not verified'}</span>
@@ -2597,7 +2597,10 @@ function readPhoto(file){
    Leave them empty to run in demo mode (nothing is sent anywhere). */
 const SUPABASE_URL='https://ipslqfrtebxtugcoechb.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable__Ka4KLe6RCbwMb-4kOlTqA_trhLGtK8';  // Settings → API Keys → Publishable key. Never a secret key.
-const LINKEDIN_LOGIN=false;     // true once LinkedIn is turned on under Authentication → Providers
+const LINKEDIN_LOGIN=true;      // LinkedIn (OIDC) is on under Authentication → Providers: log in with LinkedIn, and new members verify with it
+/* New sign-ups prove who they are by logging in to their own LinkedIn; the database checks the name matches (20261205000000). */
+const liSignup=()=>LIVE&&LINKEDIN_LOGIN&&S.join&&S.join.mode!=='sync';
+const JOIN_LI_KEY='bamba-join-li';
 const LIVE=!!(SUPABASE_URL&&SUPABASE_ANON_KEY);
 const SUPABASE_JS='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js';
 // Integrity check: the browser refuses the file if the CDN ever serves anything else. Update it with the version.
@@ -2621,7 +2624,7 @@ function apiErr(e){
     : /signups not allowed|user not found/i.test(m)?'not-member'
     : /expired|invalid|otp/i.test(m)&&s!==429?'wrong-code'
     : s===429||/rate limit|security purposes/i.test(m)?'rate-limit'
-    : /already-approved|already-declined|already-open|not-admin|not-approved|not-pending|not-member|missing-school|bad-name|too-many-rows|not-logged-in|no-profile|bad-photo|rate-limit/.exec(m)?.[0]
+    : /already-approved|already-declined|already-open|not-admin|not-approved|not-pending|not-member|missing-school|bad-name|too-many-rows|linkedin-name-mismatch|linkedin-required|not-logged-in|no-profile|bad-photo|rate-limit/.exec(m)?.[0]
     || (/row-level security/i.test(m)?'not-allowed': /check constraint/i.test(m)?'invalid':'failed');
   return Object.assign(new Error(code),{code,detail:m});
 }
@@ -2658,8 +2661,9 @@ const API={
     for(const b of ['avatars','post-photos']){ const {data}=await c.storage.from(b).list(session.user.id,{limit:1000}); if(data&&data.length) await c.storage.from(b).remove(data.map(f=>`${session.user.id}/${f.name}`)); }
     await rpc('delete_my_account'); await c.auth.signOut({scope:'local'}).catch(()=>{}); },
   /* Leaves the page; LinkedIn sends the member back here and sb() finishes the login on load. */
-  async linkedIn(){ const c=await sb(); const {error}=await c.auth.signInWithOAuth({provider:'linkedin_oidc',options:{redirectTo:location.origin+location.pathname}}); if(error) throw apiErr(error); },
+  async linkedIn(kind){ const c=await sb(); const {error}=await c.auth.signInWithOAuth({provider:'linkedin_oidc',options:{redirectTo:location.origin+location.pathname+(kind?'?li='+kind:'')}}); if(error) throw apiErr(error); },
   async sessionEmail(){ const c=await sb(); const {data}=await c.auth.getSession(); return data.session?.user?.email||null; },
+  async sessionUser(){ const c=await sb(); const {data}=await c.auth.getSession(); return data.session?.user||null; },
   async signOut(){ const c=await sb(); await c.auth.signOut(); },
   /* The logged-in member's own profile, or null if they haven't asked to join. */
   myProfile:()=>rpc('my_profile'),
@@ -2974,7 +2978,7 @@ function viewJoin(){
         <span class="jphoto-t"><b>Profile photo*</b><small>Every member has a clear photo of their face, so people recognize each other. JPG or PNG.</small>
         <span class="btn sm ghost pill upload">${I.camera}${d.photo?'Change photo':'Upload photo'}<input type="file" id="j-photo" accept="image/*" aria-label="Upload your profile photo"></span><p class="err" hidden></p></span></div>
       <div class="two">${fld('j-first','First name*',`<input type="text" id="j-first" value="${esc(d.first)}" maxlength="${LIMITS.name}">`)}${fld('j-last','Last name*',`<input type="text" id="j-last" value="${esc(d.last)}" maxlength="${LIMITS.name}">`)}</div>
-      <div class="jsec">${J.pdfEmail
+      <div class="jsec">${liSignup()?`<p class="hint" style="margin:0"><span>${I.link||''}Your email comes from your LinkedIn account. You’ll verify it with LinkedIn in the last step.</span></p>`:J.pdfEmail
         ? fld('j-email','Email*',`<input type="email" id="j-email" value="${esc(J.pdfEmail)}" readonly aria-readonly="true" class="locked">`,'<p class="hint"><span>From your LinkedIn PDF. To use a different email, change it on LinkedIn and download the PDF again.</span></p>')
         : fld('j-email','Email*',`<input type="email" id="j-email" value="${esc(d.email||'')}" placeholder="you@example.com">`,'<p class="hint"><span>We send your registration email here once an admin approves you.</span></p>')}</div>
       <div class="jsec">${fld('j-head','Headline*',`<input type="text" id="j-head" value="${esc(d.role)}" maxlength="${LIMITS.headline}" placeholder="Ex: MBA Candidate · ex-PM at Monday.com">`)}</div>
@@ -3009,10 +3013,10 @@ function viewJoin(){
       main=`${J.sendErr?`<div class="notice" style="background:var(--warm-soft);color:var(--warm);margin-bottom:14px">${I.x}<span>${esc(J.sendErr)}</span></div>`:''}<p class="lead" style="margin:0 0 14px">An admin reviews your request by hand. This is what they’ll see:</p>
         <div class="invite" style="flex-direction:column;align-items:stretch;gap:10px"><span><b>${esc(d.first+' '+d.last)}</b><small>${esc(d.role)}${J.liurl?' · '+esc(J.liurl):''}</small></span>${ev}</div>
         <div class="jsec">${fld('j-answer','Where in Israel are you from, and what did you do before your MBA?*',`<textarea id="j-answer" maxlength="400" placeholder="Ex: Grew up in Haifa, served in 8200, then PM at Monday.com for 4 years.">${esc(J.answer||'')}</textarea>`)}</div>
-        ${LIVE?`<div class="jsec"><h3>${I.shield.replace('<svg','<svg width="17" height="17"')}Choose a password</h3><p class="muted" style="margin:-4px 0 10px;font-size:14px">You’ll log in with ${esc(d.email)} and this password.</p>
+        ${liSignup()?`<div class="jsec"><h3>${I.shield.replace('<svg','<svg width="17" height="17"')}Verify with LinkedIn</h3><p class="muted" style="margin:-4px 0 0;font-size:14px">Log in to <b>your own</b> LinkedIn account so we can confirm this profile is yours. The name on your LinkedIn account has to match <b>${esc(d.first+' '+d.last)}</b>. You’ll use LinkedIn to log in to Ba-mba, and we’ll email you at your LinkedIn email address.</p></div>`:LIVE?`<div class="jsec"><h3>${I.shield.replace('<svg','<svg width="17" height="17"')}Choose a password</h3><p class="muted" style="margin:-4px 0 10px;font-size:14px">You’ll log in with ${esc(d.email)} and this password.</p>
           <div class="two">${fld('j-pass','Password*',`<input type="password" id="j-pass" autocomplete="new-password" placeholder="At least ${PW_MIN} characters">`)}${fld('j-pass2','Repeat password*',`<input type="password" id="j-pass2" autocomplete="new-password">`)}</div></div>`:''}
         <div class="jsec field" id="fw-j-agree"><label class="checkrow"><input type="checkbox" id="j-agree" ${J.agree?'checked':''}>I’m Israeli and I study or studied at ${esc(sc.full)}.</label><p class="err" hidden></p></div>
-        <div class="row"><button class="btn lg primary pill" data-act="join-request-send" ${J.sending?'disabled':''}>${J.sending?'Sending…':'Submit for approval'}</button><button class="link" data-act="join-go" data-step="review">Back</button></div>`;
+        <div class="row"><button class="btn lg primary pill" data-act="join-request-send" ${J.sending?'disabled':''}>${J.sending?(liSignup()?'Verifying…':'Sending…'):(liSignup()?'Verify with LinkedIn and send':'Submit for approval')}</button><button class="link" data-act="join-go" data-step="review">Back</button></div>`;
     }
     body=`<div class="jcard"><h1>Request to join ${esc(sc.tag)} ${yy(e.year)}</h1>${main}</div>`;
   }
@@ -3030,13 +3034,13 @@ function joinReadReview(){
   const J=S.join, d=J.draft; let ok=true;
   const need=(id,msg)=>{ const bad=!val(id); fieldErr(id,bad?msg:''); if(bad) ok=false; };
   const needName=(id,msg)=>{ const m=nameErr(val(id),msg); fieldErr(id,m); if(m) ok=false; };
-  needName('j-first','Enter your first name'); const em=J.pdfEmail||val('j-email'); if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ fieldErr('j-email','Enter a valid email address'); ok=false; } else fieldErr('j-email',''); needName('j-last','Enter your last name'); need('j-head','Enter a headline'); need('j-school','Select your school');
+  needName('j-first','Enter your first name'); const em=J.pdfEmail||val('j-email'); if(!liSignup()){ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ fieldErr('j-email','Enter a valid email address'); ok=false; } else fieldErr('j-email',''); } needName('j-last','Enter your last name'); need('j-head','Enter a headline'); need('j-school','Select your school');
   const c=readContactFields('j'); if(!c) ok=false;
   if(!d.photo){ fieldErr('j-photo','Add a photo of your face. Every member needs one.'); ok=false; } else fieldErr('j-photo','');
   if(!ok) return false;
   const y=+val('j-year'), sch=val('j-school'), prev=d.schools[0]||{};
   if(document.getElementById('j-liurl')) J.liurl=val('j-liurl').replace(/^https?:\/\/(www\.)?/,'');
-  Object.assign(d,{first:val('j-first'),last:val('j-last'),role:val('j-head'),email:J.pdfEmail||val('j-email'),about:val('j-about'),location:val('j-loc'),industry:val('j-ind'),phone:c.phone,shareEmail:c.shareEmail,pref:c.pref});
+  Object.assign(d,{first:val('j-first'),last:val('j-last'),role:val('j-head'),email:liSignup()?d.email:(J.pdfEmail||val('j-email')),about:val('j-about'),location:val('j-loc'),industry:val('j-ind'),phone:c.phone,shareEmail:c.shareEmail,pref:c.pref});
   d.schools=[{school:sch,program:prev.program||'MBA',year:y,start:prev.start||y-2}];
   return true;
 }
@@ -3087,18 +3091,19 @@ async function joinVerifyCode(){
   J.pass=null; await joinSave();
 }
 async function joinSave(){
-  const J=S.join;
+  const J=S.join; J.lastErr='';
   try{ const row=await API.submitJoin(joinPayload()); J.reqId=row.id; J.reqSent=true; J.codeSent=false;
     const d=J.draft; await API.saveContact({phone:d.phone||'',shareEmail:d.shareEmail!==false,pref:d.pref}).catch(e=>console.error('Contact save failed:', e&&e.detail||e));
     if(d.photo&&d.photo.startsWith('data:')){
       try{ const path=await API.uploadPhoto('avatars',d.photo); await API.saveProfile({photoPath:path}); J.photoPath=path; }
       catch(e){ console.error('Photo upload failed:', e&&e.detail||e); toast('Your request was sent, but we couldn’t save your photo. Add it from your profile.', null, 12000); } } }
-  catch(err){ J.sendErr=joinErrText(err); }
+  catch(err){ J.lastErr=err.code; J.sendErr=joinErrText(err); }
   J.sending=false; render(); window.scrollTo(0,0);
 }
 function joinErrText(err){
   return err.code==='already-approved'||err.code==='already-registered'?'This email already has an account. Go back to the first page and log in, or use “Forgot password?”.'
     :err.code==='weak-password'?`Choose a stronger password: at least ${PW_MIN} characters.`
+    :err.code==='linkedin-required'?'Verify with LinkedIn to send your request.'
     :err.code==='bad-name'?'Your name can only have letters, spaces, hyphens (-), apostrophes (\') and periods. Go back and fix it.'
     :err.code==='already-declined'?'This email’s request to join wasn’t approved. Reply to any of our emails if you think that’s a mistake.'
     :err.code==='rate-limit'?'Too many codes requested. Wait a minute and try again.'
@@ -3166,9 +3171,40 @@ async function loginLinkedIn(){
   L.liBusy=true; render();
   try{ await API.linkedIn(); }catch(_){ L.err='LinkedIn login didn’t work. Try again, or log in with your email and password.'; L.liBusy=false; render(); }
 }
+/* Sign-up, last step: keep the draft in this tab, go to LinkedIn, and send the request when we come back. */
+function joinLinkedInSubmit(){
+  const J=S.join; J.sendErr='';
+  try{ sessionStorage.setItem(JOIN_LI_KEY, JSON.stringify({at:Date.now(), join:{...J, login:{}, pass:null, sending:false}})); }
+  catch(_){ J.sendErr='Your browser blocked saving this form. Turn off private browsing and try again.'; render(); return; }
+  J.sending=true; render();
+  API.linkedIn('join').catch(()=>{ J.sending=false; J.sendErr='We couldn’t open LinkedIn. Try again.'; render(); });
+}
+/* Back from LinkedIn after "Verify with LinkedIn and send": restore the draft and send it as the LinkedIn account. */
+function handleJoinLinkedInReturn(q){
+  let saved=null; try{ saved=JSON.parse(sessionStorage.getItem(JOIN_LI_KEY)||'null'); }catch(_){ }
+  history.replaceState(null,'',location.pathname);
+  S.firstRun=!loadMe(); joinStart('join');
+  if(!saved||!saved.join||Date.now()-saved.at>3600e3){ S.join.step='login'; S.join.login={err:'Your sign-up form expired. Start again with your LinkedIn PDF.'}; render(); return; }
+  Object.assign(S.join, saved.join, {step:'verify', reqSent:false, sending:false, sendErr:''});
+  if(q.has('error')){ S.join.sendErr='LinkedIn verification was cancelled. Try again when you’re ready.'; render(); return; }
+  S.join.sending=true; render();
+  (async()=>{
+    const J=S.join, d=J.draft, user=await API.sessionUser().catch(()=>null);
+    if(!user){ J.sending=false; J.sendErr='LinkedIn didn’t log you in. Try again.'; render(); return; }
+    const md=user.user_metadata||{}, liName=(md.full_name||md.name||[md.given_name,md.family_name].filter(Boolean).join(' ')||'').trim();
+    d.email=user.email||d.email;
+    await joinSave();
+    if(J.reqSent){ try{ sessionStorage.removeItem(JOIN_LI_KEY); }catch(_){ } return; }
+    if(J.lastErr==='linkedin-name-mismatch'){
+      J.sendErr=`The LinkedIn account you logged in with${liName?' belongs to '+liName:''}, but this profile is ${d.first} ${d.last}. Verify with your own LinkedIn account (log out of LinkedIn first if it’s someone else’s), or upload your own LinkedIn PDF.`;
+      await API.signOut().catch(()=>{}); render();
+    }
+  })();
+}
 /* Back from LinkedIn: the URL carries ?code (or ?error). Supabase turns the code into a login as it starts. Returns true if this load is a LinkedIn return. */
 function handleLinkedInReturn(){
   const q=new URLSearchParams(location.search); if(!LIVE||!(q.has('code')||q.has('error'))) return false;
+  if(q.get('li')==='join'){ handleJoinLinkedInReturn(q); return true; }
   S.firstRun=!loadMe(); joinStart('join'); const L=S.join.login={}; S.join.step='login';
   if(q.has('error')){ history.replaceState(null,'',location.pathname); L.err='LinkedIn login was cancelled.'; return true; }
   L.liBusy=true;
@@ -3334,7 +3370,7 @@ function liveReq(r){
   let h=0; for(const ch of r.id) h=(h*31+ch.charCodeAt(0))>>>0;   // stable number for the generated avatar
   return {id:100000+h%900000,uid:r.id,live:true,name:`${r.first_name} ${r.last_name}`,first:r.first_name,last:r.last_name,hair:h%2?'short':'long',
     role:r.headline,company:cur?cur.company:'',schools:[{school,program:'MBA',year:r.class_year||NOW_YEAR}],
-    email:r.email,phone:r.phone,answer:r.join_answer,url:r.linkedin_url,asked:ago(r.created_at),career:r.career||[],source:r.signup_source};
+    email:r.email,phone:r.phone,answer:r.join_answer,url:r.linkedin_url,asked:ago(r.created_at),career:r.career||[],source:r.signup_source,liVerified:!!r.linkedin_verified,liName:r.linkedin_name||''};
 }
 /* Profile fields that sign-up doesn't ask for. A new member starts with these empty, not with the sample member's. */
 const BLANK_DETAILS = () => ({canRefer:false,unit:'',ilUni:'',hometown:'',topics:[]});
@@ -3421,7 +3457,7 @@ document.addEventListener('click',e=>{
     case 'forgot-confirm': forgotConfirm(); break;
     case 'join-go': S.join.step=t.dataset.step; render(); window.scrollTo(0,0); break;
     case 'join-rm': S.join.draft.career.splice(+t.dataset.idx,1); render(); break;
-    case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); liveSaveProfile(); liveSaveContact(); if(LIVE&&me().photo&&me().photo.startsWith('data:')) livePhoto(me()); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else if(LIVE){ joinCheckEmail(); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
+    case 'join-review-next': if(joinReadReview()){ if(S.join.mode==='sync'){ joinApply(); liveSaveProfile(); liveSaveContact(); if(LIVE&&me().photo&&me().photo.startsWith('data:')) livePhoto(me()); S.join=null; go('me',{},false); toast('Profile updated from LinkedIn'); } else if(LIVE&&!liSignup()){ joinCheckEmail(); } else { S.join.step='verify'; S.join.reqSent=false; render(); window.scrollTo(0,0); } } break;
     case 'join-finish': joinApply(t.dataset.status); me().reqId=S.join.reqId||null; if(LIVE){ me().uid=S.join.reqId||null; if(S.join.photoPath) me().photoPath=S.join.photoPath; } saveMe(); S.firstRun=false; S.join.step='done'; render(); window.scrollTo(0,0); break;
     case 'join-demo-approve': { const m=me(); m.verify.school='admin'; saveMe(); render(); openRegEmail(m.first,m.email,'An admin approved your request. In the live app this lands in your inbox.'); break; }
     case 'join-taken-login': { const email=S.join.draft.email; closeModal(); S.join.login={email}; S.join.step='login'; render(); window.scrollTo(0,0); break; }
@@ -3432,7 +3468,8 @@ document.addEventListener('click',e=>{
     case 'join-request-send': { const J=S.join; J.answer=val('j-answer'); J.agree=document.getElementById('j-agree').checked; let ok=true;
       if(J.answer.length<10){ fieldErr('j-answer','Write a sentence or two for the admin'); ok=false; } else fieldErr('j-answer','');
       if(!J.agree){ fieldErr('j-agree','Confirm this to send your request'); ok=false; } else fieldErr('j-agree','');
-      if(LIVE){ const pw=document.getElementById('j-pass').value, pw2=document.getElementById('j-pass2').value;
+      if(ok&&liSignup()){ joinLinkedInSubmit(); break; }
+      if(LIVE&&!liSignup()){ const pw=document.getElementById('j-pass').value, pw2=document.getElementById('j-pass2').value;
         if(pw.length<PW_MIN){ fieldErr('j-pass',`Use at least ${PW_MIN} characters`); ok=false; } else fieldErr('j-pass','');
         if(pw!==pw2){ fieldErr('j-pass2','The passwords don’t match'); ok=false; } else fieldErr('j-pass2','');
         if(ok) J.pass=pw; }
