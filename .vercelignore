@@ -1,0 +1,5 @@
+# Deploy only the site itself. Database code, tests and docs stay in GitHub.
+supabase
+backend
+*.md
+.github
