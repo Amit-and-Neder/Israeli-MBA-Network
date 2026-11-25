@@ -1,4 +1,4 @@
-// Israeli MBA Network: sends the app's emails, through Gmail (SMTP) or Resend.
+// Ba-mba (the Israeli MBA network): sends the app's emails, through Gmail (SMTP) or Resend.
 //
 //   { action: "join-request" }            -> emails the admins about the caller's pending request (with Approve and
 //                                            Decline buttons), and tells the applicant their request is waiting
@@ -17,7 +17,7 @@
 //   SMTP_HOST       e.g. smtp.gmail.com     SMTP_PORT  465
 //   SMTP_USER       the Gmail address       SMTP_PASSWORD  a Gmail app password (not the normal password)
 //   RESEND_API_KEY  key from resend.com
-//   FROM_EMAIL      e.g. "Israeli MBA Network <you@gmail.com>" (with Gmail it must be SMTP_USER's address)
+//   FROM_EMAIL      e.g. "Ba-mba <you@gmail.com>" (with Gmail it must be SMTP_USER's address)
 //   ADMIN_EMAILS    comma-separated, who gets "new request" emails
 //   APP_URL         the site's address, e.g. https://ba-mba.com/
 // SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided automatically.
@@ -25,7 +25,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.119.0";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
-const NETWORK = "Israeli MBA Network";
+const NETWORK = "Ba-mba";
 const env = (k: string) => Deno.env.get(k) ?? "";
 const cors = {
   "Access-Control-Allow-Origin": "*",
