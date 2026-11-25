@@ -2982,7 +2982,7 @@ function viewJoin(){
         <span class="jphoto-t"><b>Profile photo*</b><small>Every member has a clear photo of their face, so people recognize each other. JPG or PNG.</small>
         <span class="btn sm ghost pill upload">${I.camera}${d.photo?'Change photo':'Upload photo'}<input type="file" id="j-photo" accept="image/*" aria-label="Upload your profile photo"></span><p class="err" hidden></p></span></div>
       <div class="two">${fld('j-first','First name*',`<input type="text" id="j-first" value="${esc(d.first)}" maxlength="${LIMITS.name}">`)}${fld('j-last','Last name*',`<input type="text" id="j-last" value="${esc(d.last)}" maxlength="${LIMITS.name}">`)}</div>
-      <div class="jsec">${liSignup()?`<p class="hint" style="margin:0"><span>${I.link||''}Your email comes from your LinkedIn account. You’ll sign in with LinkedIn in the last step.</span></p>`:J.pdfEmail
+      <div class="jsec">${liSignup()?`<p class="hint" style="margin:0"><span>Your email comes from your LinkedIn account. You’ll sign in with LinkedIn in the last step.</span></p>`:J.pdfEmail
         ? fld('j-email','Email*',`<input type="email" id="j-email" value="${esc(J.pdfEmail)}" readonly aria-readonly="true" class="locked">`,'<p class="hint"><span>From your LinkedIn PDF. To use a different email, change it on LinkedIn and download the PDF again.</span></p>')
         : fld('j-email','Email*',`<input type="email" id="j-email" value="${esc(d.email||'')}" placeholder="you@example.com">`,'<p class="hint"><span>We send your registration email here once an admin approves you.</span></p>')}</div>
       <div class="jsec">${fld('j-head','Headline*',`<input type="text" id="j-head" value="${esc(d.role)}" maxlength="${LIMITS.headline}" placeholder="Ex: MBA Candidate · ex-PM at Monday.com">`)}</div>
@@ -3176,6 +3176,10 @@ async function loginLinkedIn(){
   L.liBusy=true; render();
   try{ await API.linkedIn(); }catch(_){ L.err='LinkedIn login didn’t work. Try again, or log in with your email and password.'; L.liBusy=false; render(); }
 }
+/* LinkedIn sends ?error=access_denied when the person clicks Cancel; anything else is a real failure. */
+const liReturnErr=q=>q.get('error')==='access_denied'||q.get('error_code')==='access_denied'
+  ? 'LinkedIn sign-in was cancelled. Try again when you’re ready.'
+  : 'LinkedIn sign-in didn’t work on our side. Try again in a few minutes. If it keeps happening, email israeli.network.app@gmail.com.';
 /* Sign-up, last step: keep the draft in this tab, go to LinkedIn, and send the request when we come back. */
 function joinLinkedInSubmit(){
   const J=S.join; J.sendErr='';
@@ -3191,7 +3195,7 @@ function handleJoinLinkedInReturn(q){
   S.firstRun=!loadMe(); joinStart('join');
   if(!saved||!saved.join||Date.now()-saved.at>3600e3){ S.join.step='login'; S.join.login={err:'Your sign-up form expired. Start again with your LinkedIn PDF.'}; render(); return; }
   Object.assign(S.join, saved.join, {step:'verify', reqSent:false, sending:false, sendErr:''});
-  if(q.has('error')){ S.join.sendErr='LinkedIn sign-in was cancelled. Try again when you’re ready.'; render(); return; }
+  if(q.has('error')){ S.join.sendErr=liReturnErr(q); console.warn('LinkedIn sign-in error:', q.get('error'), q.get('error_description')); render(); return; }
   S.join.sending=true; render();
   (async()=>{
     const J=S.join, d=J.draft, user=await API.sessionUser().catch(()=>null);
@@ -3211,7 +3215,7 @@ function handleLinkedInReturn(){
   const q=new URLSearchParams(location.search); if(!LIVE||!(q.has('code')||q.has('error'))) return false;
   if(q.get('li')==='join'){ handleJoinLinkedInReturn(q); return true; }
   S.firstRun=!loadMe(); joinStart('join'); const L=S.join.login={}; S.join.step='login';
-  if(q.has('error')){ history.replaceState(null,'',location.pathname); L.err='LinkedIn login was cancelled.'; return true; }
+  if(q.has('error')){ console.warn('LinkedIn login error:', q.get('error'), q.get('error_description')); history.replaceState(null,'',location.pathname); L.err=liReturnErr(q).replace('sign-in','login'); return true; }
   L.liBusy=true;
   API.sessionEmail().then(email=>{ history.replaceState(null,'',location.pathname); if(!email) throw new Error('no session'); return loginFinish(); })
     .catch(()=>{ L.err='LinkedIn login didn’t work. Try again, or log in with your email and password.'; L.liBusy=false; render(); });
