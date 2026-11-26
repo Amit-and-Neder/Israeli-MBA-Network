@@ -173,6 +173,16 @@ mark{background:none;color:var(--accent-text);font-weight:700}
 .pcard:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
 .pcard-hit{display:flex;flex-direction:column;align-items:flex-start;gap:10px;text-align:left;width:100%}
 .pcard .nm{font-weight:650;font-size:15.5px;line-height:1.2}
+.cflag{display:inline-block;width:20px;height:14px;border-radius:3px;overflow:hidden;flex:none;vertical-align:-2px;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+.cflag svg{display:block;width:100%;height:100%}
+.pc-where{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-size:12.5px;color:var(--muted)}
+.pc-where>span{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.pwhere{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 12px}
+.pwhere>span{display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);font-size:13.5px;color:var(--ink)}
+.pwhere small{color:var(--muted);font-size:12.5px;font-weight:500}
+.pwhere .cflag{width:24px;height:16px}
+.band-label b{display:inline-flex;align-items:center;gap:8px}
+.band-label .cflag{width:24px;height:16px;box-shadow:0 0 0 1px rgba(255,255,255,.5)}
 .pcard .rl{color:var(--muted);font-size:13px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:35px}
 .signal{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--accent-text);background:var(--accent-soft);padding:4px 9px;border-radius:8px;align-self:flex-start;max-width:100%}
 .signal span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1478,7 +1488,8 @@ function pcard(p,signal,warm){
     <button class="pcard-hit" data-act="profile" data-id="${p.id}">
       ${p.statusNote?`<span class="cstatus">${esc(p.statusNote)}</span>`:''}
       <span class="pc-top">${av(p,64)}<span class="cbs">${badges(p,'md')}</span></span>
-      <div><div class="nm">${esc(p.name)}</div><div class="rl">${esc(p.title||p.role)} · ${esc(p.company)}</div></div>
+      <div><div class="nm">${esc(p.name)}</div><div class="rl">${esc(p.title||p.role)} · ${esc(p.company)}</div>
+        <div class="pc-where"><span title="Studied at">${flagOf(schoolCountry(p.schools[0].school))}${esc(p.schools[0].school)}</span>${p.location?`<span title="Lives and works in">${flagOf(LOC_COUNTRY[p.location])||I.pin.replace('<svg','<svg width="13" height="13"')}${esc(p.location)}</span>`:''}</div></div>
       <span class="card-tags">${statusTag(p,'margin:0')}${indSticker(p)}</span>
     </button>
     <span class="signal ${warm?'warm':''}">${I[sg.ico]||I.users}<span>${esc(sg.txt)}</span></span>
@@ -1503,7 +1514,7 @@ function rrow(p,extra=''){
     <div class="main">
       <div class="nmline"><button class="nm" data-act="profile" data-id="${p.id}">${esc(p.name)}</button>${badges(p,'md')}${statusTag(p,'margin:0')}${indSticker(p)}</div>
       <div class="rl">${esc(p.title||p.role)} · <b>${coName(p)}</b></div>
-      <div class="sub2">${esc(locFull(p.location))} · ${p.schools.map(s=>esc(`${SCHOOLS[s.school].full}, Class of ${s.year}`)).join(' · ')}</div>
+      <div class="sub2">${flagOf(LOC_COUNTRY[p.location])} ${esc(locFull(p.location))} · ${p.schools.map(s=>`${flagOf(schoolCountry(s.school))} ${esc(`${SCHOOLS[s.school].full}, Class of ${s.year}`)}`).join(' · ')}</div>
       ${extra}
     </div>
     <div class="acts">${starBtn(p.id)}${rowAction(p)}</div></li>`;
@@ -1759,6 +1770,12 @@ function topicsPanel(p,isMe){
   return `<section class="panel lower"><div class="panel-h"><div><h2>Open to talking about</h2><p class="sub">${isMe?'Industries and topics members can reach out about':'Good reasons to reach out to '+esc(p.first)}</p></div>${isMe?`<button class="ibtn" data-act="edit" data-kind="topics" aria-label="Edit topics">${I.pencil}</button>`:''}</div>
     ${p.topics.length?`<div class="chips">${p.topics.map(t=>`<span class="chip" style="cursor:default">${esc(t)}</span>`).join('')}</div>`:'<p class="muted" style="margin:0">Add a few so members know what to ask you about.</p>'}</section>`;
 }
+/* Where they studied and where they live and work now, each with its country's flag. */
+function whereRow(p){
+  const studied=[...new Set(p.schools.map(s=>schoolCountry(s.school)).filter(Boolean))];
+  const lives=LOC_COUNTRY[p.location]||'';
+  return `<div class="pwhere">${studied.map(c=>`<span>${flagOf(c)}<small>Studied in</small>${esc(c)}</span>`).join('')}${p.location?`<span>${flagOf(lives)||I.pin}<small>Lives &amp; works in</small>${esc(locFull(p.location))}</span>`:''}</div>`;
+}
 function viewProfile(id){
   const p = byId(id), isMe = id===ME;
   const cg = commonGround(p);
@@ -1775,7 +1792,7 @@ function viewProfile(id){
     : `<div class="pactions">${starBtn(id,'lg')}</div>`;
   return `<main><div class="wrap page">
     ${isMe?'':`<button class="back" data-act="back">${I.left}Back</button>`}
-    <section class="phead" style="--sc:${SCHOOLS[p.schools[0].school].color}"><div class="phead-band"><span class="band-label"><b>${esc(SCHOOLS[p.schools[0].school].full)}</b><span>${esc(p.schools[0].program)} · CLASS OF ${p.schools[0].year}</span></span><span class="band-mark">${esc(SCHOOLS[p.schools[0].school].tag)} ${yy(p.schools[0].year)}</span></div><div class="phead-body">
+    <section class="phead" style="--sc:${SCHOOLS[p.schools[0].school].color}"><div class="phead-band"><span class="band-label"><b>${flagOf(schoolCountry(p.schools[0].school))}${esc(SCHOOLS[p.schools[0].school].full)}</b><span>${esc(p.schools[0].program)} · CLASS OF ${p.schools[0].year}</span></span><span class="band-mark">${esc(SCHOOLS[p.schools[0].school].tag)} ${yy(p.schools[0].year)}</span></div><div class="phead-body">
       <div class="pav">${isMe?`<button class="av-edit" data-act="edit" data-kind="photo" aria-label="Edit photo">${av(p,132)}<span class="cam">${I.camera}</span></button>`:av(p,132)}
         ${p.statusNote?(isMe?`<button class="pstatus" data-act="edit" data-kind="status" aria-label="Edit your status">${esc(p.statusNote)}</button>`:`<span class="pstatus">${esc(p.statusNote)}</span>`):isMe?`<button class="pstatus add" data-act="edit" data-kind="status">${I.plus}Add a status</button>`:''}</div>
       ${isMe?`<button class="ibtn intro-edit" data-act="edit" data-kind="intro" aria-label="Edit intro">${I.pencil}</button>`:''}
@@ -1783,7 +1800,7 @@ function viewProfile(id){
         <h1>${esc(p.name)}${isMe?' <span class="tag">YOU</span>':''}</h1>
         <div class="school-line">${badges(p,'lg')}<span class="txt"><b>${p.schools.map(s=>esc(SCHOOLS[s.school].full)).join(', ')}</b><span>${p.schools.map(s=>esc(`${s.program} · ${s.year>NOW_YEAR?'Graduating':'Class of'} ${s.year}`)).join(', ')}</span></span></div>
         <div class="rl">${esc(p.title||p.role)} · <b>${coName(p)}</b></div>
-        <div class="meta"><span>${I.pin}${esc(locFull(p.location))}</span></div>
+        ${whereRow(p)}
         <div class="badges">${isMe&&p.verify&&p.verify.school==='pending'?`<span class="vbadge pend">${I.clock}Awaiting admin approval</span>`:''}${statusTag(p,'margin:0;vertical-align:0;align-self:center')}${indSticker(p,true)}<span class="vbadge pref ${p.pref}">${p.pref==='whatsapp'?I.wa:I.mail}${prefLabel}</span></div>
       </div>
       ${actions}
@@ -2365,6 +2382,28 @@ function sendRequest(id){
 const STORE_KEY='imn-my-profile-v2';
 const ME_FIELDS=['statusNote','first','last','role','location','industry','schools','career','email','phone','pref','photo','about','verify','reqId','canRefer','unit','ilUni','hometown','topics','uid','photoPath','linkedin'];
 /* Country for each city, shown next to it ("Boston, United States") and used to group the picker. */
+/* Country flags (small, flat) for where a member studied and where they live. */
+const COUNTRY_CODE={'United States':'US','Israel':'IL','United Kingdom':'GB','France':'FR','Spain':'ES','Germany':'DE','Italy':'IT','Switzerland':'CH','Netherlands':'NL','Denmark':'DK'};
+const SCHOOL_COUNTRY={'INSEAD':'France','London Business School':'United Kingdom','HEC Paris':'France','IESE':'Spain','IE Business School':'Spain','ESADE':'Spain',
+  'Oxford Saïd':'United Kingdom','Cambridge Judge':'United Kingdom','IMD':'Switzerland','SDA Bocconi':'Italy','ESSEC':'France','ESCP':'France',
+  'University of St. Gallen':'Switzerland','Rotterdam School of Management':'Netherlands','Warwick Business School':'United Kingdom',
+  'Imperial College Business School':'United Kingdom','Mannheim Business School':'Germany','WHU – Otto Beisheim':'Germany',
+  'Copenhagen Business School':'Denmark','Alliance Manchester Business School':'United Kingdom'};
+const schoolCountry=k=>SCHOOL_COUNTRY[k]||(SCHOOLS[k]&&SCHOOLS[k].region==='US'?'United States':'');
+const FLAG_SVG={
+  US:()=>{ let r=''; for(let k=0;k<7;k++) r+=`<rect y="${k*40/13*2}" width="60" height="${40/13}" fill="#B22234"/>`; return `<rect width="60" height="40" fill="#fff"/>${r}<rect width="26" height="${40*7/13}" fill="#3C3B6E"/>`; },
+  IL:()=>`<rect width="60" height="40" fill="#fff"/><rect y="5" width="60" height="5" fill="#0038B8"/><rect y="30" width="60" height="5" fill="#0038B8"/><path d="M30 13.5l5.6 9.7H24.4zM30 26.5l-5.6-9.7h11.2z" fill="none" stroke="#0038B8" stroke-width="1.6"/>`,
+  GB:()=>`<rect width="60" height="40" fill="#012169"/><path d="M0 0L60 40M60 0L0 40" stroke="#fff" stroke-width="8"/><path d="M0 0L60 40M60 0L0 40" stroke="#C8102E" stroke-width="3"/><path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="12"/><path d="M30 0v40M0 20h60" stroke="#C8102E" stroke-width="7"/>`,
+  FR:()=>`<rect width="20" height="40" fill="#0055A4"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#EF4135"/>`,
+  IT:()=>`<rect width="20" height="40" fill="#009246"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#CE2B37"/>`,
+  DE:()=>`<rect width="60" height="14" fill="#000"/><rect y="13" width="60" height="14" fill="#DD0000"/><rect y="26" width="60" height="14" fill="#FFCE00"/>`,
+  NL:()=>`<rect width="60" height="14" fill="#AE1C28"/><rect y="13" width="60" height="14" fill="#fff"/><rect y="26" width="60" height="14" fill="#21468B"/>`,
+  ES:()=>`<rect width="60" height="40" fill="#AA151B"/><rect y="10" width="60" height="20" fill="#F1BF00"/>`,
+  CH:()=>`<rect width="60" height="40" fill="#DA291C"/><path d="M26 10h8v6h6v8h-6v6h-8v-6h-6v-8h6z" fill="#fff"/>`,
+  DK:()=>`<rect width="60" height="40" fill="#C8102E"/><rect x="18" width="7" height="40" fill="#fff"/><rect y="16.5" width="60" height="7" fill="#fff"/>`,
+};
+/* Flag for a country name ('' if we don't have one). Decorative: the country is always written next to it. */
+const flagOf=country=>{ const c=COUNTRY_CODE[country]; return c&&FLAG_SVG[c]?`<span class="cflag" aria-hidden="true"><svg viewBox="0 0 60 40" preserveAspectRatio="none">${FLAG_SVG[c]()}</svg></span>`:''; };
 const LOC_COUNTRY={'Boston':'United States','New York':'United States','SF Bay Area':'United States','Seattle':'United States','Los Angeles':'United States','Chicago':'United States','Washington, DC':'United States','Austin':'United States','Miami':'United States',
   'Tel Aviv':'Israel','Jerusalem':'Israel','Haifa':'Israel','London':'United Kingdom','Paris':'France','Barcelona':'Spain','Madrid':'Spain','Berlin':'Germany'};
 const locFull=l=>l&&LOC_COUNTRY[l]?`${l}, ${LOC_COUNTRY[l]}`:(l||'');
