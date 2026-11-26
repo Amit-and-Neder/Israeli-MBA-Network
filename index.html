@@ -2480,11 +2480,13 @@ function editShell(title,body,{del=null,saveKind,idx=''}={}){
 let photoDraft;
 /* "Open to talking about": the member's own tags. They type any topic, remove any, and may tap a suggestion. Nothing is picked for them. */
 const TOPIC_MAX=20, TOPIC_LEN=40;
+/* Shown first among the suggestions, besides the industries. */
+const TOPIC_SUGGESTIONS=['Entrepreneurship'];
 let topicsDraft=[];
 const topicKey=t=>t.toLocaleLowerCase();
 function topicsEditor(){
   const mine=new Set(topicsDraft.map(topicKey));
-  const sugg=[...new Set([...Object.keys(INDUSTRIES),...P.flatMap(x=>x.topics||[])])].filter(t=>!mine.has(topicKey(t))).slice(0,16);
+  const sugg=[...new Set([...TOPIC_SUGGESTIONS,...Object.keys(INDUSTRIES),...P.flatMap(x=>x.topics||[])])].filter(t=>!mine.has(topicKey(t))).slice(0,16);
   const full=topicsDraft.length>=TOPIC_MAX;
   return `<p class="req-note">Write the industries and topics members can reach out to you about. Add as many as you like (up to ${TOPIC_MAX}) and remove any.</p>
     <div class="chips topic-mine">${topicsDraft.length?topicsDraft.map((t,i)=>`<span class="chip">${esc(t)}<button type="button" data-act="topic-rm" data-i="${i}" aria-label="Remove ${esc(t)}">${I.x}</button></span>`).join(''):'<span class="muted" style="font-size:14px">No topics yet.</span>'}</div>
