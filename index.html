@@ -248,7 +248,16 @@ button.pstatus:hover{border-color:var(--accent)}
 .dl dt{color:var(--muted);font-size:13px;font-weight:600;padding-top:1px}
 .dl dd{margin:0;min-width:0}
 .dl .none{color:var(--faint)}
-.topic-picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:2px 10px;margin-bottom:14px}
+.topic-mine{margin:2px 0 14px;min-height:36px}
+.topic-mine .chip{padding:5px 6px 5px 12px;background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
+.topic-mine .chip button{display:inline-grid;place-items:center;width:22px;height:22px;border:0;border-radius:99px;background:none;color:inherit;cursor:pointer;padding:0}
+.topic-mine .chip button:hover{background:var(--surface-2)}
+.topic-mine .chip svg{width:12px;height:12px}
+.topic-add{display:flex;gap:8px}
+.topic-add input{flex:1;min-width:0}
+.topic-sugg{margin-top:16px}
+.topic-sugg h4{margin:0 0 8px;font-size:13px;font-weight:600;color:var(--muted)}
+.topic-sugg .chip{cursor:pointer;font:inherit;font-size:13.5px;font-weight:500;color:var(--ink)}
 .mba-sep{border:0;border-top:1px solid var(--line);margin:16px 0}
 .lower{opacity:.97}
 .lower h2{font-size:17px}
@@ -2426,6 +2435,32 @@ function editShell(title,body,{del=null,saveKind,idx=''}={}){
     <div class="edit-f">${del?`<button class="btn danger" data-act="delete-item" data-kind="${saveKind}" data-idx="${idx}">${del}</button>`:''}<span class="sp"></span><button class="btn primary pill" data-act="save-edit" data-kind="${saveKind}" data-idx="${idx}">Save</button></div>`;
 }
 let photoDraft;
+/* "Open to talking about": the member's own tags. They type any topic, remove any, and may tap a suggestion. Nothing is picked for them. */
+const TOPIC_MAX=20, TOPIC_LEN=40;
+let topicsDraft=[];
+const topicKey=t=>t.toLocaleLowerCase();
+function topicsEditor(){
+  const mine=new Set(topicsDraft.map(topicKey));
+  const sugg=[...new Set([...Object.keys(INDUSTRIES),...P.flatMap(x=>x.topics||[])])].filter(t=>!mine.has(topicKey(t))).slice(0,16);
+  const full=topicsDraft.length>=TOPIC_MAX;
+  return `<p class="req-note">Write the industries and topics members can reach out to you about. Add as many as you like (up to ${TOPIC_MAX}) and remove any.</p>
+    <div class="chips topic-mine">${topicsDraft.length?topicsDraft.map((t,i)=>`<span class="chip">${esc(t)}<button type="button" data-act="topic-rm" data-i="${i}" aria-label="Remove ${esc(t)}">${I.x}</button></span>`).join(''):'<span class="muted" style="font-size:14px">No topics yet.</span>'}</div>
+    ${fld('e-topic','Add a topic',`<div class="topic-add"><input type="text" id="e-topic" placeholder="Ex: PM interviews, relocating with a partner" maxlength="${TOPIC_LEN}" ${full?'disabled':''}><button type="button" class="btn ghost" data-act="topic-add" ${full?'disabled':''}>Add</button></div>`,`<p class="hint"><span>${full?`You’ve reached ${TOPIC_MAX} topics. Remove one to add another.`:'Press Enter to add'}</span></p>`)}
+    ${sugg.length&&!full?`<div class="topic-sugg"><h4>Suggestions, tap to add</h4><div class="chips">${sugg.map(t=>`<button type="button" class="chip" data-act="topic-sugg" data-t="${esc(t)}"><span aria-hidden="true">+</span>${esc(t)}</button>`).join('')}</div></div>`:''}`;
+}
+function drawTopics(err='',focus=true){
+  const box=document.getElementById('topics-ed'); if(!box) return;
+  box.innerHTML=topicsEditor(); if(err) fieldErr('e-topic',err);
+  const inp=document.getElementById('e-topic'); if(focus&&inp&&!inp.disabled) inp.focus();
+}
+/* Adds one topic; returns an error message, or '' if added (or nothing to add). */
+function addTopic(raw){
+  const t=String(raw||'').replace(/\s+/g,' ').trim(); if(!t) return '';
+  if(t.length>TOPIC_LEN) return `Keep each topic under ${TOPIC_LEN} characters.`;
+  if(topicsDraft.some(x=>topicKey(x)===topicKey(t))) return 'You already have this topic.';
+  if(topicsDraft.length>=TOPIC_MAX) return `You can have up to ${TOPIC_MAX} topics.`;
+  topicsDraft.push(t); return '';
+}
 function openEdit(kind,idx){
   const p=me(); let html='';
   if(kind==='intro'){
@@ -2480,10 +2515,8 @@ function openEdit(kind,idx){
       ${fld('e-home','Hometown',`<input type="text" id="e-home" value="${esc(p.hometown||'')}" placeholder="Ex: Haifa" maxlength="60">`)}`,{saveKind:'israel'});
   }
   if(kind==='topics'){
-    const picked=new Set(p.topics); const sugg=[...new Set([...Object.keys(INDUSTRIES),...P.flatMap(x=>x.topics)])].slice(0,24);
-    html=editShell('Open to talking about',`<p class="req-note">Pick the industries and topics members can reach out to you about.</p>
-      <div class="topic-picks">${sugg.map(t=>`<label class="fopt"><input type="checkbox" data-topic value="${esc(t)}" ${picked.has(t)?'checked':''}><span>${esc(t)}</span></label>`).join('')}</div>
-      ${fld('e-topics','Other topics',`<input type="text" id="e-topics" value="${esc(p.topics.filter(t=>!sugg.includes(t)).join(', '))}" placeholder="Ex: Relocating with a partner, PM interviews" maxlength="200">`,'<p class="hint"><span>Separate with commas</span></p>')}`,{saveKind:'topics'});
+    topicsDraft=[...(p.topics||[])];
+    html=editShell('Open to talking about',`<div id="topics-ed">${topicsEditor()}</div>`,{saveKind:'topics'});
   }
   if(kind==='photo'){
     photoDraft = p.photo||null;
@@ -2529,7 +2562,7 @@ function saveEdit(kind,idx){
     if(idx==='') p.schools.push(entry); else p.schools[+idx]=entry; }
   if(kind==='photo'){ p.photo=photoDraft||null; }
   if(kind==='israel'){ Object.assign(p,{unit:val('e-unit'),ilUni:val('e-iluni'),hometown:val('e-home')}); }
-  if(kind==='topics'){ p.topics=[...new Set([...[...document.querySelectorAll('[data-topic]:checked')].map(x=>x.value),...val('e-topics').split(',').map(x=>x.trim()).filter(Boolean)])]; }
+  if(kind==='topics'){ const err=addTopic(val('e-topic')); if(err){ fieldErr('e-topic',err); return; } p.topics=[...topicsDraft]; }
   recompute(p); saveMe(); closeModal(); render();
   if(LIVE&&kind==='photo') livePhoto(p); else { liveSaveProfile(); if(kind==='contact') liveSaveContact(); }
   toast(kind==='photo'?'Photo updated':'Profile updated');
@@ -3517,6 +3550,9 @@ document.addEventListener('click',e=>{
     case 'save-edit': saveEdit(t.dataset.kind,t.dataset.idx); break;
     case 'delete-item': deleteItem(t.dataset.kind,t.dataset.idx); break;
     case 'add-section': openAddSection(); break;
+    case 'topic-add': { const err=addTopic(val('e-topic')); drawTopics(err); if(err) document.getElementById('e-topic').value=val('e-topic'); break; }
+    case 'topic-rm': topicsDraft.splice(+t.dataset.i,1); drawTopics('',false); break;
+    case 'topic-sugg': drawTopics(addTopic(t.dataset.t),false); break;
     case 'photo-remove': photoDraft=null; document.getElementById('photo-prev').innerHTML=av({...me(),photo:null},180); break;
     case 'acct-password': acctPassword(); break;
     case 'gate-check': S.gateBusy=true; render(); checkApproval().finally(()=>{ S.gateBusy=false; render(); if(me().verify.school==='pending') toast('Still waiting. We’ll email you as soon as an admin approves you.'); }); break;
@@ -3541,7 +3577,7 @@ document.addEventListener('change',e=>{
   if(e.target.id==='feed-school'){ S.feedSchool=e.target.value; render(); return; }
   if(e.target.dataset.sort!==undefined){ S.sort=e.target.value; render(); }
 });
-document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.target.id==='l-email'||e.target.id==='l-pass')){ e.preventDefault(); loginSubmit(); } if(e.key==='Enter'&&e.target.id==='l-code'){ e.preventDefault(); loginConfirm(); } if(e.key==='Enter'&&e.target.id==='f-email'){ e.preventDefault(); forgotSend(); } if(e.key==='Enter'&&e.target.id==='f-pass2'){ e.preventDefault(); forgotConfirm(); } if(e.key==='Enter'&&e.target.id==='j-code'){ e.preventDefault(); joinVerifyCode(); } if(e.key==='Escape'){ closeModal(); S.draftAll=null; if(S.pill){ S.pill=null; render(); } } });
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.target.id==='l-email'||e.target.id==='l-pass')){ e.preventDefault(); loginSubmit(); } if(e.key==='Enter'&&e.target.id==='l-code'){ e.preventDefault(); loginConfirm(); } if(e.key==='Enter'&&e.target.id==='f-email'){ e.preventDefault(); forgotSend(); } if(e.key==='Enter'&&e.target.id==='f-pass2'){ e.preventDefault(); forgotConfirm(); } if(e.key==='Enter'&&e.target.id==='j-code'){ e.preventDefault(); joinVerifyCode(); } if((e.key==='Enter'||e.key===',')&&e.target.id==='e-topic'){ e.preventDefault(); const v=e.target.value, err=addTopic(v); drawTopics(err); if(err) document.getElementById('e-topic').value=v; } if(e.key==='Escape'){ closeModal(); S.draftAll=null; if(S.pill){ S.pill=null; render(); } } });
 if(LIVE){ liveReset(); S.joinReqs=[]; }
 if(!reviewFromUrl()&&!handleLinkedInReturn()){ if(!loadMe()){ S.firstRun=true; joinStart('join'); } else checkApproval(); }
 render();
