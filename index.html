@@ -2642,6 +2642,12 @@ async function notifyCall(body){
   throw apiErr(error);
 }
 async function notify(body){ try{ const c=await sb(); await c.functions.invoke('notify',{body}); }catch(_){ } }
+/* Photo data URL -> file to upload. Decoded here, because the site's security policy (connect-src) blocks fetch('data:…'). */
+function dataUrlBlob(dataUrl){
+  const [head,b64]=String(dataUrl).split(','), type=(head.match(/^data:([^;,]+)/)||[])[1]||'image/jpeg';
+  const bin=atob(b64||''), bytes=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return new Blob([bytes],{type});
+}
 const API={
   /* Email + password logins. Sessions are saved in this browser and renewed automatically, so a member stays
      logged in until they log out or change their password (which logs out their other devices). */
@@ -2707,7 +2713,7 @@ const API={
   reviewDecide:(member,key,approve)=>notifyCall({action:'review',member,key,approve}),
   /* Photos are private files in Supabase Storage, under "<your id>/". */
   async uploadPhoto(bucket,dataUrl){ const c=await sb(); const {data:{session}}=await c.auth.getSession(); if(!session) throw apiErr({message:'not-logged-in'});
-    const blob=await (await fetch(dataUrl)).blob(), path=`${session.user.id}/${Date.now()}.jpg`;
+    const blob=dataUrlBlob(dataUrl), path=`${session.user.id}/${Date.now()}.jpg`;
     const {error}=await c.storage.from(bucket).upload(path,blob,{contentType:'image/jpeg'}); if(error) throw apiErr(error); return path; },
   async removePhoto(bucket,path){ try{ const c=await sb(); await c.storage.from(bucket).remove([path]); }catch(_){ } },
   async photoUrls(bucket,paths){ if(!paths.length) return {}; const c=await sb(); const {data,error}=await c.storage.from(bucket).createSignedUrls(paths,12*3600);
