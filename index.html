@@ -313,7 +313,8 @@ button.pstatus:hover{border-color:var(--accent)}
 .cb.md{font-size:13.5px;border-radius:9px}
 .cb.md .cb-s,.cb.md .cb-y{padding:4px 9px}
 .pc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;width:100%}
-.pc-top .cbs{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.pc-top .cbs{display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:0}
+.pc-top .cb-s{letter-spacing:.04em;padding-left:7px;padding-right:7px}
 .srow{display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(0,3fr);gap:10px 16px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
 .srow:first-of-type{border-top:0}
 .srow .sn{display:flex;align-items:center;gap:10px;font-weight:650;text-align:left}
@@ -1116,6 +1117,9 @@ const SCHOOLS = {
   'Copenhagen Business School':{region:'Europe',color:'#0E3B5C',full:'Copenhagen Business School',tag:'CBS DK',domain:'cbs.dk',aliases:['copenhagen business school','copenhagen']},
   'Alliance Manchester Business School':{region:'Europe',color:'#660099',full:'Alliance Manchester Business School',tag:'AMBS',domain:'manchester.ac.uk',aliases:['alliance manchester business school','manchester business school','ambs']},
 };
+/* The university, for badges and short mentions ("MIT", not "Sloan"). Search still uses each school's tag and aliases. */
+const SCHOOL_UNI={"Harvard Business School": "Harvard", "Stanford GSB": "Stanford", "Wharton": "Penn", "Chicago Booth": "Chicago", "Kellogg": "Northwestern", "Columbia Business School": "Columbia", "MIT Sloan": "MIT", "Berkeley Haas": "Berkeley", "Yale SOM": "Yale", "Tuck": "Dartmouth", "NYU Stern": "NYU", "Duke Fuqua": "Duke", "Michigan Ross": "Michigan", "UCLA Anderson": "UCLA", "Cornell Johnson": "Cornell", "UVA Darden": "UVA", "CMU Tepper": "CMU", "Texas McCombs": "UT Austin", "USC Marshall": "USC", "UNC Kenan-Flagler": "UNC", "Emory Goizueta": "Emory", "WashU Olin": "WashU", "Georgetown McDonough": "Georgetown", "Indiana Kelley": "Indiana", "Rice Jones": "Rice", "Vanderbilt Owen": "Vanderbilt", "Notre Dame Mendoza": "Notre Dame", "Georgia Tech Scheller": "Georgia Tech", "Minnesota Carlson": "Minnesota", "Florida Warrington": "Florida", "Wisconsin School of Business": "Wisconsin", "UW Foster": "UW", "Ohio State Fisher": "Ohio State", "ASU W. P. Carey": "ASU", "Penn State Smeal": "Penn State", "Purdue Daniels": "Purdue", "BYU Marriott": "BYU", "Texas A&M Mays": "Texas A&M", "BU Questrom": "BU", "Babson Olin": "Babson", "INSEAD": "INSEAD", "London Business School": "LBS", "HEC Paris": "HEC Paris", "IESE": "IESE", "IE Business School": "IE", "ESADE": "ESADE", "Oxford Saïd": "Oxford", "Cambridge Judge": "Cambridge", "IMD": "IMD", "SDA Bocconi": "Bocconi", "ESSEC": "ESSEC", "ESCP": "ESCP", "University of St. Gallen": "St. Gallen", "Rotterdam School of Management": "Erasmus", "Warwick Business School": "Warwick", "Imperial College Business School": "Imperial", "Mannheim Business School": "Mannheim", "WHU – Otto Beisheim": "WHU", "Copenhagen Business School": "Copenhagen", "Alliance Manchester Business School": "Manchester"};
+const uni=k=>SCHOOL_UNI[k]||(SCHOOLS[k]&&SCHOOLS[k].tag)||k;
 /* School picker: one A–Z list. Each name ends in (US) or (EU). */
 const schoolRegionTag = k => SCHOOLS[k].region==='US'?'(US)':'(EU)';
 const schoolLabel = k => `${k} ${schoolRegionTag(k)}`;
@@ -1302,10 +1306,10 @@ const S = {
 /* ---------- helpers ---------- */
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const yy = y => "'"+String(y).slice(2);
-const schoolTag = s => `${SCHOOLS[s.school].tag} ${yy(s.year)}`;
+const schoolTag = s => `${uni(s.school)} ${yy(s.year)}`;
 function classBadge(s,size=''){
   const sc=SCHOOLS[s.school], cur=s.year>NOW_YEAR;
-  return `<span class="cb ${size}" style="--sc:${sc.color}" title="${esc(sc.full)} · ${esc(s.program)} · Class of ${s.year}"><span class="cb-s">${sc.tag}</span><span class="cb-y">${yy(s.year)}</span>${cur&&size==='lg'?'<span class="cb-c">Current</span>':''}</span>`;
+  return `<span class="cb ${size}" style="--sc:${sc.color}" title="${esc(sc.full)} · ${esc(s.program)} · Class of ${s.year}"><span class="cb-s">${esc(uni(s.school))}</span><span class="cb-y">${yy(s.year)}</span>${cur&&size==='lg'?'<span class="cb-c">Current</span>':''}</span>`;
 }
 const badges = (p,size='') => p.schools.map(s=>classBadge(s,size)).join(' ');
 const lastIntro = id => [...S.intros].reverse().find(r=>r.to===id);
@@ -1316,7 +1320,7 @@ const me = () => byId(ME);
 const sharedSchool = p => p.schools.find(s=>me().schools.some(m=>m.school===s.school));
 const sharedPrev = p => [...p.prev, p.curCompany].filter(Boolean).find(c=>me().prev.includes(c));
 function relevance(p){
-  const s = sharedSchool(p); if(s) return {txt:`Also ${SCHOOLS[s.school].tag}`,ico:'cap'};
+  const s = sharedSchool(p); if(s) return {txt:`Also ${uni(s.school)}`,ico:'cap'};
   const c = sharedPrev(p); if(c) return {txt:`Also ex-${c}`,ico:'building'};
   return {txt:locFull(p.location),ico:'pin'};
 }
@@ -1547,7 +1551,7 @@ function railData(key){
     const mine=me().schools[+key.split(':')[1]||0]||me().schools[0]; const sc=SCHOOLS[mine.school];
     const items=shuffled(P.filter(p=>p.id!==ME && p.schools.some(s=>s.school===mine.school))
       .map(p=>({p,sig:{txt:locFull(p.location),ico:'pin'}})),'school:'+mine.school);
-    return {title:`Your ${sc.tag} community`,sub:`Israelis from ${sc.full}`,items};
+    return {title:`Your ${uni(mine.school)} community`,sub:`Israelis from ${sc.full}`,items};
   }
   if(key==='pymk'){
     const items = P.filter(p=>p.id!==ME && !S.stars.has(p.id)).map(p=>{
@@ -1601,7 +1605,7 @@ function viewHome(){
       ${S.browse?browsePanel(S.browse):''}
       <div class="try"><span>Try:</span>${EXAMPLES.map(e=>`<button data-act="search" data-q="${esc(e)}">${esc(e)}</button>`).join('')}</div>
     </section>
-    <div class="invite-strip"><span class="ico ill">${ILL.colleague}</span><span class="t"><b>Bring your ${esc(SCHOOLS[me().schools[0].school].tag)} classmates</b><small>The network is only as strong as who’s in it. Invite Israelis from your program in one tap.</small></span><button class="btn primary" data-act="invite">${I.plus}Invite classmates</button></div>
+    <div class="invite-strip"><span class="ico ill">${ILL.colleague}</span><span class="t"><b>Bring your ${esc(uni(me().schools[0].school))} classmates</b><small>The network is only as strong as who’s in it. Invite Israelis from your program in one tap.</small></span><button class="btn primary" data-act="invite">${I.plus}Invite classmates</button></div>
     ${rail('interacted')}${[...new Set(me().schools.map(x=>x.school))].map(k=>rail(k===me().schools[0].school?'school':'school:'+me().schools.findIndex(x=>x.school===k))).join('')}${rail('pymk')}${rail('viewed')}${rail('industry')}
     <p class="demo-note">${LIVE?'':'Prototype with fictional members. Email and WhatsApp hand-offs are simulated. '}<button class="link" style="font-size:12px" data-act="reset-me">${LIVE?'Log out':'Start over as a new user'}</button></p>
   </div></main>`;
@@ -1792,7 +1796,7 @@ function viewProfile(id){
     : `<div class="pactions">${starBtn(id,'lg')}</div>`;
   return `<main><div class="wrap page">
     ${isMe?'':`<button class="back" data-act="back">${I.left}Back</button>`}
-    <section class="phead" style="--sc:${SCHOOLS[p.schools[0].school].color}"><div class="phead-band"><span class="band-label"><b>${flagOf(schoolCountry(p.schools[0].school))}${esc(SCHOOLS[p.schools[0].school].full)}</b><span>${esc(p.schools[0].program)} · CLASS OF ${p.schools[0].year}</span></span><span class="band-mark">${esc(SCHOOLS[p.schools[0].school].tag)} ${yy(p.schools[0].year)}</span></div><div class="phead-body">
+    <section class="phead" style="--sc:${SCHOOLS[p.schools[0].school].color}"><div class="phead-band"><span class="band-label"><b>${flagOf(schoolCountry(p.schools[0].school))}${esc(SCHOOLS[p.schools[0].school].full)}</b><span>${esc(p.schools[0].program)} · CLASS OF ${p.schools[0].year}</span></span><span class="band-mark">${esc(uni(p.schools[0].school))} ${yy(p.schools[0].year)}</span></div><div class="phead-body">
       <div class="pav">${isMe?`<button class="av-edit" data-act="edit" data-kind="photo" aria-label="Edit photo">${av(p,132)}<span class="cam">${I.camera}</span></button>`:av(p,132)}
         ${p.statusNote?(isMe?`<button class="pstatus" data-act="edit" data-kind="status" aria-label="Edit your status">${esc(p.statusNote)}</button>`:`<span class="pstatus">${esc(p.statusNote)}</span>`):isMe?`<button class="pstatus add" data-act="edit" data-kind="status">${I.plus}Add a status</button>`:''}</div>
       ${isMe?`<button class="ibtn intro-edit" data-act="edit" data-kind="intro" aria-label="Edit intro">${I.pencil}</button>`:''}
@@ -1833,7 +1837,7 @@ function liveGate(){
       <div style="display:flex;justify-content:center"><span class="welcome-mark" style="background:var(--warm-soft);color:var(--warm)">${I.clock}</span></div>
       <h1>Your request is waiting for approval</h1>
       <p class="lead" style="margin-inline:auto">Thanks, ${esc(me().first)}. An admin reviews every request by hand to keep the network Israeli MBAs only, usually within a day. We’ll email ${esc(me().email||'you')} as soon as you’re approved, and then you’ll see the whole network here.</p>
-      <div class="mini" style="justify-content:center;margin:6px auto 18px;max-width:420px">${av(me(),46)}<span style="text-align:left"><b>${esc(me().name)}</b><small>${esc(me().role)} · ${esc(SCHOOLS[me().schools[0].school].tag)} ${yy(me().schools[0].year)}</small></span></div>
+      <div class="mini" style="justify-content:center;margin:6px auto 18px;max-width:420px">${av(me(),46)}<span style="text-align:left"><b>${esc(me().name)}</b><small>${esc(me().role)} · ${esc(uni(me().schools[0].school))} ${yy(me().schools[0].year)}</small></span></div>
       <div class="row" style="justify-content:center"><button class="btn lg primary pill" data-act="gate-check" ${S.gateBusy?'disabled':''}>${S.gateBusy?'Checking…':'Check again'}</button><button class="btn lg ghost pill" data-act="reset-me">Log out</button></div>
     </div></div></main>`;
   if(st==='declined') return `<main><div class="wrap join"><div class="jcard" style="text-align:center">
@@ -1956,7 +1960,7 @@ function viewNetwork(){
     body = `<div class="notice" style="margin:-6px 0 14px">${I.shield}<span><b>Admins only.</b> Every new member is approved here by hand. Approve someone only if you’re confident they’re Israeli and studied where they say. Approving sends them their official welcome email. ${LIVE?'Each new request also arrives in your inbox.':'In the live app, each new request also arrives in the admin’s inbox with an Approve link.'}</span></div>`
       + (S.joinReqs.length?`<div class="rlist">${S.joinReqs.map(r=>{ const k=r.knows!=null?byId(r.knows):null; return `<div class="jr">
         <div class="jr-top">${av(r,52)}<span class="who"><b>${esc(r.name)}</b> ${badges(r,'md')}<div class="muted" style="font-size:13.5px">${esc(r.role)} · ${esc(r.company)} · asked ${esc(r.asked)}</div></span></div>
-        ${r.live?`<div class="ev"><span class="evc ${r.liVerified?'ok':'no'}">${r.liVerified?I.check+'Signed in with LinkedIn as '+esc(r.liName):I.x+'No LinkedIn sign-in'}</span><span class="evc ok">${I.cap}${esc(SCHOOLS[r.schools[0].school].tag)} ${yy(r.schools[0].year)} (self-reported)</span><span class="evc ok">${I.mail||''}${esc(r.email)} (confirmed)</span>${r.phone?`<span class="evc ok">${esc(r.phone)}</span>`:''}<span class="evc ${r.url?'ok':'no'}">${r.url?I.link+'LinkedIn URL added':I.x+'No LinkedIn URL'}</span></div>`
+        ${r.live?`<div class="ev"><span class="evc ${r.liVerified?'ok':'no'}">${r.liVerified?I.check+'Signed in with LinkedIn as '+esc(r.liName):I.x+'No LinkedIn sign-in'}</span><span class="evc ok">${I.cap}${esc(uni(r.schools[0].school))} ${yy(r.schools[0].year)} (self-reported)</span><span class="evc ok">${I.mail||''}${esc(r.email)} (confirmed)</span>${r.phone?`<span class="evc ok">${esc(r.phone)}</span>`:''}<span class="evc ${r.url?'ok':'no'}">${r.url?I.link+'LinkedIn URL added':I.x+'No LinkedIn URL'}</span></div>`
           +(r.career.length?`<div class="qa"><span>Career</span>${r.career.map(c=>esc(`${c.role} · ${c.company}${c.start?` (${c.start}–${c.end||'Present'})`:''}`)).join('<br>')}</div>`:'')
         :`<div class="ev"><span class="evc ${r.li.edu?'ok':'no'}">${r.li.edu?I.check:I.x}${r.li.edu?'LinkedIn: '+esc(r.li.edu):'School not listed on LinkedIn'}</span>
           <span class="evc ${r.li.id?'ok':'no'}">${r.li.id?I.check:I.x}${r.li.id?'Signed in with LinkedIn':'No LinkedIn sign-in'}</span>
@@ -2220,13 +2224,13 @@ function inviteText(lang){
   const m=me(), sc=SCHOOLS[m.schools[0].school], first=m.first||'';
   return lang==='he'
     ? {subject:'הצטרפו אליי ל-Ba-mba',
-       body:`היי! הצטרפתי ל-Ba-mba, הקהילה הפרטית של ישראלים בוגרי וסטודנטים של MBA בארה״ב ובאירופה.\nכבר יש שם ישראלים מ-${sc.tag}, וזו דרך מעולה למצוא את הקולגה, המשקיע או ההשקעה הבאה, ולעזור אחד לשני.\nההצטרפות לוקחת 2 דקות עם ה-PDF מהלינקדאין:\n${SITE_URL}\n\n${first}`}
+       body:`היי! הצטרפתי ל-Ba-mba, הקהילה הפרטית של ישראלים בוגרי וסטודנטים של MBA בארה״ב ובאירופה.\nכבר יש שם ישראלים מ-${uni(m.schools[0].school)}, וזו דרך מעולה למצוא את הקולגה, המשקיע או ההשקעה הבאה, ולעזור אחד לשני.\nההצטרפות לוקחת 2 דקות עם ה-PDF מהלינקדאין:\n${SITE_URL}\n\n${first}`}
     : {subject:'Join me on Ba-mba',
-       body:`Hi! I joined Ba-mba, the private community of Israeli MBA alumni and students in the US and Europe.\nIsraelis from ${sc.tag} are already there, and it’s a great way to find your next colleague, investor or investment, and to help each other.\nJoining takes 2 minutes with your LinkedIn PDF:\n${SITE_URL}\n\n${first}`};
+       body:`Hi! I joined Ba-mba, the private community of Israeli MBA alumni and students in the US and Europe.\nIsraelis from ${uni(m.schools[0].school)} are already there, and it’s a great way to find your next colleague, investor or investment, and to help each other.\nJoining takes 2 minutes with your LinkedIn PDF:\n${SITE_URL}\n\n${first}`};
 }
 function openInvite(){
   const t=inviteText(inviteLang), sc=SCHOOLS[me().schools[0].school];
-  openModal(`<h3>Invite your ${esc(sc.tag)} classmates</h3>
+  openModal(`<h3>Invite your ${esc(uni(me().schools[0].school))} classmates</h3>
     <p class="sub">Send a personal invite on WhatsApp or by email. It links to the sign-up page, and an admin approves every member.</p>
     <div class="seg inv-lang" role="group" aria-label="Message language"><button class="${inviteLang==='he'?'on':''}" data-act="inv-lang" data-lang="he">עברית</button><button class="${inviteLang==='en'?'on':''}" data-act="inv-lang" data-lang="en">English</button></div>
     <textarea id="inv-text" dir="${inviteLang==='he'?'rtl':'ltr'}" rows="8" aria-label="Invite message">${esc(t.body)}</textarea>
@@ -2251,8 +2255,8 @@ function introText(p){
   const m=me(); const ms=m.schools[0]; const s=sharedSchool(p); const c=sharedPrev(p);
   const past=m.career.find(x=>!/Present/.test(x.years)); const cur=m.career.find(x=>/Present/.test(x.years));
   const bg = m.status==='Student' ? (past?` (ex-${past.role} at ${past.company})`:'') : (cur?` (${cur.role} at ${cur.company})`:'');
-  const hook = s?` We’re both ${SCHOOLS[s.school].tag}.`:c?` We both worked at ${c}.`:'';
-  return `Hi ${p.first}! I’m ${m.first}, ${SCHOOLS[ms.school].tag} ${yy(ms.year)}${bg}. I found you through Ba-mba.${hook} I’m exploring ${p.industry.toLowerCase()} roles and would love 15 minutes to hear how you got to ${p.company}.`;
+  const hook = s?` We both went to ${uni(s.school)}.`:c?` We both worked at ${c}.`:'';
+  return `Hi ${p.first}! I’m ${m.first}, ${uni(ms.school)} ${yy(ms.year)}${bg}. I found you through Ba-mba.${hook} I’m exploring ${p.industry.toLowerCase()} roles and would love 15 minutes to hear how you got to ${p.company}.`;
 }
 function openConnect(id){
   const p=byId(id);
@@ -3102,7 +3106,7 @@ function viewJoin(){
         <div class="row"><button class="btn lg primary pill" data-act="join-request-send" ${J.sending?'disabled':''}>${J.sending?(liSignup()?'Opening LinkedIn…':'Sending…'):(liSignup()?'Continue with LinkedIn and send':'Submit for approval')}</button><button class="link" data-act="join-go" data-step="review">Back</button></div>
         <p class="muted" style="font-size:12.5px;margin:10px 0 0">By sending, you agree to our <a href="/terms" target="_blank" rel="noopener">Terms of Use</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</p>`;
     }
-    body=`<div class="jcard"><h1>Request to join ${esc(sc.tag)} ${yy(e.year)}</h1>${main}</div>`;
+    body=`<div class="jcard"><h1>Request to join ${esc(uni(e.school))} ${yy(e.year)}</h1>${main}</div>`;
   }
   if(J.step==='done'){
     body=`<div class="jcard" style="text-align:center"><div style="display:flex;justify-content:center"><span class="welcome-mark">${I.check}</span></div>
